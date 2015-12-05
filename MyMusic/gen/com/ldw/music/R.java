@@ -308,9 +308,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int artist_tv2=0x7f050023;
         public static final int auto_download_lyric=0x7f050047;
         public static final int backBtn=0x7f050007;
-        public static final int bottomLayout=0x7f05001b;
+        public static final int bottomLayout=0x7f05001c;
         public static final int btn_favorite=0x7f05006c;
-        public static final int btn_menu2=0x7f05001d;
+        public static final int btn_menu2=0x7f05001b;
         public static final int btn_more=0x7f050071;
         public static final int btn_pause=0x7f05006e;
         public static final int btn_pause2=0x7f050021;
@@ -346,7 +346,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int gridview_item_name=0x7f050042;
         public static final int gridview_item_num=0x7f050043;
         public static final int handle=0x7f05002b;
-        public static final int headicon_iv=0x7f05001c;
+        public static final int headicon_iv=0x7f05001d;
         public static final int image=0x7f050054;
         public static final int item_artist_tv=0x7f050063;
         public static final int item_musicname_tv=0x7f050062;

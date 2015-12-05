@@ -11,3 +11,5 @@ gen/
 proguard/
 \drawable-xhdpi
 http.txt
+\bin
+\gen

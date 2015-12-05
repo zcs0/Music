@@ -7,20 +7,33 @@
     android:gravity="center"
     android:orientation="vertical" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/top_layout"
         android:layout_width="fill_parent"
         android:layout_height="50dip"
         android:background="@color/half_transparent"
-        android:gravity="center" >
+         >
+
+        <ImageButton
+            android:id="@+id/btn_menu2"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="4.0dip"
+            android:background="@drawable/selector_music_btn"
+            android:padding="6.0dip"
+            android:src="@drawable/icon_menu_point" />
 
         <TextView
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="我的首页"
             android:textColor="@color/white"
             android:textSize="@dimen/title_text_sp" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/bottomLayout"
@@ -133,8 +146,8 @@
                     android:id="@+id/position_tv2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:text="00:00" />
+                    android:text="00:00"
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -146,12 +159,12 @@
                     android:id="@+id/duration_tv2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:text="00:00" />
+                    android:text="00:00"
+                    android:textColor="@color/white" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-    
+
     <ProgressBar
         android:id="@+id/playback_seekbar2"
         style="?android:attr/progressBarStyleHorizontal"
@@ -162,18 +175,18 @@
         android:maxHeight="2.0dip"
         android:minHeight="2.0dip"
         android:progressDrawable="@drawable/playback_seekbar2" />
-    
+
     <GridView
         android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/top_layout"
         android:layout_above="@id/playback_seekbar2"
+        android:layout_below="@id/top_layout"
         android:layout_margin="8.0dip"
         android:horizontalSpacing="6.0dip"
         android:numColumns="3"
         android:verticalSpacing="6.0dip" />
-    
+
     <com.ldw.music.view.MySlidingDrawer
         android:id="@+id/slidingDrawer"
         android:layout_width="fill_parent"
@@ -181,7 +194,7 @@
         android:background="@drawable/sliding_bg"
         android:content="@+id/content"
         android:handle="@+id/handle"
-        android:visibility="invisible" >
+        android:visibility="gone" >
 
         <include layout="@layout/sliding_handle" />
 
@@ -192,14 +205,14 @@
         android:id="@+id/viewPager"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="invisible" >
+        android:visibility="gone" >
     </android.support.v4.view.ViewPager>
-    
+
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPagerSub"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="invisible" >
+        android:visibility="gone" >
     </android.support.v4.view.ViewPager>
 
 </RelativeLayout>

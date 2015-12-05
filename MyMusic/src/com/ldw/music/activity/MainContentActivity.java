@@ -87,7 +87,7 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 		// configure the SlidingMenu
 		mSlidingMenu = new SlidingMenu(this);
 		mSlidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
-		mSlidingMenu.setMode(SlidingMenu.RIGHT);
+		mSlidingMenu.setMode(SlidingMenu.LEFT);
 		mSlidingMenu.setShadowWidthRes(R.dimen.shadow_width);
 		mSlidingMenu.setShadowDrawable(R.drawable.shadow);
 		mSlidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
