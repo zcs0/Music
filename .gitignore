@@ -9,3 +9,4 @@ bin/
 gen/
 .settings/
 proguard/
+\drawable-xhdpi
