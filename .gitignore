@@ -10,3 +10,4 @@ gen/
 .settings/
 proguard/
 \drawable-xhdpi
+http.txt
