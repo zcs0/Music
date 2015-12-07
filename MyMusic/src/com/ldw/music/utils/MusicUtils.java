@@ -197,7 +197,14 @@ public class MusicUtils implements IConstants {
 	public static List<MusicInfo> queryMusic(Context context, int from) {
 		return queryMusic(context, null, null, from);
 	}
-
+	/**
+	 * 
+	 * @param context
+	 * @param selections
+	 * @param selection
+	 * @param from
+	 * @return
+	 */
 	public static List<MusicInfo> queryMusic(Context context,
 			String selections, String selection, int from) {
 		if(mMusicInfoDao == null) {

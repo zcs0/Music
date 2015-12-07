@@ -26,12 +26,12 @@ import android.widget.TextView;
 
 import com.ldw.music.R;
 import com.ldw.music.activity.IConstants;
-import com.ldw.music.adapter.MyPagerAdapter;
+import com.ldw.music.adapter.DataPagerAdapter;
 import com.ldw.music.fragment.BaseFragment;
 import com.ldw.music.model.FolderInfo;
 import com.ldw.music.storage.SPStorage;
 import com.ldw.music.utils.MusicUtils;
-import com.ldw.music.viewpagerlistener.MyOnPageChangeListener;
+import com.ldw.music.viewpagerlistener.ViewPagerOnPageChangeListener;
 
 /**
  * 文件夹列表
@@ -56,11 +56,6 @@ public class FolderBrowserManager extends BaseFragment implements IConstants,
 	private ViewPager mViewPager;
 	private List<View> mListViews = new ArrayList<View>();
 
-//	public FolderBrowserManager(Activity activity, UIManager manager) {
-//		this.mActivity = activity;
-//		this.mInflater = LayoutInflater.from(activity);
-//		this.mUIManager = manager;
-//	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -69,9 +64,9 @@ public class FolderBrowserManager extends BaseFragment implements IConstants,
 		mViewPager.setVisibility(View.VISIBLE);
 		mListViews.add(new TextView(getActivity()));
 		mListViews .add(getView());
-		mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
 		mViewPager.setCurrentItem(1, true);
-		mViewPager.setOnPageChangeListener(new MyOnPageChangeListener(mViewPager));
+		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(mViewPager));
 		return mView;
 	}
 	public View findViewById(int ids){
@@ -87,6 +82,14 @@ public class FolderBrowserManager extends BaseFragment implements IConstants,
 		View folderView = mInflater.inflate(R.layout.folderbrower, null);
 		initBg(folderView);
 		initView(folderView);
+		folderView.findViewById(R.id.backBtn).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				backStack();
+				
+			}
+		});
 		return folderView;
 	}
 

@@ -30,6 +30,7 @@ import com.ldw.music.R;
 import com.ldw.music.activity.IConstants;
 import com.ldw.music.activity.MainContentActivity;
 import com.ldw.music.activity.MainContentActivity.OnBackListener;
+import com.ldw.music.fragment.MusicListFragment;
 import com.ldw.music.storage.SPStorage;
 
 /**
@@ -156,68 +157,35 @@ public class UIManager implements IConstants, OnBackListener {
 	}
 
 	public void setContentType(int type, Object obj) {
-		MyMusicManager UIManager;
+		MusicListFragment UIManager;
 		// 注册监听返回按钮
 		mMainActivity.registerBackListener(this);
 		switch (type) {
 		case START_FROM_LOCAL:// 我的音乐
-			UIManager = new MyMusicManager();
-			UIManager.show(mActivity, this,START_FROM_LOCAL);
+			UIManager = new MusicListFragment();
+			UIManager.show(mActivity, this,START_FROM_LOCAL,obj);
 			break;
 		case START_FROM_FAVORITE://我的最爱
-			UIManager = new MyMusicManager();
-			UIManager.show(mActivity, this,START_FROM_FAVORITE);
+			//UIManager = new MyMusicManager();
+			UIManager = new MusicListFragment();
+			UIManager.show(mActivity, this,START_FROM_FAVORITE,obj);
 			break;
 		case START_FROM_FOLDER://文件夹
-
 			FolderBrowserManager folderBrowser = new FolderBrowserManager();
 			folderBrowser.show(mActivity, this);
-//			View transView3 = mInflater.inflate(
-//					R.layout.viewpager_trans_layout, null);
-//			View folderView = mMainUIManager.getView();
-//			mViewPager.setVisibility(View.VISIBLE);
-//			mListViews.clear();
-//			mViewPager.removeAllViews();
-
-//			mListViews.add(transView3);
-//			mListViews.add(folderView);
-//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-//			mViewPager.setCurrentItem(1, true);
 			break;
 		case START_FROM_ARTIST://歌手
-
-			mMainUIManager = new ArtistBrowserManager(
-					mActivity, this);
-			View transView4 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View artistView = mMainUIManager.getView();
-//			mViewPager.setVisibility(View.VISIBLE);
-			mListViews.clear();
-//			mViewPager.removeAllViews();
-
-			mListViews.add(transView4);
-			mListViews.add(artistView);
-//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-//			mViewPager.setCurrentItem(1, true);
+			ArtistBrowserManager artistBrowserManager = new ArtistBrowserManager();
+			artistBrowserManager.show(mActivity, this);
 			break;
 		case START_FROM_ALBUM://专辑
-			mMainUIManager = new AlbumBrowserManager(
-					mActivity, this);
-			View transView5 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View albumView = mMainUIManager.getView();
-//			mViewPager.setVisibility(View.VISIBLE);
-			mListViews.clear();
-//			mViewPager.removeAllViews();
-
-			mListViews.add(transView5);
-			mListViews.add(albumView);
-//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-//			mViewPager.setCurrentItem(1, true);
+			AlbumBrowserManager albumBrowserManager = new AlbumBrowserManager();
+			albumBrowserManager.show(mActivity, this);
 			break;
 		case FOLDER_TO_MYMUSIC:
-			UIManager = new MyMusicManager();
-			UIManager.show(mActivity, this,START_FROM_FOLDER);
+//			UIManager = new MyMusicManager();
+			UIManager = new MusicListFragment();
+			UIManager.show(mActivity, this,START_FROM_FOLDER,obj);
 //			mMainUIManager = new MyMusicManager(mActivity, this);
 //			View transViewSub1 = mInflater.inflate(
 //					R.layout.viewpager_trans_layout, null);
@@ -232,8 +200,9 @@ public class UIManager implements IConstants, OnBackListener {
 //			mViewPagerSub.setCurrentItem(1, true);
 			break;
 		case ARTIST_TO_MYMUSIC:
-			UIManager = new MyMusicManager();
-			UIManager.show(mActivity, this,START_FROM_ARTIST);
+//			UIManager = new MyMusicManager();
+			UIManager = new MusicListFragment();
+			UIManager.show(mActivity, this,START_FROM_ARTIST,obj);
 //			mMainUIManager = new MyMusicManager(mActivity, this);
 //			View transViewSub2 = mInflater.inflate(
 //					R.layout.viewpager_trans_layout, null);
@@ -248,8 +217,9 @@ public class UIManager implements IConstants, OnBackListener {
 //			mViewPagerSub.setCurrentItem(1, true);
 			break;
 		case ALBUM_TO_MYMUSIC:
-			UIManager = new MyMusicManager();
-			UIManager.show(mActivity, this,START_FROM_ALBUM);
+//			UIManager = new MyMusicManager();
+			UIManager = new MusicListFragment();
+			UIManager.show(mActivity, this,START_FROM_ALBUM,obj);
 //			mMainUIManager = new MyMusicManager(mActivity, this);
 //			View transViewSub3 = mInflater.inflate(
 //					R.layout.viewpager_trans_layout, null);

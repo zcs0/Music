@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="歌手"
+            android:text="文件夹"
             android:textColor="@color/white"
             android:textSize="@dimen/title_text_sp" />
 

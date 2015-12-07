@@ -25,7 +25,6 @@ public class BaseFragment extends Fragment implements OnClickListener {
 	protected void showFragment(FragmentActivity activity,Fragment fragment,int ids) {//rl_file_list
 		this.activity = activity;
 		FragmentTransaction beginTransaction = activity.getSupportFragmentManager().beginTransaction();
-		beginTransaction.remove(fragment);
 		if(!fragment.isAdded()){//没有添加
 			//beginTransaction.replace(ids, fragment);
 			beginTransaction.add(ids, fragment);
@@ -76,18 +75,18 @@ public class BaseFragment extends Fragment implements OnClickListener {
 		int[] id = ids;
 		if (id != null && id.length > 0) {
 			for (int i : id) {
-				getView(i).setOnClickListener(this);
+				getViewById(i).setOnClickListener(this);
 			}
 		}
 	}
 
 	public <T extends View> T setOnClick(int layoutResId) {
-		View view = getView(layoutResId);
+		View view = getViewById(layoutResId);
 		view.setOnClickListener(this);
 		return (T) view;
 	}
 
-	public <T extends View> T getView(int layoutId) {
+	public <T extends View> T getViewById(int layoutId) {
 		return (T) getActivity().findViewById(layoutId);
 	}
 	@Override

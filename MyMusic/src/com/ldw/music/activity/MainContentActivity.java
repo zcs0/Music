@@ -132,7 +132,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 			public void run() {
 				if (mMusicDao.hasData()) {
 					// 如果有数据就等三秒跳转
-					mHandler.sendMessageDelayed(mHandler.obtainMessage(), 3000);
+					mHandler.sendMessageDelayed(mHandler.obtainMessage(), 800);
 				} else {
 					MusicUtils.queryMusic(MainContentActivity.this,
 							START_FROM_LOCAL);

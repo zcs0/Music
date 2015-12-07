@@ -9,6 +9,9 @@ import java.util.List;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,16 +26,19 @@ import android.widget.TextView;
 
 import com.ldw.music.R;
 import com.ldw.music.activity.IConstants;
+import com.ldw.music.adapter.DataPagerAdapter;
+import com.ldw.music.fragment.BaseFragment;
 import com.ldw.music.model.AlbumInfo;
 import com.ldw.music.storage.SPStorage;
 import com.ldw.music.utils.MusicUtils;
+import com.ldw.music.viewpagerlistener.ViewPagerOnPageChangeListener;
 
 /**
  * 专辑列表
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class AlbumBrowserManager extends MainUIManager implements IConstants,
+public class AlbumBrowserManager extends BaseFragment implements IConstants,
 OnClickListener, OnItemClickListener {
 	
 	private Activity mActivity;
@@ -45,13 +51,31 @@ OnClickListener, OnItemClickListener {
 	private MyAdapter mAdapter;
 	
 	private LinearLayout mAlbumLayout;
-	
-	public AlbumBrowserManager(Activity activity, UIManager manager) {
+	private View mView;
+	private ViewPager mViewPager;
+	private List<View> mListViews = new ArrayList<View>();
+	public void show(FragmentActivity activity, UIManager manager) {
 		this.mActivity = activity;
 		this.mUIManager = manager;
 		this.mInflater = LayoutInflater.from(activity);
+		showFragment(activity,this, R.id.rl_file_list);
 	}
-	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		mView = View.inflate(getActivity(), R.layout.vp_files_list, null);
+		mViewPager = (ViewPager) findViewById(R.id.vp_file_list);
+		mViewPager.setVisibility(View.VISIBLE);
+		mListViews.add(new TextView(getActivity()));
+		mListViews.add(getView());
+		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
+		mViewPager.setCurrentItem(1, true);
+		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(mViewPager));
+		return mView;
+	}
+	public View findViewById(int ids){
+		return mView.findViewById(ids);
+	}
 	public View getView() {
 		View view = mInflater.inflate(R.layout.albumbrower, null);
 		initBg(view);
@@ -143,7 +167,6 @@ OnClickListener, OnItemClickListener {
 		mUIManager.setContentType(ALBUM_TO_MYMUSIC, mAdapter.getItem(position));
 	}
 
-	@Override
 	protected void setBgByPath(String path) {
 		Bitmap bitmap = mUIManager.getBitmapByPath(path);
 		if(bitmap != null) {
@@ -151,12 +174,7 @@ OnClickListener, OnItemClickListener {
 		}
 	}
 
-	@Override
-	public View getView(int from) {
-		return null;
-	}
 
-	@Override
 	public View getView(int from, Object obj) {
 		return null;
 	}
