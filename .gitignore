@@ -11,5 +11,7 @@ gen/
 proguard/
 \drawable-xhdpi
 http.txt
-\bin
-\gen
+/bin
+/gen
+MyMusic/bin
+MyMusic/gen
