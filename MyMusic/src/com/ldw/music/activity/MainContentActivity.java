@@ -82,10 +82,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		// set the Above View
 		mMainFragment = new MainFragment();//主界面
 		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
-		//beginTransaction.addToBackStack(null);
-		//beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE/*TRANSIT_FRAGMENT_OPEN*/);
 		beginTransaction.add(R.id.frame_main, mMainFragment).commit();
-
 		// configure the SlidingMenu
 		mSlidingMenu = new SlidingMenu(this);
 		mSlidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
@@ -99,9 +96,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		//测
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.frame_menu, new MenuFragment()).commit();
-//		getSupportFragmentManager().beginTransaction()
-//		.replace(R.id.frame_menu, new SlidingDrawerManager()).commit();
-
+		 //数据库
 		mMusicDao = new MusicInfoDao(this);
 
 		mHandler = new Handler() {
@@ -159,10 +154,14 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	public void unRegisterBackListener(OnBackListener listener) {
 		mBackListeners.remove(listener);
 	}
-//关闭界面
+	//关闭界面
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
+		if(mMainFragment.getIsPlayShow()){//判断播放音乐界面是否正在显示
+			mMainFragment.hidePlayUi();//隐藏播放界面
+		}else{
+			super.onBackPressed();
+		}
 		if (mSlidingMenu.isMenuShowing()) {
 			mSlidingMenu.showContent();
 		} else {

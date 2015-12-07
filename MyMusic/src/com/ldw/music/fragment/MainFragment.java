@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -102,20 +103,24 @@ public class MainFragment extends BaseFragment implements IConstants,
 		mUIManager.setOnRefreshListener(this);
 		
 		mBottomUIManager = new MainBottomUIManager(getActivity(), view);
-		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);
-		
-		mMusicTimer = new MusicTimer(mSdm.mHandler, mBottomUIManager.mHandler);//播放界面的监听，和底部的监听
+		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面
+		mMusicTimer = new MusicTimer(mSdm.mHandler, mBottomUIManager.mHandler);//播放界面，和底部刷新播放时间的监听
 		mSdm.setMusicTimer(mMusicTimer);
-		
 		mPlayBroadcast = new MusicPlayBroadcast();
+		//添加一个广播监听
 		IntentFilter filter = new IntentFilter(BROADCAST_NAME);
 		filter.addAction(BROADCAST_NAME);
 		getActivity().registerReceiver(mPlayBroadcast, filter);
+		
+		FragmentTransaction beginTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+		beginTransaction.replace(R.id.rl_media_paly, mSdm);
+		beginTransaction.commit();
+		hide(getActivity(), mSdm);
 		mBottomLayout.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View arg0) {
-				showFragment(mSdm);//打开播放界面
+				show(getActivity(), mSdm);
 			}
 		});
 		/**
@@ -353,5 +358,19 @@ public class MainFragment extends BaseFragment implements IConstants,
 //			}
 //		}
 		return true;
+	}
+	/**
+	 * 播放界面是否正在显示
+	 * @return
+	 */
+	public boolean getIsPlayShow() {
+		//mSdm.isAdded();
+		return mSdm.isVisible();
+	}
+	/**
+	 * 隐藏播放界面
+	 */
+	public void hidePlayUi() {
+		hide(getActivity(), mSdm);
 	}
 }

@@ -18,7 +18,10 @@ public class MusicInfoDao implements IConstants {
 	
 	private static final String TABLE_MUSIC = "music_info";
 	private Context mContext;
-	
+	/**
+	 *  数据库
+	 * @param context
+	 */
 	public MusicInfoDao(Context context) {
 		this.mContext = context;
 	}

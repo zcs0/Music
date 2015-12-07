@@ -55,9 +55,13 @@
     </LinearLayout>
 
     <!-- 进入列表 -->
-
     <RelativeLayout
         android:id="@+id/rl_file_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <!-- 进入音乐播放 -->
+    <RelativeLayout
+        android:id="@+id/rl_media_paly"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -20,20 +20,30 @@ public class BaseFragment extends Fragment implements OnClickListener {
 	private FragmentActivity activity;
 	protected void showFragment(Fragment fragment){
 		this.activity = activity!=null?activity:getActivity();
-		FragmentTransaction beginTransaction = getActivity().getSupportFragmentManager().beginTransaction();
 		showFragment(activity, fragment, R.id.frame_main);
 	}
 	protected void showFragment(FragmentActivity activity,Fragment fragment,int ids) {//rl_file_list
 		this.activity = activity;
 		FragmentTransaction beginTransaction = activity.getSupportFragmentManager().beginTransaction();
+		beginTransaction.remove(fragment);
 		if(!fragment.isAdded()){//没有添加
-			beginTransaction.replace(ids, fragment);
-//			beginTransaction.show(fragment);
-		}else{
+			//beginTransaction.replace(ids, fragment);
 			beginTransaction.add(ids, fragment);
+		}else{
+			beginTransaction.show(fragment);
 		}
 		beginTransaction.addToBackStack(null);
 		beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE/*TRANSIT_FRAGMENT_OPEN*/);
+		beginTransaction.commit();
+	}
+	protected void hide(FragmentActivity activity,Fragment fragment) {
+		FragmentTransaction beginTransaction = activity.getSupportFragmentManager().beginTransaction();
+		beginTransaction.hide(fragment);
+		beginTransaction.commit();
+	}
+	protected void show(FragmentActivity activity,Fragment fragment) {
+		FragmentTransaction beginTransaction = activity.getSupportFragmentManager().beginTransaction();
+		beginTransaction.show(fragment);
 		beginTransaction.commit();
 	}
 	/**
