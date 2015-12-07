@@ -3,15 +3,14 @@
  */
 package com.ldw.music.fragment;
 
-import com.ldw.music.R;
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class LeftFragment extends Fragment {
+import com.ldw.music.R;
+
+public class LeftFragment extends BaseFragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

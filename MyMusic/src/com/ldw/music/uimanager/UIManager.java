@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +16,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -44,11 +44,12 @@ public class UIManager implements IConstants, OnBackListener {
 		public void onRefresh();
 	}
 
-	private Activity mActivity;
+	private FragmentActivity mActivity;
 	private View mView;
 	private LayoutInflater mInflater;
 	/** mViewPager为第一层 mViewPagerSub为第二层（例如从文件夹或歌手进入列表，点击列表会进入第二层） */
-	private ViewPager mViewPager, mViewPagerSub;
+	private ViewPager  mViewPagerSub;
+	//private ViewPager mViewPager;
 	private List<View> mListViews, mListViewsSub;
 
 	private OnRefreshListener mRefreshListener;
@@ -59,8 +60,12 @@ public class UIManager implements IConstants, OnBackListener {
 	private MainUIManager mMainUIManager;
 //	private SPStorage mSp;
 //	private String mDefaultBgPath;
-
-	public UIManager(Activity activity, View view) {
+	/**
+	 * UI界面管理
+	 * @param activity
+	 * @param view
+	 */
+	public UIManager(FragmentActivity activity, View view) {
 		this.mActivity = activity;
 		this.mView = view;
 		mMainActivity = (MainContentActivity) activity;
@@ -72,12 +77,12 @@ public class UIManager implements IConstants, OnBackListener {
 
 	private void init() {
 
-		mViewPager = (ViewPager) findViewById(R.id.viewPager);
-		mViewPagerSub = (ViewPager) findViewById(R.id.viewPagerSub);
+//		mViewPager = (ViewPager) findViewById(R.id.vp_file_list);
+		mViewPagerSub = (ViewPager) findViewById(R.id.vp_files_content);
 		
 		mListViews = new ArrayList<View>();
 		mListViewsSub = new ArrayList<View>();
-		mViewPager.setOnPageChangeListener(new MyOnPageChangeListener());
+//		mViewPager.setOnPageChangeListener(new MyOnPageChangeListener());
 		mViewPagerSub.setOnPageChangeListener(new MyOnPageChangeListenerSub());
 	}
 	
@@ -146,128 +151,117 @@ public class UIManager implements IConstants, OnBackListener {
 		if (mViewPagerSub.getChildCount() > 0) {
 			mViewPagerSub.setCurrentItem(0, true);
 		} else {
-			mViewPager.setCurrentItem(0, true);
+//			mViewPager.setCurrentItem(0, true);
 		}
 	}
 
 	public void setContentType(int type, Object obj) {
+		MyMusicManager UIManager;
 		// 注册监听返回按钮
 		mMainActivity.registerBackListener(this);
 		switch (type) {
-		case START_FROM_LOCAL:
-			mMainUIManager = new MyMusicManager(mActivity, this);
-			View transView1 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View contentView1 = mMainUIManager.getView(START_FROM_LOCAL);
-			mViewPager.setVisibility(View.VISIBLE);
-			mListViews.clear();
-			mViewPager.removeAllViews();
-
-			mListViews.add(transView1);
-			mListViews.add(contentView1);
-			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-			mViewPager.setCurrentItem(1, true);
+		case START_FROM_LOCAL:// 我的音乐
+			UIManager = new MyMusicManager();
+			UIManager.show(mActivity, this,START_FROM_LOCAL);
 			break;
-		case START_FROM_FAVORITE:
-			mMainUIManager = new MyMusicManager(mActivity, this);
-			View transView2 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View contentView2 = mMainUIManager.getView(START_FROM_FAVORITE);
-			mViewPager.setVisibility(View.VISIBLE);
-			mListViews.clear();
-			mViewPager.removeAllViews();
-
-			mListViews.add(transView2);
-			mListViews.add(contentView2);
-			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-			mViewPager.setCurrentItem(1, true);
+		case START_FROM_FAVORITE://我的最爱
+			UIManager = new MyMusicManager();
+			UIManager.show(mActivity, this,START_FROM_FAVORITE);
 			break;
-		case START_FROM_FOLDER:
-			mMainUIManager = new FolderBrowserManager(
-					mActivity, this);
-			View transView3 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View folderView = mMainUIManager.getView();
-			mViewPager.setVisibility(View.VISIBLE);
-			mListViews.clear();
-			mViewPager.removeAllViews();
+		case START_FROM_FOLDER://文件夹
 
-			mListViews.add(transView3);
-			mListViews.add(folderView);
-			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-			mViewPager.setCurrentItem(1, true);
+			FolderBrowserManager folderBrowser = new FolderBrowserManager();
+			folderBrowser.show(mActivity, this);
+//			View transView3 = mInflater.inflate(
+//					R.layout.viewpager_trans_layout, null);
+//			View folderView = mMainUIManager.getView();
+//			mViewPager.setVisibility(View.VISIBLE);
+//			mListViews.clear();
+//			mViewPager.removeAllViews();
+
+//			mListViews.add(transView3);
+//			mListViews.add(folderView);
+//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+//			mViewPager.setCurrentItem(1, true);
 			break;
-		case START_FROM_ARTIST:
+		case START_FROM_ARTIST://歌手
+
 			mMainUIManager = new ArtistBrowserManager(
 					mActivity, this);
 			View transView4 = mInflater.inflate(
 					R.layout.viewpager_trans_layout, null);
 			View artistView = mMainUIManager.getView();
-			mViewPager.setVisibility(View.VISIBLE);
+//			mViewPager.setVisibility(View.VISIBLE);
 			mListViews.clear();
-			mViewPager.removeAllViews();
+//			mViewPager.removeAllViews();
 
 			mListViews.add(transView4);
 			mListViews.add(artistView);
-			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-			mViewPager.setCurrentItem(1, true);
+//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+//			mViewPager.setCurrentItem(1, true);
 			break;
-		case START_FROM_ALBUM:
+		case START_FROM_ALBUM://专辑
 			mMainUIManager = new AlbumBrowserManager(
 					mActivity, this);
 			View transView5 = mInflater.inflate(
 					R.layout.viewpager_trans_layout, null);
 			View albumView = mMainUIManager.getView();
-			mViewPager.setVisibility(View.VISIBLE);
+//			mViewPager.setVisibility(View.VISIBLE);
 			mListViews.clear();
-			mViewPager.removeAllViews();
+//			mViewPager.removeAllViews();
 
 			mListViews.add(transView5);
 			mListViews.add(albumView);
-			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
-			mViewPager.setCurrentItem(1, true);
+//			mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+//			mViewPager.setCurrentItem(1, true);
 			break;
 		case FOLDER_TO_MYMUSIC:
-			mMainUIManager = new MyMusicManager(mActivity, this);
-			View transViewSub1 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View contentViewSub1 = mMainUIManager.getView(START_FROM_FOLDER, obj);
-			mViewPagerSub.setVisibility(View.VISIBLE);
-			mListViewsSub.clear();
-			mViewPagerSub.removeAllViews();
-
-			mListViewsSub.add(transViewSub1);
-			mListViewsSub.add(contentViewSub1);
-			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
-			mViewPagerSub.setCurrentItem(1, true);
+			UIManager = new MyMusicManager();
+			UIManager.show(mActivity, this,START_FROM_FOLDER);
+//			mMainUIManager = new MyMusicManager(mActivity, this);
+//			View transViewSub1 = mInflater.inflate(
+//					R.layout.viewpager_trans_layout, null);
+//			View contentViewSub1 = mMainUIManager.getView(START_FROM_FOLDER, obj);
+//			mViewPagerSub.setVisibility(View.VISIBLE);
+//			mListViewsSub.clear();
+//			mViewPagerSub.removeAllViews();
+//
+//			mListViewsSub.add(transViewSub1);
+//			mListViewsSub.add(contentViewSub1);
+//			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
+//			mViewPagerSub.setCurrentItem(1, true);
 			break;
 		case ARTIST_TO_MYMUSIC:
-			mMainUIManager = new MyMusicManager(mActivity, this);
-			View transViewSub2 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View contentViewSub2 = mMainUIManager.getView(START_FROM_ARTIST, obj);
-			mViewPagerSub.setVisibility(View.VISIBLE);
-			mListViewsSub.clear();
-			mViewPagerSub.removeAllViews();
-
-			mListViewsSub.add(transViewSub2);
-			mListViewsSub.add(contentViewSub2);
-			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
-			mViewPagerSub.setCurrentItem(1, true);
+			UIManager = new MyMusicManager();
+			UIManager.show(mActivity, this,START_FROM_ARTIST);
+//			mMainUIManager = new MyMusicManager(mActivity, this);
+//			View transViewSub2 = mInflater.inflate(
+//					R.layout.viewpager_trans_layout, null);
+//			View contentViewSub2 = mMainUIManager.getView(START_FROM_ARTIST, obj);
+//			mViewPagerSub.setVisibility(View.VISIBLE);
+//			mListViewsSub.clear();
+//			mViewPagerSub.removeAllViews();
+//
+//			mListViewsSub.add(transViewSub2);
+//			mListViewsSub.add(contentViewSub2);
+//			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
+//			mViewPagerSub.setCurrentItem(1, true);
 			break;
 		case ALBUM_TO_MYMUSIC:
-			mMainUIManager = new MyMusicManager(mActivity, this);
-			View transViewSub3 = mInflater.inflate(
-					R.layout.viewpager_trans_layout, null);
-			View contentViewSub3 = mMainUIManager.getView(START_FROM_ALBUM, obj);
-			mViewPagerSub.setVisibility(View.VISIBLE);
-			mListViewsSub.clear();
-			mViewPagerSub.removeAllViews();
-
-			mListViewsSub.add(transViewSub3);
-			mListViewsSub.add(contentViewSub3);
-			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
-			mViewPagerSub.setCurrentItem(1, true);
+			UIManager = new MyMusicManager();
+			UIManager.show(mActivity, this,START_FROM_ALBUM);
+//			mMainUIManager = new MyMusicManager(mActivity, this);
+//			View transViewSub3 = mInflater.inflate(
+//					R.layout.viewpager_trans_layout, null);
+//			View contentViewSub3 = mMainUIManager.getView(START_FROM_ALBUM, obj);
+//			mViewPagerSub.setVisibility(View.VISIBLE);
+//			mListViewsSub.clear();
+//			mViewPagerSub.removeAllViews();
+//
+//			mListViewsSub.add(transViewSub3);
+//			mListViewsSub.add(contentViewSub3);
+//			mViewPagerSub.setAdapter(new MyPagerAdapter(mListViewsSub));
+//			mViewPagerSub.setCurrentItem(1, true);
 			break;
 		}
 	}
@@ -302,39 +296,39 @@ public class UIManager implements IConstants, OnBackListener {
 		}
 	}
 
-	private class MyOnPageChangeListener implements OnPageChangeListener {
-
-		int onPageScrolled = -1;
-
-		// 当滑动状态改变时调用
-		@Override
-		public void onPageScrollStateChanged(int arg0) {
-			System.out.println("onPageScrollStateChanged--->" + arg0);
-			if (onPageScrolled == 0 && arg0 == 0) {
-				mMainActivity.unRegisterBackListener(UIManager.this);
-				mViewPager.removeAllViews();
-				mViewPager.setVisibility(View.INVISIBLE);
-				if (mRefreshListener != null) {
-					mRefreshListener.onRefresh();
-				}
-			}
-		}
-
-		// 当当前页面被滑动时调用
-		@Override
-		public void onPageScrolled(int arg0, float arg1, int arg2) {
-			onPageScrolled = arg0;
-			// System.out.println("onPageScrolled--->" + "arg0=" + arg0 +
-			// " arg1="
-			// + arg1 + " arg2=" + arg2);
-		}
-
-		// 当新的页面被选中时调用
-		@Override
-		public void onPageSelected(int arg0) {
-			// System.out.println("onPageSelected--->" + arg0);
-		}
-	}
+//	private class MyOnPageChangeListener implements OnPageChangeListener {
+//
+//		int onPageScrolled = -1;
+//
+//		// 当滑动状态改变时调用
+//		@Override
+//		public void onPageScrollStateChanged(int arg0) {
+//			System.out.println("onPageScrollStateChanged--->" + arg0);
+//			if (onPageScrolled == 0 && arg0 == 0) {
+//				mMainActivity.unRegisterBackListener(UIManager.this);
+////				mViewPager.removeAllViews();
+////				mViewPager.setVisibility(View.INVISIBLE);
+//				if (mRefreshListener != null) {
+//					mRefreshListener.onRefresh();
+//				}
+//			}
+//		}
+//
+//		// 当当前页面被滑动时调用
+//		@Override
+//		public void onPageScrolled(int arg0, float arg1, int arg2) {
+//			onPageScrolled = arg0;
+//			// System.out.println("onPageScrolled--->" + "arg0=" + arg0 +
+//			// " arg1="
+//			// + arg1 + " arg2=" + arg2);
+//		}
+//
+//		// 当新的页面被选中时调用
+//		@Override
+//		public void onPageSelected(int arg0) {
+//			// System.out.println("onPageSelected--->" + arg0);
+//		}
+//	}
 
 	private class MyOnPageChangeListenerSub implements OnPageChangeListener {
 
@@ -365,9 +359,10 @@ public class UIManager implements IConstants, OnBackListener {
 	public void onBack() {
 		if (mViewPagerSub.isShown()) {
 			mViewPagerSub.setCurrentItem(0, true);
-		} else if (mViewPager.isShown()) {
-			mViewPager.setCurrentItem(0, true);
-		}
+		} 
+//		else if (mViewPager.isShown()) {
+//			mViewPager.setCurrentItem(0, true);
+//		}
 	}
 
 }

@@ -17,7 +17,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -45,7 +45,7 @@ import com.ldw.music.utils.SplashScreen;
  *
  */
 @SuppressLint("HandlerLeak")
-public class MainContentActivity extends FragmentActivity implements IConstants {
+public class MainContentActivity extends BaseActivity implements IConstants {
 
 	public static final String ALARM_CLOCK_BROADCAST = "alarm_clock_broadcast";
 	public SlidingMenu mSlidingMenu;
@@ -64,7 +64,7 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
-
+		
 		DisplayMetrics metric = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metric);
 		mScreenWidth = metric.widthPixels;
@@ -80,9 +80,11 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 		mSplashScreen.show(R.drawable.image_splash_background,
 				SplashScreen.SLIDE_LEFT);
 		// set the Above View
-		mMainFragment = new MainFragment();
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.frame_main, mMainFragment).commit();
+		mMainFragment = new MainFragment();//主界面
+		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
+		//beginTransaction.addToBackStack(null);
+		//beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE/*TRANSIT_FRAGMENT_OPEN*/);
+		beginTransaction.add(R.id.frame_main, mMainFragment).commit();
 
 		// configure the SlidingMenu
 		mSlidingMenu = new SlidingMenu(this);
@@ -94,8 +96,11 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 		mSlidingMenu.setFadeDegree(0.35f);
 		mSlidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
 		mSlidingMenu.setMenu(R.layout.frame_menu);
+		//测
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.frame_menu, new MenuFragment()).commit();
+//		getSupportFragmentManager().beginTransaction()
+//		.replace(R.id.frame_menu, new SlidingDrawerManager()).commit();
 
 		mMusicDao = new MusicInfoDao(this);
 
@@ -154,9 +159,10 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 	public void unRegisterBackListener(OnBackListener listener) {
 		mBackListeners.remove(listener);
 	}
-
+//关闭界面
 	@Override
 	public void onBackPressed() {
+		super.onBackPressed();
 		if (mSlidingMenu.isMenuShowing()) {
 			mSlidingMenu.showContent();
 		} else {
@@ -165,7 +171,7 @@ public class MainContentActivity extends FragmentActivity implements IConstants 
 				// 在activity中调用 moveTaskToBack (boolean nonRoot)方法即可将activity
 				// 退到后台，注意不是finish()退出。
 				// 参数为false代表只有当前activity是task根，指应用启动的第一个activity时，才有效;
-				moveTaskToBack(true);
+				//moveTaskToBack(true);
 			}
 			for (OnBackListener listener : mBackListeners) {
 				listener.onBack();

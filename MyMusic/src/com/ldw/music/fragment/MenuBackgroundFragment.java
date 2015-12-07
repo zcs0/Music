@@ -15,11 +15,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -37,7 +36,7 @@ import com.ldw.music.storage.SPStorage;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuBackgroundFragment extends Fragment implements
+public class MenuBackgroundFragment extends BaseFragment implements
 		OnItemClickListener, IConstants, OnClickListener {
 
 	private ImageButton mBackBtn;

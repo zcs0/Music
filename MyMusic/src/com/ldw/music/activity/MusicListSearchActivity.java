@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,7 +56,7 @@ import com.ldw.music.view.KeyBoardKeyView;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MusicListSearchActivity extends Activity implements
+public class MusicListSearchActivity extends BaseActivity implements
 		OnClickListener, IConstants, OnItemClickListener {
 
 	private ImageView mKeyboardSwitcherIv;

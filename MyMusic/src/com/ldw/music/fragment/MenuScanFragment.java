@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,7 +25,7 @@ import com.ldw.music.utils.MusicUtils;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuScanFragment extends Fragment implements IConstants, OnClickListener {
+public class MenuScanFragment extends BaseFragment implements IConstants, OnClickListener {
 
 	private Button mScanBtn;
 	private ImageButton mBackBtn;

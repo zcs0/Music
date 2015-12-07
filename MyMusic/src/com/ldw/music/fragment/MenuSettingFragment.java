@@ -5,7 +5,6 @@ package com.ldw.music.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,7 +23,7 @@ import com.ldw.music.storage.SPStorage;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuSettingFragment extends Fragment implements OnClickListener, IConstants {
+public class MenuSettingFragment extends BaseFragment implements OnClickListener, IConstants {
 	
 	private LinearLayout mAdviceLayout, mAboutLayout;
 	private CheckedTextView mChangeSongTv, mAutoLyricTv, mFilterSizeTv, mFilterTimeTv;

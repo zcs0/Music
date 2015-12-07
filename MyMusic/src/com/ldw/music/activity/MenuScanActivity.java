@@ -8,7 +8,6 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -16,7 +15,6 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 
 import com.ldw.music.R;
 import com.ldw.music.fragment.LeftFragment;
-import com.ldw.music.fragment.MenuBackgroundFragment;
 import com.ldw.music.fragment.MenuScanFragment;
 import com.ldw.music.fragment.RightFragment;
 
@@ -25,7 +23,7 @@ import com.ldw.music.fragment.RightFragment;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuScanActivity extends FragmentActivity {
+public class MenuScanActivity extends BaseActivity {
 	
 	public ViewPager mViewPager;
 	private List<Fragment> mFragmentList = new ArrayList<Fragment>();

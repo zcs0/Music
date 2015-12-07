@@ -6,12 +6,8 @@ package com.ldw.music.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -27,7 +23,7 @@ import com.ldw.music.fragment.RightFragment;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuBackgroundActivity extends FragmentActivity {
+public class MenuBackgroundActivity extends BaseActivity {
 
 	public ViewPager mViewPager;
 	private List<Fragment> mFragmentList = new ArrayList<Fragment>();

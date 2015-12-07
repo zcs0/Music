@@ -3,9 +3,9 @@
  */
 package com.ldw.music.uimanager;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,20 +15,26 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.ldw.music.MusicApp;
 import com.ldw.music.R;
 import com.ldw.music.activity.IConstants;
 import com.ldw.music.adapter.MyAdapter;
+import com.ldw.music.adapter.MyPagerAdapter;
+import com.ldw.music.fragment.BaseFragment;
 import com.ldw.music.model.AlbumInfo;
 import com.ldw.music.model.ArtistInfo;
 import com.ldw.music.model.FolderInfo;
@@ -37,23 +43,25 @@ import com.ldw.music.service.ServiceManager;
 import com.ldw.music.storage.SPStorage;
 import com.ldw.music.utils.MusicTimer;
 import com.ldw.music.utils.MusicUtils;
+import com.ldw.music.viewpagerlistener.MyOnPageChangeListener;
 
 /**
  * 我的音乐
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MyMusicManager extends MainUIManager implements IConstants,
+public class MyMusicManager extends BaseFragment implements IConstants,
 		OnTouchListener {
-
+	private ViewPager mViewPager;
+	private View mView;
 	private LayoutInflater mInflater;
-	private Activity mActivity;
+	private FragmentActivity mActivity;
 
 	private String TAG = MyMusicManager.class.getSimpleName();
 	private MyAdapter mAdapter;
 	private ListView mListView;
 	private ServiceManager mServiceManager = null;
-	private SlidingDrawerManager mSdm;
+	private SlidingManagerFragment mSdm;
 	private MyMusicUIManager mUIm;
 	private MusicTimer mMusicTimer;
 	private MusicPlayBroadcast mPlayBroadcast;
@@ -65,11 +73,30 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 	private Bitmap defaultArtwork;
 
 	private UIManager mUIManager;
-
-	public MyMusicManager(Activity activity, UIManager manager) {
+	public MyMusicManager(){}
+	private List<View> mListViews = new ArrayList<View>();
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		mView = View.inflate(getActivity(), R.layout.vp_files_list, null);
+		mViewPager = (ViewPager) findViewById(R.id.vp_file_list);
+		mViewPager.setVisibility(View.VISIBLE);
+		mListViews.add(new TextView(getActivity()));
+		mListViews.add(getView(mFrom));
+		mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+		mViewPager.setCurrentItem(1, true);
+		mViewPager.setOnPageChangeListener(new MyOnPageChangeListener(mViewPager));
+		return mView;
+	}
+	public View findViewById(int ids){
+		return mView.findViewById(ids);
+	}
+	public void  show(FragmentActivity activity, UIManager manager,int from) {
+		this.mFrom = from;
 		this.mActivity = activity;
-		mInflater = LayoutInflater.from(activity);
 		this.mUIManager = manager;
+		mInflater = LayoutInflater.from(activity);
+		showFragment(activity,this, R.id.rl_file_list);
 	}
 
 	public View getView(int from) {
@@ -78,11 +105,19 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 
 	public View getView(int from, Object object) {
 		View contentView = mInflater.inflate(R.layout.mymusic, null);
-		mFrom = from;
+		
 		mObj = object;
-		initBg(contentView);
+		//initBg(contentView);
 		initView(contentView);
-
+		//返回上一页
+		contentView.findViewById(R.id.backBtn).setOnClickListener(new View.OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						backStack();
+						
+					}
+				});
 		return contentView;
 	}
 
@@ -91,7 +126,7 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 				R.drawable.img_album_background);
 		mServiceManager = MusicApp.mServiceManager;
 
-		mBottomLayout = (RelativeLayout) view.findViewById(R.id.bottomLayout);
+		mBottomLayout = (RelativeLayout) view.findViewById(R.id.rl_bottomLayout);
 
 		mListView = (ListView) view.findViewById(R.id.music_listview);
 
@@ -105,13 +140,14 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 
 		mUIm = new MyMusicUIManager(mActivity, mServiceManager, view,
 				mUIManager);
-		mSdm = new SlidingDrawerManager(mActivity, mServiceManager, view);
+		mSdm = new SlidingManagerFragment(mActivity, mServiceManager);
 		mMusicTimer = new MusicTimer(mSdm.mHandler, mUIm.mHandler);
 		mSdm.setMusicTimer(mMusicTimer);
 
 		initListView();
 
 		initListViewStatus();
+		
 	}
 
 	private void initBg(View view) {
@@ -153,11 +189,13 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 			Log.d(TAG, "", e);
 		}
 	}
-
+	/**
+	 * 列表
+	 */
 	private void initListView() {
 		mAdapter = new MyAdapter(mActivity, mServiceManager, mSdm);
 		mListView.setAdapter(mAdapter);
-
+		//播放音乐
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -170,7 +208,7 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 		});
 		StringBuffer select = new StringBuffer();
 		switch (mFrom) {
-		case START_FROM_ARTIST:
+		case START_FROM_ARTIST://歌手
 			ArtistInfo artistInfo = (ArtistInfo) mObj;
 			// select.append(" and " + Media.ARTIST + " = '"
 			// + artistInfo.artist_name + "'");
@@ -178,7 +216,7 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 					select.toString(), artistInfo.artist_name,
 					START_FROM_ARTIST));
 			break;
-		case START_FROM_ALBUM:
+		case START_FROM_ALBUM://专辑
 			AlbumInfo albumInfo = (AlbumInfo) mObj;
 			// select.append(" and " + Media.ALBUM_ID + " = "
 			// + albumInfo.album_id);
@@ -186,7 +224,8 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 					select.toString(), albumInfo.album_id + "",
 					START_FROM_ALBUM));
 			break;
-		case START_FROM_FOLDER:
+		case START_FROM_FOLDER://文件夹
+
 			FolderInfo folderInfo = (FolderInfo) mObj;
 			// select.append(" and " + Media.DATA + " like '"
 			// + folderInfo.folder_path + File.separator + "%'");
@@ -194,12 +233,12 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 					select.toString(), folderInfo.folder_path,
 					START_FROM_FOLDER));
 			break;
-		case START_FROM_FAVORITE:
+		case START_FROM_FAVORITE://我的最爱
 			mAdapter.setData(MusicUtils.queryFavorite(mActivity),
 					START_FROM_FAVORITE);
 			break;
 		default:
-			mAdapter.setData(MusicUtils.queryMusic(mActivity, START_FROM_LOCAL));
+			mAdapter.setData(MusicUtils.queryMusic(mActivity, START_FROM_LOCAL));//我的音乐
 			break;
 		}
 	}
@@ -275,6 +314,7 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 	}
 
 	int oldY = 0;
+	
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -289,7 +329,6 @@ public class MyMusicManager extends MainUIManager implements IConstants,
 		return true;
 	}
 
-	@Override
 	protected void setBgByPath(String path) {
 		Bitmap bitmap = mUIManager.getBitmapByPath(path);
 		if (bitmap != null) {

@@ -6,7 +6,6 @@ package com.ldw.music.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import android.widget.TextView;
 import com.ldw.music.R;
 import com.ldw.music.aidl.IMediaService;
 import com.ldw.music.model.MusicInfo;
-import com.ldw.music.service.ServiceManager;
 import com.ldw.music.utils.MusicUtils;
 
 /**
@@ -37,7 +35,7 @@ import com.ldw.music.utils.MusicUtils;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class PlayQueueActivity extends Activity implements OnItemClickListener, IConstants {
+public class PlayQueueActivity extends BaseActivity implements OnItemClickListener, IConstants {
 	
 	private ListView mListView;
 	private TextView mTitleTv;

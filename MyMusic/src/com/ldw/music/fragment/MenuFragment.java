@@ -6,13 +6,11 @@ package com.ldw.music.fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ldw.music.MusicApp;
 import com.ldw.music.R;
@@ -30,7 +28,7 @@ import com.ldw.music.slidemenu.SlidingMenu.OnOpenedListener;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuFragment extends Fragment implements OnClickListener,
+public class MenuFragment extends BaseFragment implements OnClickListener,
 		IConstants, OnOpenedListener {
 
 	private TextView mMediaCountTv;

@@ -9,6 +9,9 @@ import java.util.List;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,16 +26,19 @@ import android.widget.TextView;
 
 import com.ldw.music.R;
 import com.ldw.music.activity.IConstants;
+import com.ldw.music.adapter.MyPagerAdapter;
+import com.ldw.music.fragment.BaseFragment;
 import com.ldw.music.model.FolderInfo;
 import com.ldw.music.storage.SPStorage;
 import com.ldw.music.utils.MusicUtils;
+import com.ldw.music.viewpagerlistener.MyOnPageChangeListener;
 
 /**
  * 文件夹列表
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class FolderBrowserManager extends MainUIManager implements IConstants,
+public class FolderBrowserManager extends BaseFragment implements IConstants,
 		OnItemClickListener, OnClickListener {
 
 	private Activity mActivity;
@@ -46,13 +52,37 @@ public class FolderBrowserManager extends MainUIManager implements IConstants,
 	private UIManager mUIManager;
 
 	private RelativeLayout mFolderLayout;
+	private View mView;
+	private ViewPager mViewPager;
+	private List<View> mListViews = new ArrayList<View>();
 
-	public FolderBrowserManager(Activity activity, UIManager manager) {
-		this.mActivity = activity;
-		this.mInflater = LayoutInflater.from(activity);
-		this.mUIManager = manager;
+//	public FolderBrowserManager(Activity activity, UIManager manager) {
+//		this.mActivity = activity;
+//		this.mInflater = LayoutInflater.from(activity);
+//		this.mUIManager = manager;
+//	}
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		mView = View.inflate(getActivity(), R.layout.vp_files_list, null);
+		mViewPager = (ViewPager) findViewById(R.id.vp_file_list);
+		mViewPager.setVisibility(View.VISIBLE);
+		mListViews.add(new TextView(getActivity()));
+		mListViews .add(getView());
+		mViewPager.setAdapter(new MyPagerAdapter(mListViews));
+		mViewPager.setCurrentItem(1, true);
+		mViewPager.setOnPageChangeListener(new MyOnPageChangeListener(mViewPager));
+		return mView;
 	}
-
+	public View findViewById(int ids){
+		return mView.findViewById(ids);
+	}
+	public void  show(FragmentActivity activity, UIManager manager) {
+		this.mActivity = activity;
+		this.mUIManager = manager;
+		mInflater = LayoutInflater.from(activity);
+		showFragment(activity,this, R.id.rl_file_list);
+	}
 	public View getView() {
 		View folderView = mInflater.inflate(R.layout.folderbrower, null);
 		initBg(folderView);
@@ -141,7 +171,6 @@ public class FolderBrowserManager extends MainUIManager implements IConstants,
 		mUIManager.setCurrentItem();
 	}
 
-	@Override
 	protected void setBgByPath(String path) {
 		Bitmap bitmap = mUIManager.getBitmapByPath(path);
 		if (bitmap != null) {
@@ -150,12 +179,10 @@ public class FolderBrowserManager extends MainUIManager implements IConstants,
 		}
 	}
 
-	@Override
 	public View getView(int from) {
 		return null;
 	}
 
-	@Override
 	public View getView(int from, Object obj) {
 		return null;
 	}

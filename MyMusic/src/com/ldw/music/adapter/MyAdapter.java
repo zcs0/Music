@@ -23,7 +23,7 @@ import com.ldw.music.db.MusicInfoDao;
 import com.ldw.music.interfaces.IQueryFinished;
 import com.ldw.music.model.MusicInfo;
 import com.ldw.music.service.ServiceManager;
-import com.ldw.music.uimanager.SlidingDrawerManager;
+import com.ldw.music.uimanager.SlidingManagerFragment;
 import com.ldw.music.utils.MusicUtils;
 import com.ldw.music.utils.StringHelper;
 
@@ -32,7 +32,7 @@ public class MyAdapter extends BaseAdapter implements IConstants {
 	private LayoutInflater mLayoutInflater;
 	private ArrayList<MusicInfo> mMusicList;
 	private ServiceManager mServiceManager;
-	private SlidingDrawerManager mSdm;
+	private SlidingManagerFragment mSdm;
 
 	private int mPlayState, mCurPlayMusicIndex = -1;
 //	private IQueryFinished mIQueryFinished;
@@ -45,7 +45,7 @@ public class MyAdapter extends BaseAdapter implements IConstants {
 		ImageView playStateIconIv, favoriteIv;
 	}
 
-	public MyAdapter(Context context, ServiceManager sm, SlidingDrawerManager sdm) {
+	public MyAdapter(Context context, ServiceManager sm, SlidingManagerFragment sdm) {
 		mLayoutInflater = LayoutInflater.from(context);
 		mMusicList = new ArrayList<MusicInfo>();
 		this.mServiceManager = sm;
