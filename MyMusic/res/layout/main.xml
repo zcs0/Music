@@ -12,7 +12,7 @@
         android:background="@color/top_color" >
 
         <TextView
-            android:id="@+id/topTv"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -217,7 +217,7 @@
         android:divider="@color/divider_color"
         android:dividerHeight="0.5dip" />
 
-    <com.ldw.music.view.MySlidingDrawer
+    <com.music.view.MySlidingDrawer
         android:id="@+id/slidingDrawer"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -229,6 +229,6 @@
         <include layout="@layout/sliding_handle" />
 
         <include layout="@layout/sliding_content" />
-    </com.ldw.music.view.MySlidingDrawer>
+    </com.music.view.MySlidingDrawer>
 
 </RelativeLayout>

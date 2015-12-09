@@ -1,0 +1,73 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_mymusic_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/topLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip"
+        android:background="@color/half_transparent" >
+
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/selector_music_btn"
+            android:padding="10dip"
+            android:src="@drawable/icon_back" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="音乐列表"
+            android:textColor="@color/white"
+            android:textSize="@dimen/title_text_sp" />
+
+        <ImageButton
+            android:id="@+id/searchBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/selector_music_btn"
+            android:padding="10.0dip"
+            android:src="@drawable/icon_search" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/music_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@color/divider_color"
+        android:dividerHeight="0.5dip" />
+
+    <include
+        android:visibility="gone"
+        android:id="@+id/rl_bottomLayout"
+        layout="@layout/main_bottom_btn" />
+    <!--
+    <com.music.view.MySlidingDrawer
+        android:id="@+id/slidingDrawer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@drawable/sliding_bg"
+        android:content="@+id/content"
+        android:handle="@+id/title_txt_handle"
+        android:visibility="invisible" >
+
+        <include layout="@layout/sliding_handle" />
+
+        <include layout="@layout/sliding_content" />
+    </com.music.view.MySlidingDrawer>
+    -->
+
+</LinearLayout>

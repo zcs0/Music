@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="64dip"
-    android:layout_alignParentBottom="true"
-    android:background="@color/bottom_color" >
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    
+    >
 
     <ProgressBar
         android:id="@+id/playback_seekbar2"
@@ -24,7 +24,7 @@
     <ImageButton
         android:id="@+id/btn_menu2"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_margin="4.0dip"
@@ -44,7 +44,7 @@
     <ImageButton
         android:id="@+id/btn_playNext2"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/split"
         android:background="@drawable/selector_music_btn"
@@ -54,7 +54,7 @@
     <FrameLayout
         android:id="@+id/playLayout"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginRight="12.0dip"
         android:layout_toLeftOf="@id/btn_playNext2" >
@@ -85,7 +85,7 @@
         android:layout_toRightOf="@id/headicon_iv"
         android:orientation="vertical" >
 
-        <com.ldw.music.view.AlwaysMarqueeTextView
+        <com.music.view.AlwaysMarqueeTextView
             android:id="@+id/artist_tv2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
             android:textColor="@color/white"
             android:textSize="12sp" />
 
-        <com.ldw.music.view.AlwaysMarqueeTextView
+        <com.music.view.AlwaysMarqueeTextView
             android:id="@+id/musicname_tv2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -8,7 +8,6 @@
     android:gravity="center" >
 
     <TextView
-        android:text="fghggffg"
         android:id="@+id/musicname_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,7 +15,6 @@
         android:textSize="20sp" />
 
     <TextView
-        android:text="fghggffg"
         android:id="@+id/artist_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

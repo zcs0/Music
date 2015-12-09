@@ -3,17 +3,14 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:background="@drawable/bg" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <RelativeLayout
-            android:id="@+id/top_layout"
             android:layout_width="fill_parent"
             android:layout_height="50dip"
             android:background="@color/half_transparent" >
@@ -40,38 +37,43 @@
         </RelativeLayout>
 
         <GridView
-            android:id="@+id/gridview"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:id="@+id/gv_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_margin="8.0dip"
+            android:layout_weight="1"
             android:horizontalSpacing="6.0dip"
             android:numColumns="3"
             android:verticalSpacing="6.0dip" />
-
-        <include
-            android:id="@+id/rl_bottomLayout"
-            layout="@layout/main_bottom_btn" />
     </LinearLayout>
-
     <!-- 进入列表 -->
+
     <RelativeLayout
         android:id="@+id/rl_file_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <!-- 进入音乐播放 -->
-    <RelativeLayout
-        android:id="@+id/rl_media_paly"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/rl_bottomLayout" />
 
     <!-- 列表中文件路径打开 -->
-
-    <android.support.v4.view.ViewPager
+   <!--  <android.support.v4.view.ViewPager
         android:id="@+id/vp_files_content"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone" >
-    </android.support.v4.view.ViewPager>
+    </android.support.v4.view.ViewPager> -->
+    <!-- 控件按钮 -->
+    <include
+        android:id="@+id/rl_bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/main_bottom_btn" />
+    <!-- 进入音乐播放界面 -->
+
+    <RelativeLayout
+        android:id="@+id/rl_media_paly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
 </RelativeLayout>
