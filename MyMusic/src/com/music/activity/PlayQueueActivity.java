@@ -92,7 +92,7 @@ public class PlayQueueActivity extends BaseActivity implements OnItemClickListen
 			}
 		};
 		
-		Intent intent = new Intent("com.ldw.music.service.MediaService");
+		Intent intent = new Intent(IConstants.SERVICE_NAME);
 		bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 

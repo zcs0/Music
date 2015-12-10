@@ -1,4 +1,4 @@
-package com.ldw.music.adapter;
+package com.music.adapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,13 +16,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ldw.music.R;
-import com.ldw.music.activity.IConstants;
-import com.ldw.music.interfaces.IQueryFinished;
-import com.ldw.music.model.MusicInfo;
-import com.ldw.music.service.ServiceManager;
-import com.ldw.music.utils.MusicUtils;
-import com.ldw.music.utils.StringHelper;
+import com.music.R;
+import com.music.activity.IConstants;
+import com.music.interfaces.IQueryFinished;
+import com.music.model.MusicInfo;
+import com.music.service.ServiceManager;
+import com.music.utils.MusicUtils;
+import com.music.utils.StringHelper;
 
 public class MyAdapter extends BaseAdapter implements IConstants {
 

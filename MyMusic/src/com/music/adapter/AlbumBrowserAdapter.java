@@ -26,7 +26,8 @@ public class AlbumBrowserAdapter extends IBaseAdapter{
 	public AlbumBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
 		this.mContext = context;
 		this.mServiceManager = sm;
-		mMusicList = baseMusic;
+		this.mMList = baseMusic;
+		mMList = baseMusic;
 		mAlbumList.clear();
 		if(baseMusic==null)return;
 		for (BaseMusic bm : baseMusic) {

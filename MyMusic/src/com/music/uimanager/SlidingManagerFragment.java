@@ -60,7 +60,6 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.utils.MusicTimer;
-import com.music.view.MySlidingDrawer;
 
 /**
  * 底部弹出的歌词界面控制
@@ -73,7 +72,7 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		OnSeekBarChangeListener, IConstants, OnDrawerOpenListener,
 		OnDrawerCloseListener {
 
-	private MySlidingDrawer mSliding;
+	private View mSliding;
 	private TextView mMusicNameTv, mArtistTv, mCurTimeTv, mTotalTimeTv;
 	private ImageButton mPrevBtn, mNextBtn, mPlayBtn, mPauseBtn, mVolumeBtn,
 			mFavoriteBtn;
@@ -151,6 +150,7 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		this.mServiceManager = sm;
 		this.mActivity = a;
 		mView = View.inflate(mActivity, R.layout.media_player, null);
+		//mView = View.inflate(mActivity, R.layout.main_music_list, null);
 		initView();
 	}
 
@@ -164,7 +164,7 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		
 		mListView = (ListView) findViewById(R.id.music_listview);
 		mGridView = (GridView) findViewById(R.id.gv_view);
-		mSliding = (MySlidingDrawer) findViewById(R.id.md_media_player);
+		mSliding = (View) findViewById(R.id.md_media_player);
 		mMusicNameTv = (TextView) findViewById(R.id.musicname_tv);
 		mArtistTv = (TextView) findViewById(R.id.artist_tv);
 		mPrevBtn = (ImageButton) findViewById(R.id.btn_playPre);
@@ -183,9 +183,9 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		mLrcListView.startAnimation(AnimationUtils.loadAnimation(mActivity,
 				android.R.anim.fade_in));
 
-		mSliding.setOnDrawerCloseListener(this);
-		mSliding.setOnDrawerOpenListener(this);
-		mSliding.open();
+//		mSliding.setOnDrawerCloseListener(this);
+//		mSliding.setOnDrawerOpenListener(this);
+//		mSliding.open();
 		mPrevBtn.setOnClickListener(this);
 		mNextBtn.setOnClickListener(this);
 		mPlayBtn.setOnClickListener(this);
@@ -327,11 +327,11 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 			break;
 		case R.id.btn_volume:
 			if (mVolumeLayout.isShown()) {
-				mVolumeLayout.setVisibility(View.INVISIBLE);
-				mVolumeLayout.startAnimation(view_out);
+				//mVolumeLayout.setVisibility(View.INVISIBLE);
+				//mVolumeLayout.startAnimation(view_out);
 			} else {
-				mVolumeLayout.setVisibility(View.VISIBLE);
-				mVolumeLayout.startAnimation(view_in);
+				//mVolumeLayout.setVisibility(View.VISIBLE);
+				//mVolumeLayout.startAnimation(view_in);
 			}
 			break;
 		case R.id.btn_more:
@@ -408,19 +408,6 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		this.mMusicTimer = musicTimer;
 	}
 
-	public void open() {
-		mSliding.setVisibility(View.VISIBLE);
-		mSliding.animateOpen();
-	}
-
-	public void close() {
-		mSliding.animateClose();
-	}
-
-	public boolean isOpened() {
-		return mSliding.isOpened();
-	}
-
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
@@ -478,7 +465,12 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 		String lyricFilePath = MusicApp.lrcPath + "/" + playingSong.musicName
 				+ ".lrc";
 		File lyricfile = new File(lyricFilePath);
-
+		if(!lyricfile.exists()){
+			lyricFilePath = MusicApp.lrcPath + "/" + playingSong.musicName + ".txt";
+			lyricfile = new File(lyricFilePath);
+		}
+		
+		
 		if (lyricfile.exists()) {
 			// 本地有歌词，直接读取
 			// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");
@@ -496,12 +488,19 @@ public class SlidingManagerFragment extends Fragment implements OnClickListener,
 			}
 		}
 	}
-
+	/**
+	 * 取得歌曲同目录下的歌词文件绝对路径
+	 * 下载歌词保存路径
+	 * @param musicName
+	 * @param artist
+	 */
 	private void loadLyricByHand(String musicName, String artist) {
-		// 取得歌曲同目录下的歌词文件绝对路径
 		String lyricFilePath = MusicApp.lrcPath + "/" + musicName + ".lrc";
 		File lyricfile = new File(lyricFilePath);
-
+		if(!lyricfile.exists()){
+			lyricFilePath = MusicApp.lrcPath + "/" + musicName + ".txt";
+			lyricfile = new File(lyricFilePath);
+		}
 		if (lyricfile.exists()) {
 			// 本地有歌词，直接读取
 			// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");

@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<com.music.view.MySlidingDrawer xmlns:android="http://schemas.android.com/apk/res/android"
+<com.music.view.ScrollDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/md_media_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/sliding_bg"
     android:content="@+id/content"
-    android:handle="@+id/title_txt_handle"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
      >
 
-    <include layout="@layout/sliding_handle" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/sliding_bg"
+        android:orientation="vertical" >
+        <include layout="@layout/sliding_handle" />
 
-   <include layout="@layout/sliding_content" />
+        <include layout="@layout/sliding_content" />
+    </LinearLayout>
 
-</com.music.view.MySlidingDrawer>
+</com.music.view.ScrollDrawerLayout>

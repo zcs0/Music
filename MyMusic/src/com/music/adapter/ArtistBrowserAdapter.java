@@ -27,6 +27,7 @@ public class ArtistBrowserAdapter extends IBaseAdapter {
 	public ArtistBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
 		this.mContext = context;
 		this.mServiceManager = sm;
+		this.mMList = baseMusic;
 		mArtistList.clear();
 		for (BaseMusic bm : baseMusic) {
 			if(bm instanceof ArtistInfo){

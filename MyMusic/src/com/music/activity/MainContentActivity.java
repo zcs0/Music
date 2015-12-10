@@ -156,11 +156,12 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	//关闭界面
 	@Override
 	public void onBackPressed() {
-		if(mMainFragment.getIsPlayShow()){//判断播放音乐界面是否正在显示
-			mMainFragment.hidePlayUi();//隐藏播放界面
-		}else{
-			super.onBackPressed();
-		}
+		super.onBackPressed();
+//		if(mMainFragment.getIsPlayShow()){//判断播放音乐界面是否正在显示
+//			mMainFragment.hidePlayUi();//隐藏播放界面
+//		}else{
+//			super.onBackPressed();
+//		}
 //		if (mSlidingMenu.isMenuShowing()) {
 //			mSlidingMenu.showContent();
 //		} else {

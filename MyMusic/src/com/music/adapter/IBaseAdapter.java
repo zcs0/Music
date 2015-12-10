@@ -20,17 +20,17 @@ import com.music.utils.StringHelper;
  */
 public abstract class IBaseAdapter extends BaseAdapter {
 	protected Context mContext;
-	protected List<BaseMusic> mMusicList = new ArrayList<BaseMusic>();
+	protected List<BaseMusic> mMList = new ArrayList<BaseMusic>();
 	/**
 	 * 当数据库中有数据的时候会调用该方法来更新列表
 	 * 
 	 * @param list
 	 */
 	public void setData(List<BaseMusic> list) {
-		mMusicList = list;
+		mMList = list;
 		if(list==null||list.size()<=0)return;
 		// 为list排序
-		Collections.sort(mMusicList, comparator);
+		Collections.sort(mMList, comparator);
 		notifyDataSetChanged();
 	}
 	Comparator<BaseMusic> comparator = new Comparator<BaseMusic>() {
@@ -56,5 +56,8 @@ public abstract class IBaseAdapter extends BaseAdapter {
 			}
 		}
 	};
+	public List<BaseMusic> getMList() {
+		return mMList;
+	}
 
 }

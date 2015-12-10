@@ -10,21 +10,24 @@ package com.music.activity;
  */
 public interface IConstants {
 	
-	public static final String BROADCAST_NAME = "com.ldw.music.broadcast";
-	public static final String SERVICE_NAME = "com.ldw.music.service.MediaService";
-	public static final String BROADCAST_QUERY_COMPLETE_NAME = "com.ldw.music.querycomplete.broadcast";
-	public static final String BROADCAST_CHANGEBG = "com.ldw.music.changebg";
-	public static final String BROADCAST_SHAKE = "com.ldw.music.shake";
+	public static final String BROADCAST_NAME = "com.music.broadcast";
+	public static final String SERVICE_NAME = "com.music.service.MediaService";
+	public static final String BROADCAST_QUERY_COMPLETE_NAME = "com.music.querycomplete.broadcast";
+	public static final String BROADCAST_CHANGEBG = "com.music.changebg";
+	public static final String BROADCAST_SHAKE = "com.music.shake";
+	public static final String PAUSE_BROADCAST_NAME = "com.music.pause.broadcast";
+	public static final String NEXT_BROADCAST_NAME = "com.music.next.broadcast";
+	public static final String PRE_BROADCAST_NAME = "com.music.pre.broadcast";
 	
 	//是否开启了振动模式
 	public static final String SHAKE_ON_OFF = "SHAKE_ON_OFF";
 	
-	public static final String SP_NAME = "com.ldw.music_preference";
-	public static final String SP_BG_PATH = "bg_path";
+	public static final String SP_NAME = "com.music_preference";
+	public static final String SP_BG_PATH = "bg_path";//图片保存路径
 	public static final String SP_SHAKE_CHANGE_SONG = "shake_change_song";
-	public static final String SP_AUTO_DOWNLOAD_LYRIC = "auto_download_lyric";
-	public static final String SP_FILTER_SIZE = "filter_size";
-	public static final String SP_FILTER_TIME = "filter_time";
+	public static final String SP_AUTO_DOWNLOAD_LYRIC = "auto_download_lyric";//是否自动下载歌词
+	public static final String SP_FILTER_SIZE = "filter_size";//过滤大小
+	public static final String SP_FILTER_TIME = "filter_time";//过滤时间
 	
 	public final static int REFRESH_PROGRESS_EVENT = 0x100;
 

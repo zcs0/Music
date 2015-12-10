@@ -34,9 +34,6 @@ import com.music.storage.SPStorage;
  */
 public class MediaService extends Service implements IConstants, OnShakeListener {
 	
-	private static final String PAUSE_BROADCAST_NAME = "com.ldw.music.pause.broadcast";
-	private static final String NEXT_BROADCAST_NAME = "com.ldw.music.next.broadcast";
-	private static final String PRE_BROADCAST_NAME = "com.ldw.music.pre.broadcast";
 	private static final int PAUSE_FLAG = 0x1;
 	private static final int NEXT_FLAG = 0x2;
 	private static final int PRE_FLAG = 0x3;

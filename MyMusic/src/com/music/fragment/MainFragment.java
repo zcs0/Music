@@ -95,7 +95,7 @@ public class MainFragment extends BaseFragment implements IConstants,
 
 		mGridView.setAdapter(mAdapter);
 		
-		mUIManager = new UIManager(getActivity(), mView);//中间显示的管理
+		mUIManager = new UIManager(getActivity(), mView,mServiceManager);//中间显示的管理
 		mUIManager.setOnRefreshListener(this);
 		
 		mBottomUIManager = new MainBottomUIManager(getActivity(), mView);
@@ -109,14 +109,14 @@ public class MainFragment extends BaseFragment implements IConstants,
 		getActivity().registerReceiver(mPlayBroadcast, filter);
 		FragmentTransaction beginTransaction = getActivity().getSupportFragmentManager().beginTransaction();
 		beginTransaction.replace(R.id.rl_media_paly, mSdm).commit();
-		
 		hide(getActivity(), mSdm);
 		mBottomLayout.setOnClickListener(new View.OnClickListener() {//显示播放
 			@Override
 			public void onClick(View arg0) {
 				mView.findViewById(R.id.rl_media_paly).setVisibility(View.VISIBLE);
 				FragmentTransaction beginTransaction2 = getActivity().getSupportFragmentManager().beginTransaction();
-				beginTransaction2.setCustomAnimations(R.anim.push_bottom_in, R.anim.push_bottom_out);
+				beginTransaction2.setCustomAnimations(R.anim.push_bottom_in, R.anim.push_bottom_out,R.anim.push_bottom_in, R.anim.push_bottom_out);
+				beginTransaction2.addToBackStack("");
 				beginTransaction2.show(mSdm);
 				beginTransaction2.commit();
 			}
@@ -224,33 +224,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 				holder.numTv.setText(albumNum + "");
 				break;
 			}
-
-//			convertView.setOnClickListener(new View.OnClickListener() {
-//
-//				@Override
-//				public void onClick(View v) {
-//					int from = -1;
-//					switch (position) {
-//					case 0:// 我的音乐
-//						from = START_FROM_LOCAL;
-//						break;
-//					case 1:// 我的最爱
-//						from = START_FROM_FAVORITE;
-//						break;
-//					case 2:// 文件夹
-//						from = START_FROM_FOLDER;
-//						break;
-//					case 3:// 歌手
-//						from = START_FROM_ARTIST;
-//						break;
-//					case 4:// 专辑
-//						from = START_FROM_ALBUM;
-//						break;
-//					}
-//					mUIManager.setContentType(from);
-//				}
-//			});
-
 			holder.iv.setImageResource(drawable[position]);
 			holder.nameTv.setText(name[position]);
 
@@ -262,7 +235,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 			TextView nameTv, numTv;
 		}
 	}
-
 	@Override
 	public void onServiceConnectComplete(IMediaService service) {
 		// service绑定成功会执行到这里
@@ -370,6 +342,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 	 * 隐藏播放界面
 	 */
 	public void hidePlayUi() {
-		hide(getActivity(), mSdm);
+		//hide(getActivity(), mSdm);
 	}
 }

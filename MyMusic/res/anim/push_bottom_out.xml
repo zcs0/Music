@@ -2,14 +2,14 @@
 <!-- 上下滑入式 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <translate
+     <translate
         android:duration="350"
         android:fromYDelta="0"
         android:toYDelta="100%p" />
 
     <alpha
-        android:duration="200"
-        android:fromAlpha="1.0"
+        android:duration="350"
+        android:fromAlpha="1"
         android:toAlpha="0.0" />
 
 </set>

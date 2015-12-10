@@ -323,7 +323,7 @@ public class MyMusicManager extends BaseFragment implements IConstants,
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			oldY = (int) event.getY();
 			if (oldY > bottomTop) {
-				mSdm.open();
+				//mSdm.open();
 			}
 		}
 		return true;

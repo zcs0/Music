@@ -4,6 +4,7 @@
 package com.music.adapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
@@ -26,7 +27,7 @@ import com.music.utils.MusicUtils;
 public class MusicAdapter extends IBaseAdapter implements IConstants {
 
 	private LayoutInflater mLayoutInflater;
-	private ArrayList<MusicInfo> mMusicList;
+	private List<MusicInfo> mMusicList;
 //	private ServiceManager mServiceManager;
 
 	private int mPlayState, mCurPlayMusicIndex = -1;
@@ -42,6 +43,7 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 	public MusicAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
 		mMusicList = new ArrayList<MusicInfo>();
 		this.mContext = context;
+		this.mMList = baseMusic;
 //		this.mServiceManager = sm;
 		if(baseMusic==null)return;
 		mFavoriteDao = new FavoriteInfoDao(context);
@@ -51,9 +53,15 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 				mMusicList.add((MusicInfo)bm);
 			}
 		}
-		
+		Collections.sort(mMusicList, comparator);
 	}
-/*	public MusicAdapter(Context context, ServiceManager sm, SlidingManagerFragment sdm) {
+	
+	public List<MusicInfo> getmMusicList() {
+		return mMusicList;
+	}
+
+
+	/*	public MusicAdapter(Context context, ServiceManager sm, SlidingManagerFragment sdm) {
 		mLayoutInflater = LayoutInflater.from(context);
 		mMusicList = new ArrayList<MusicInfo>();
 		this.mServiceManager = sm;
@@ -79,9 +87,6 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 		notifyDataSetChanged();
 	}
 
-	public List<MusicInfo> getData() {
-		return mMusicList;
-	}
 
 	public void setQueryFinished(IQueryFinished finish) {
 //		mIQueryFinished = finish;

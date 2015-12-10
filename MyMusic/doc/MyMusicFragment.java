@@ -1,4 +1,4 @@
-package com.ldw.music.fragment;
+package com.music.fragment;
 
 import java.util.List;
 
@@ -23,22 +23,22 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.ldw.music.R;
-import com.ldw.music.activity.IConstants;
-import com.ldw.music.activity.SlidingDrawerManager;
-import com.ldw.music.activity.UIManager;
-import com.ldw.music.adapter.MyAdapter;
-import com.ldw.music.db.AlbumInfoDao;
-import com.ldw.music.db.ArtistInfoDao;
-import com.ldw.music.db.MusicInfoDao;
-import com.ldw.music.interfaces.IOnServiceConnectComplete;
-import com.ldw.music.interfaces.IQueryFinished;
-import com.ldw.music.model.AlbumInfo;
-import com.ldw.music.model.ArtistInfo;
-import com.ldw.music.model.MusicInfo;
-import com.ldw.music.service.ServiceManager;
-import com.ldw.music.utils.MusicTimer;
-import com.ldw.music.utils.MusicUtils;
+import com.music.R;
+import com.music.activity.IConstants;
+import com.music.activity.SlidingDrawerManager;
+import com.music.activity.UIManager;
+import com.music.adapter.MyAdapter;
+import com.music.db.AlbumInfoDao;
+import com.music.db.ArtistInfoDao;
+import com.music.db.MusicInfoDao;
+import com.music.interfaces.IOnServiceConnectComplete;
+import com.music.interfaces.IQueryFinished;
+import com.music.model.AlbumInfo;
+import com.music.model.ArtistInfo;
+import com.music.model.MusicInfo;
+import com.music.service.ServiceManager;
+import com.music.utils.MusicTimer;
+import com.music.utils.MusicUtils;
 
 public class MyMusicFragment extends Fragment implements
 		IOnServiceConnectComplete, IConstants, OnTouchListener, IQueryFinished {

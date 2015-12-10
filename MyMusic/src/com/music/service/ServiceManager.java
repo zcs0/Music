@@ -54,13 +54,13 @@ public class ServiceManager implements IConstants {
 	}
 
 	public void connectService() {
-		Intent intent = new Intent("com.ldw.music.service.MediaService");
+		Intent intent = new Intent(IConstants.SERVICE_NAME/*"com.music.service.MediaService"*/);
 		mContext.bindService(intent, mConn, Context.BIND_AUTO_CREATE);
 	}
 	
 	public void disConnectService() {
 		mContext.unbindService(mConn);
-		mContext.stopService(new Intent("com.ldw.music.service.MediaService"));
+		mContext.stopService(new Intent(IConstants.SERVICE_NAME));//"com.music.service.MediaService"
 	}
 	
 	public void refreshMusicList(List<MusicInfo> musicList) {

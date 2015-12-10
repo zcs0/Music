@@ -92,8 +92,8 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(
 				mViewPager));
 		initView();//初始化控件
-		
 		createAdapter();//创建Adapter
+		initListViewStatus();
 		return mView;
 	}
 	
@@ -155,6 +155,12 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	private void initView(){
 		listView = findViewById(R.id.music_list_view);
 		tv_title = findViewById(R.id.tv_title);
+		int playState = mServiceManager.getPlayState();
+		MusicInfo music = mServiceManager.getCurMusic();
+		if (playState == MPS_NOFILE || playState == MPS_INVALID) {
+			//return;
+		}
+		
 		//返回上一页
 		findViewById(R.id.backBtn).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -168,9 +174,15 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				
-				BaseMusic baseMusic = queryMusic.get(position);
+				List<BaseMusic> mList = musicAdapter.getMList();
+				BaseMusic baseMusic = mList.get(position);
+				//BaseMusic baseMusic = queryMusic.get(position);
 				if(baseMusic instanceof MusicInfo){//如果是一个可播放的文件
+					ArrayList<MusicInfo> mMusicList  = new ArrayList<MusicInfo>();
+					for (BaseMusic list : queryMusic) {
+						mMusicList.add((MusicInfo)list);
+					}
+					mServiceManager.refreshMusicList(mMusicList);
 					mServiceManager.playById(((MusicInfo)baseMusic).songId);
 				}else{
 					List<BaseMusic> queryMusic=null;
@@ -211,6 +223,9 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 		mInflater = LayoutInflater.from(activity);
 		showFragment(activity, this, R.id.rl_file_list);
 	}
+	/**
+	 * 设置播放状态
+	 */
 	private void initListViewStatus() {
 		try {
 			mSdm.setListViewAdapter(mAdapter);
@@ -221,7 +236,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 			if (playState == MPS_PLAYING) {
 				mMusicTimer.startTimer();
 			}
-			List<MusicInfo> musicList = mAdapter.getData();
+			List<MusicInfo> musicList = mAdapter.getmMusicList();
 			int playingSongPosition = MusicUtils.seekPosInListById(musicList,
 					mServiceManager.getCurMusicId());
 			mAdapter.setPlayState(playState, playingSongPosition);
@@ -318,6 +333,14 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	public void setBaseMusic(int type,BaseMusic baseMusic) {
 		this.mFrom = type;
 		this.baseMusic = baseMusic;
+		
+	}
+	/**
+	 * 设置音乐播放管理者
+	 * @param mServiceManager2
+	 */
+	public void setServiceManager(ServiceManager sm) {
+		this.mServiceManager=sm;
 		
 	}
 

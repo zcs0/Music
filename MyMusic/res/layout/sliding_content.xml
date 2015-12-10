@@ -135,7 +135,7 @@
     </LinearLayout>
     
     <!--
-         <com.ldw.music.view.LrcView
+         <com.music.view.LrcView
         android:id="@+id/lrctextview"
         android:layout_width="match_parent"
         android:layout_height="200dip"

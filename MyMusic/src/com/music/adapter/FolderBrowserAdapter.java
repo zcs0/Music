@@ -26,6 +26,7 @@ public class FolderBrowserAdapter extends IBaseAdapter implements IConstants{
 	private ServiceManager mServiceManager;
 	public FolderBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
 		this.mContext = context;
+		this.mMList = baseMusic;
 		mMusicList = new ArrayList<FolderInfo>();
 		this.mServiceManager = sm;
 		if(baseMusic==null)return;

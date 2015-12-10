@@ -26,9 +26,9 @@ import android.view.View;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
-import com.music.activity.MainContentActivity.OnBackListener;
 import com.music.fragment.MusicListFragment;
 import com.music.model.BaseMusic;
+import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 
 /**
@@ -37,7 +37,7 @@ import com.music.storage.SPStorage;
  * @author longdw
  * 
  */
-public class UIManager implements IConstants, OnBackListener {
+public class UIManager implements IConstants {
 
 	public interface OnRefreshListener {
 		public void onRefresh();
@@ -57,6 +57,7 @@ public class UIManager implements IConstants, OnBackListener {
 	private View mMainLayout;
 	private ChangeBgReceiver mReceiver;
 	private MainUIManager mMainUIManager;
+	private ServiceManager mServiceManager;
 //	private SPStorage mSp;
 //	private String mDefaultBgPath;
 	/**
@@ -64,9 +65,16 @@ public class UIManager implements IConstants, OnBackListener {
 	 * @param activity
 	 * @param view 主界面的view
 	 */
-	public UIManager(FragmentActivity activity, View view) {
+	/**
+	 * UI界面管理
+	 * @param activity
+	 * @param view 主界面
+	 * @param mServiceManager 音乐播放管理
+	 */
+	public UIManager(FragmentActivity activity, View view,ServiceManager sm) {
 		this.mActivity = activity;
 		this.mView = view;
+		this.mServiceManager = sm;
 		mMainActivity = (MainContentActivity) activity;
 		this.mInflater = LayoutInflater.from(activity);
 		initBroadCast();//广播
@@ -96,13 +104,14 @@ public class UIManager implements IConstants, OnBackListener {
 		findViewById(R.id.rl_file_list).setVisibility(View.VISIBLE);
 		FragmentTransaction beginTransaction = mActivity.getSupportFragmentManager().beginTransaction();
 		MusicListFragment musicList = new MusicListFragment();
+		musicList.setServiceManager(mServiceManager);//设置音乐播放管理者
 		musicList.setBaseMusic(type,baseMusic);//设置要显示的数据
+		beginTransaction.setCustomAnimations(R.anim.push_right_in, R.anim.push_right_out,R.anim.push_right_in, R.anim.push_right_out);
 		beginTransaction.replace(R.id.rl_file_list, musicList);
 		beginTransaction.addToBackStack("");
 		beginTransaction.commit();
 		
 	}
-//	
 	private void initBroadCast() {
 		mReceiver = new ChangeBgReceiver();
 		IntentFilter filter = new IntentFilter(BROADCAST_CHANGEBG);
@@ -129,6 +138,7 @@ public class UIManager implements IConstants, OnBackListener {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String path = intent.getStringExtra("path");
+			if(TextUtils.isEmpty(path))return;
 			Bitmap bitmap = getBitmapByPath(path);
 			if(bitmap != null) {
 				mMainLayout.setBackgroundDrawable(new BitmapDrawable(mActivity.getResources(), bitmap));
@@ -152,17 +162,6 @@ public class UIManager implements IConstants, OnBackListener {
 	}
 	public void setOnRefreshListener(OnRefreshListener listener) {
 		mRefreshListener = listener;
-	}
-	@Override
-	public void onBack() {
-//		if (mViewPagerSub.isShown()) {//如果在文件列表中，返回
-//			mViewPagerSub.setCurrentItem(0, true);
-//			mViewPagerSub.setVisibility(View.GONE);
-//		}
-//		else if (mViewPager.isShown()) {//如果在音乐列表中
-//			mViewPager.setCurrentItem(0, true);
-//			mViewPager.setVisibility(View.GONE);
-//		}
 	}
 
 }
