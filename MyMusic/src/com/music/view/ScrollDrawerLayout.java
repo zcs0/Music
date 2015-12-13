@@ -1,8 +1,8 @@
 package com.music.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,6 +30,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 	private float upX;
 	private float upY;
 	private Scroller scroller;
+	private boolean isTouch;//是否推动触摸
 	public ScrollDrawerLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		WindowManager wm = (WindowManager) this.getContext().getSystemService(
@@ -44,6 +45,13 @@ public class ScrollDrawerLayout extends LinearLayout {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		scrollTo(0, 0);
+	}
+	@Override
+	protected void onDraw(Canvas canvas) {
+		// TODO Auto-generated method stub
+		super.onDraw(canvas);
+		
 	}
 
 
@@ -60,6 +68,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
+		//System.out.println(event.getAction()+"++++++++++++++++++++++++++");
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			detector.onTouchEvent(event);
@@ -74,7 +83,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 			
 			//如果在不最上，且移动10
 			if(Math.abs(moveY - downY) > 5){//不在最上且大于5全拦截
-				Log.i("onInterceptTouchEvent Top","Math.abs(y): Math.abs(x)"+ Math.abs(y) +":"+Math.abs(x));
+				//Log.i("onInterceptTouchEvent Top","Math.abs(y): Math.abs(x)"+ Math.abs(y) +":"+Math.abs(x));
 				return isScroll;
 				//如果在最上-----向下滑，IScrollView在最顶，y方向大于x方向
 			}else if(Math.abs(y) > Math.abs(x)&&moveY - downY > 5){//上下滑大于左右且大于5
@@ -90,8 +99,9 @@ public class ScrollDrawerLayout extends LinearLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		//Log.i("touch", "2");
+		//Log.i("touch", event.getAction()+"----------------------");
 		detector.onTouchEvent(event);
+		isTouch = true;
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			downX = event.getRawX();
@@ -111,13 +121,11 @@ public class ScrollDrawerLayout extends LinearLayout {
 		case MotionEvent.ACTION_UP:
 			upX = event.getRawX();
 			upY = event.getRawY();
-			System.out.println("onTouchEvent  upY  "+upY);
-			System.out.println("onTouchEvent  getScrollY()  "+getScrollY());
-			//moves(downX - upX, downY - upY);
+			isTouch = false;
 			updateView();
 			break;
 		}
-		return super.onTouchEvent(event);
+		return isScroll;
 	}
 	private void updateView(){
 		int scrollY = Math.abs(getScrollY());//所在屏幕的位置，screenHeight屏幕的高度
@@ -137,7 +145,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 	 * @param y
 	 *            距离（正值）
 	 */
-	private void moveByLocation(float x, final float y) {
+	public void moveByLocation(float x, final float y) {
 		int distanceY = (int) (y + getScrollY());
 		// x位置，y位置，x要移动的距离，y要移动的距离,动画时间
 		scroller.startScroll(getScrollX(), getScrollY(), (int) x, -distanceY,
@@ -148,11 +156,18 @@ public class ScrollDrawerLayout extends LinearLayout {
 	@Override
 	public void computeScroll() {
 		if (scroller.computeScrollOffset()) {
-			int currY = scroller.getCurrY();
+			int currY = scroller.getCurrY();//速度下的距离
+			System.out.println("速度下的距离   "+currY);
 			scrollTo(0, currY);
 			invalidate();// 继续刷新页面
 		}else{//移动完成
-			
+			if(scrollStateListener!=null&&!isTouch){//滑动停止时
+				boolean isShow = true;
+				if(Math.abs(getScrollY())>=screenHeight-5){
+					isShow=false;
+				}
+				scrollStateListener.scrollEnd(getScrollX(),getScrollY(),isShow);
+			}
 		}
 	}
 
@@ -225,14 +240,20 @@ public class ScrollDrawerLayout extends LinearLayout {
 	public void setOnScrollListener(ScrollStateListener listener){
 		this.scrollStateListener = listener;
 	}
-	interface ScrollStateListener{
+	public interface ScrollStateListener{
 		/**
 		 * 滑动时监听
 		 * @param rawXDown 按下时的位置
 		 * @param rawXMove 移动到的位置
 		 */
 		public void scrollState(float rawXDown,float rawXMove);
-		public void scrollEnd(float rawXDown,float rawXMove);
+		/**
+		 * 
+		 * @param rawXDown
+		 * @param rawXMove
+		 * @param b 是否显示
+		 */
+		public void scrollEnd(float rawXDown,float rawXMove,boolean isShow);
 	}
 	
 	

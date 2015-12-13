@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/apk/res/com.music"
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="vertical" >
 
-   <RelativeLayout
+    <RelativeLayout
         android:id="@+id/modeLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
@@ -133,7 +134,7 @@
                 android:src="@drawable/icon_items" />
         </LinearLayout>
     </LinearLayout>
-    
+
     <!--
          <com.music.view.LrcView
         android:id="@+id/lrctextview"
@@ -145,26 +146,47 @@
         android:layout_below="@id/modeLayout" />
     -->
 
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/player_frame_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomLayout"
         android:layout_below="@id/modeLayout" >
-
-        <ListView
-            android:id="@+id/lyricshow"
-            android:layout_width="match_parent"
+		<com.music.view.NumberPicker 
+		    tool:itemCount="10"
+		    android:id="@+id/lyricshow"
+		    tool:solidColor="#00ff00"
+            tool:selectionDividerHeight="10dp"
+            tool:selectionDividersDistance="10dp"
+            tool:selectTextColor="#FFFF0000"
+            tool:setlectTextSize="23sp"
+            tool:textColor="#00fff0"
+            tool:textSize="20sp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:descendantFocusability="blocksDescendants"
             android:divider="@color/transparent"
             android:gravity="center"
-            android:scrollbars="none" />
+		    />
+       <!--  <com.music.view.ScrollListView
+            android:id="@+id/lyricshow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:descendantFocusability="blocksDescendants"
+            android:divider="@color/transparent"
+            android:gravity="center"
+            android:scrollbars="none" /> -->
 
         <TextView
             android:id="@+id/lyric_empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:gravity="center"
             android:padding="15dip"
             android:text="没有歌词,点击手动下载"
@@ -172,7 +194,7 @@
             android:textIsSelectable="false"
             android:textSize="18sp"
             android:visibility="gone" />
-    </FrameLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/volumeLayout"

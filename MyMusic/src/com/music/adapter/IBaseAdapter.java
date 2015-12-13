@@ -57,6 +57,7 @@ public abstract class IBaseAdapter extends BaseAdapter {
 		}
 	};
 	public List<BaseMusic> getMList() {
+		//Collections.sort(mMList, comparator);
 		return mMList;
 	}
 

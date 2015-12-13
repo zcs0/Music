@@ -15,9 +15,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.music.model.LyricSentence;
+import com.music.utils.CharsetDetector;
 
 /**
  * 歌词的显示控制
@@ -68,7 +70,7 @@ public class LyricLoadHelper {
 	private final Pattern mTimePattern = Pattern
 			.compile("(?<=\\[)(\\d{2}:\\d{2}\\.?\\d{0,3})(?=\\])");
 
-	private final String mEncoding = "utf-8";
+	private String mEncoding = "UTF-8";
 
 	public List<LyricSentence> getLyricSentences() {
 		return mLyricSentences;
@@ -104,6 +106,7 @@ public class LyricLoadHelper {
 				Log.i(TAG, "歌词文件存在");
 				mHasLyric = true;
 				try {
+					mEncoding = CharsetDetector.getEncode(new FileInputStream(file));//检查编码格式
 					FileInputStream fr = new FileInputStream(file);
 					InputStreamReader isr = new InputStreamReader(fr, mEncoding);
 					BufferedReader br = new BufferedReader(isr);
@@ -232,7 +235,7 @@ public class LyricLoadHelper {
 
 	/** 解析每行歌词文本,一行文本歌词可能对应多个时间戳 */
 	private void parseLine(String line) {
-		if (line.equals("")) {
+		if (TextUtils.isEmpty(line)) {
 			return;
 		}
 		String content = null;
@@ -289,7 +292,7 @@ public class LyricLoadHelper {
 		for (String s : times) {
 			long t = parseTime(s);
 			if (t != -1) {
-				mLyricSentences.add(new LyricSentence(t, content));
+				mLyricSentences.add(new LyricSentence(t, content));//显示歌词
 			}
 		}
 	}

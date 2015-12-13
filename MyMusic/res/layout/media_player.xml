@@ -3,16 +3,17 @@
     android:id="@+id/md_media_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:content="@+id/content"
     android:background="@android:color/transparent"
-    android:orientation="vertical"
-     >
+    android:content="@+id/content"
+    android:focusable="true"
+    android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/sliding_bg"
         android:orientation="vertical" >
+
         <include layout="@layout/sliding_handle" />
 
         <include layout="@layout/sliding_content" />

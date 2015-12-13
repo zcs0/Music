@@ -15,7 +15,12 @@
 -->
 
 <resources>
+	<declare-styleable name="Theme" >
 
+        <!-- NumberPicker style. -->
+        <attr name="numberPickerStyle" format="reference" />
+
+    </declare-styleable>
     <declare-styleable name="SlidingMenu">
         <attr name="mode">
             <enum name="left" value="0" />
@@ -41,5 +46,35 @@
         <attr name="selectorEnabled" format="boolean" />
         <attr name="selectorDrawable" format="reference" />
     </declare-styleable>
-
+<declare-styleable name="NumberPicker">
+        <!-- @hide Color for the solid color background if such for optimized rendering. -->
+        <attr name="solidColor" format="color|reference" />
+        <!-- @hide The divider for making the selection area. -->
+        <attr name="selectionDivider" format="reference" />
+        <!-- @hide 上下分割线的高度. -->
+        <attr name="selectionDividerHeight" format="dimension" />
+         <!-- @hide 上下分割线的间距. -->
+        <attr name="selectionDividersDistance" format="dimension" />
+        <!-- @hide The min height of the NumberPicker. -->
+        <attr name="internalMinHeight" format="dimension" />
+        <!-- @hide The max height of the NumberPicker. -->
+        <attr name="internalMaxHeight" format="dimension" />
+        <!-- @hide The min width of the NumberPicker. -->
+        <attr name="internalMinWidth" format="dimension" />
+        <!-- @hide The max width of the NumberPicker. -->
+        <attr name="internalMaxWidth" format="dimension" />
+        <!-- @hide The layout of the number picker. -->
+        <!-- 选中后的颜色 -->
+        <attr name="selectTextColor" format="color|reference"></attr>
+        <!-- 默认字体颜色-->
+        <attr name="textColor" format="color|reference"></attr>
+        <!-- 默认显示条数-->
+        <attr name="itemCount" format="integer"></attr>
+        <!-- 默认字体大小-->
+        <attr name="textSize" format="dimension"></attr>
+        <!-- 选中时字体大小-->
+        <attr name="setlectTextSize" format="dimension"></attr>
+        <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
+        <attr name="virtualButtonPressedDrawable" format="reference" />
+    </declare-styleable>
 </resources>

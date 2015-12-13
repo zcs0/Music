@@ -52,7 +52,9 @@ public class ServiceManager implements IConstants {
 			}
 		};
 	}
-
+	/**
+	 * 绑定服务
+	 */
 	public void connectService() {
 		Intent intent = new Intent(IConstants.SERVICE_NAME/*"com.music.service.MediaService"*/);
 		mContext.bindService(intent, mConn, Context.BIND_AUTO_CREATE);
@@ -276,7 +278,10 @@ public class ServiceManager implements IConstants {
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * 设置监听
+	 * @param IServiceConnect
+	 */
 	public void setOnServiceConnectComplete(
 			IOnServiceConnectComplete IServiceConnect) {
 		mIOnServiceConnectComplete = IServiceConnect;

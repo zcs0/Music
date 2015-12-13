@@ -116,6 +116,7 @@ public class MainFragment extends BaseFragment implements IConstants,
 				mView.findViewById(R.id.rl_media_paly).setVisibility(View.VISIBLE);
 				FragmentTransaction beginTransaction2 = getActivity().getSupportFragmentManager().beginTransaction();
 				beginTransaction2.setCustomAnimations(R.anim.push_bottom_in, R.anim.push_bottom_out,R.anim.push_bottom_in, R.anim.push_bottom_out);
+				//mSdm.showView(true);
 				beginTransaction2.addToBackStack("");
 				beginTransaction2.show(mSdm);
 				beginTransaction2.commit();

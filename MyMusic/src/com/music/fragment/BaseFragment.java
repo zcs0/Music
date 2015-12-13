@@ -49,6 +49,7 @@ public class BaseFragment extends Fragment implements OnClickListener {
 	 * 返回上一y
 	 */
 	public void backStack(){
+		mActivity = mActivity!=null?mActivity:getActivity();
 		mActivity.getSupportFragmentManager().popBackStack();
 	}
 	

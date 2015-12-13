@@ -35,7 +35,7 @@ import com.music.model.BaseMusic;
 import com.music.model.FolderInfo;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
-import com.music.uimanager.MyMusicUIManager;
+import com.music.uimanager.MusicUIManager;
 import com.music.uimanager.SlidingManagerFragment;
 import com.music.uimanager.UIManager;
 import com.music.utils.MusicTimer;
@@ -64,7 +64,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	private RelativeLayout mBottomLayout;
 	private ListView mListView;
 	private MusicPlayBroadcast mPlayBroadcast;
-	private MyMusicUIManager mUIm;
+	private MusicUIManager mUIm;
 	private SlidingManagerFragment mSdm;
 	private MusicTimer mMusicTimer;
 	private String TAG = "MusicListFragment";
@@ -179,7 +179,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 				//BaseMusic baseMusic = queryMusic.get(position);
 				if(baseMusic instanceof MusicInfo){//如果是一个可播放的文件
 					ArrayList<MusicInfo> mMusicList  = new ArrayList<MusicInfo>();
-					for (BaseMusic list : queryMusic) {
+					for (BaseMusic list : mList) {
 						mMusicList.add((MusicInfo)list);
 					}
 					mServiceManager.refreshMusicList(mMusicList);

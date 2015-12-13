@@ -33,7 +33,7 @@ import com.music.view.AlwaysMarqueeTextView;
  *
  */
 @SuppressLint("HandlerLeak")
-public class MyMusicUIManager implements OnClickListener, IConstants {
+public class MusicUIManager implements OnClickListener, IConstants {
 
 	private Activity mActivity;
 	private View mView;
@@ -48,8 +48,14 @@ public class MyMusicUIManager implements OnClickListener, IConstants {
 
 	private ImageButton mSearchBtn, mBackBtn;
 	private UIManager mUIManager;
-
-	public MyMusicUIManager(Activity a, ServiceManager sm, View view, UIManager manager) {
+	/**
+	 * 播放ui管理
+	 * @param a
+	 * @param sm
+	 * @param view
+	 * @param manager
+	 */
+	public MusicUIManager(Activity a, ServiceManager sm, View view, UIManager manager) {
 		this.mActivity = a;
 		this.mView = view;
 		this.mUIManager = manager;

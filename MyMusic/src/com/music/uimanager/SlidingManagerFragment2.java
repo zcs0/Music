@@ -30,6 +30,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -61,7 +62,6 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.utils.MusicTimer;
-import com.music.view.NumberPicker;
 import com.music.view.ScrollDrawerLayout;
 
 /**
@@ -71,7 +71,7 @@ import com.music.view.ScrollDrawerLayout;
  *
  */
 @SuppressLint({ "HandlerLeak", "ValidFragment" })
-public class SlidingManagerFragment extends BaseFragment implements OnClickListener,
+public class SlidingManagerFragment2 extends BaseFragment implements OnClickListener,
 		OnSeekBarChangeListener, IConstants, OnDrawerOpenListener,
 		OnDrawerCloseListener {
 
@@ -79,11 +79,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	private TextView mMusicNameTv, mArtistTv, mCurTimeTv, mTotalTimeTv;
 	private ImageButton mPrevBtn, mNextBtn, mPlayBtn, mPauseBtn, mVolumeBtn,
 			mFavoriteBtn;
-	/**
-	 * 歌词显示
-	 */
-	private NumberPicker mLrcListView;
-	private ListView mListView;//歌曲列表
+	private ListView mLrcListView;
 	private LinearLayout mVolumeLayout;
 	private Activity mActivity;
 	private ScrollDrawerLayout mView;
@@ -99,7 +95,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	private Animation view_in, view_out;
 	// private LrcUtil mLrcUtil;
 	// private LrcView mLrcView;
-	
+	private ListView mListView;
 	private GridView mGridView;
 
 	private ImageButton mShowMoreBtn;
@@ -123,7 +119,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	/** 歌词是否正在下载 */
 	private boolean mIsLyricDownloading;
 	protected String TAG="SlidingManagerFragment";
-	public SlidingManagerFragment(){}
+	public SlidingManagerFragment2(){}
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		this.mActivity = getActivity();
@@ -166,7 +162,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	 * @param sm
 	 * @param view
 	 */
-	public SlidingManagerFragment(FragmentActivity a, ServiceManager sm) {
+	public SlidingManagerFragment2(FragmentActivity a, ServiceManager sm) {
 		this.mServiceManager = sm;
 		this.mActivity = a;
 		mView = (ScrollDrawerLayout) View.inflate(mActivity, R.layout.media_player, null);
@@ -195,14 +191,14 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 		mShowMoreBtn = (ImageButton) findViewById(R.id.btn_more);
 		mFavoriteBtn = (ImageButton) findViewById(R.id.btn_favorite);
 		mMoveIv = (ImageView) findViewById(R.id.move_iv);
-		mLrcListView = (NumberPicker) findViewById(R.id.lyricshow);
+		mLrcListView = (ListView) findViewById(R.id.lyricshow);
 		mLrcEmptyView = (TextView) findViewById(R.id.lyric_empty);
 
-//		mLrcListView.setAdapter(mLyricAdapter);
-//		mLrcListView.setEmptyView(mLrcEmptyView);
+		mLrcListView.setAdapter(mLyricAdapter);
+		mLrcListView.setEmptyView(mLrcEmptyView);
 //		mLrcListView.startAnimation(AnimationUtils.loadAnimation(mActivity,
 //				android.R.anim.fade_in));
-//		mLrcListView.setOnScrollListener(listViewScrollListener);//ListView滑动时的事件
+		mLrcListView.setOnScrollListener(listViewScrollListener);//ListView滑动时的事件
 //		mSliding.setOnDrawerCloseListener(this);
 //		mSliding.setOnDrawerOpenListener(this);
 //		mSliding.open();
@@ -345,13 +341,13 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 		case R.id.btn_pause:
 			mServiceManager.pause();
 			break;
-		case R.id.btn_volume://声音控制
+		case R.id.btn_volume:
 			if (mVolumeLayout.isShown()) {
-				mVolumeLayout.setVisibility(View.INVISIBLE);
-				mVolumeLayout.startAnimation(view_out);
+				//mVolumeLayout.setVisibility(View.INVISIBLE);
+				//mVolumeLayout.startAnimation(view_out);
 			} else {
-				mVolumeLayout.setVisibility(View.VISIBLE);
-				mVolumeLayout.startAnimation(view_in);
+				//mVolumeLayout.setVisibility(View.VISIBLE);
+				//mVolumeLayout.startAnimation(view_in);
 			}
 			break;
 		case R.id.btn_more:
@@ -588,21 +584,11 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 			// Log.i(TAG, "onLyricLoaded");
 			lyricList = lyricSentences;
 			if (lyricSentences != null) {
-				String values[] = new String[lyricSentences.size()];
-				for (int i = 0; i < lyricSentences.size(); i++) {
-					values[i] = lyricSentences.get(i).getContentText();
-				}
-				mLrcListView.setMinValue(0);
-				mLrcListView.setMaxValue(lyricSentences.size());
-				mLrcListView.setWrapSelectorWheel(false);//设置不循环滚动
-				mLrcListView.setDisplayedValues(values);
-				mLrcListView.setValue(0);
-				
 				// Log.i(TAG, "onLyricLoaded--->歌词句子数目=" + lyricSentences.size()
 				// + ",当前句子索引=" + index);
-//				mLyricAdapter.setLyric(lyricSentences);//设置要显示的歌词
-//				mLyricAdapter.setCurrentSentenceIndex(index);
-//				mLyricAdapter.notifyDataSetChanged();
+				mLyricAdapter.setLyric(lyricSentences);//设置要显示的歌词
+				mLyricAdapter.setCurrentSentenceIndex(index);
+				mLyricAdapter.notifyDataSetChanged();
 				// 本方法执行时，lyricshow的控件还没有加载完成，所以延迟下再执行相关命令
 				// mHandler.sendMessageDelayed(
 				// Message.obtain(null, MSG_SET_LYRIC_INDEX, index, 0),
@@ -613,36 +599,12 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 		@Override
 		public void onLyricSentenceChanged(int indexOfCurSentence) {
 			Log.i(TAG, "onLyricSentenceChanged--->当前句子索引=" +indexOfCurSentence);
-			long l = 300;
-			
-			System.out.println("播放模式"+mServiceManager.getPlayState());
-			if(lyricList!=null&&indexOfCurSentence>0&&mServiceManager.getPlayState()==2){//歌词不为空，下标大于零，且正在播放
-				//l = getAnimation(lyricList, indexOfCurSentence);
-				LyricSentence one = lyricList.get(indexOfCurSentence-1);
-				l = getAnimation(lyricList, indexOfCurSentence)-one.getDuringTime();
-			}
-			if(!mPlayAuto||indexOfCurSentence<=0||mServiceManager.getPlayState()!=2){//如果是拖动，或者是刚开始
-				mLrcListView.setValue(indexOfCurSentence);
-			}else if(!TextUtils.isEmpty(lyricList.get(indexOfCurSentence).getContentText())){//文字不为空
-//				System.out.println(lyricList.get(indexOfCurSentence).getContentText());
-				mLrcListView.smoothScrollToPositionFromTop(indexOfCurSentence, (int)l);
-			}
+			mLyricAdapter.setCurrentSentenceIndex(indexOfCurSentence);//设置当前选中的是第几行
+			mLyricAdapter.notifyDataSetChanged();
+			mLrcListView.smoothScrollToPositionFromTop(indexOfCurSentence,
+					mLrcListView.getHeight() / 2, 500);
 		}
 	};
-	long l = 300;
-	private int getAnimation(List<LyricSentence> lyricList,int indexOfCurSentence){
-		if(lyricList.size()<=indexOfCurSentence)return 300;
-		String contentText = lyricList.get(indexOfCurSentence).getContentText();
-		if(TextUtils.isEmpty(contentText)){
-			getAnimation(lyricList,indexOfCurSentence+1);
-		}else{
-			LyricSentence two = lyricList.get(indexOfCurSentence);
-			l = two.getDuringTime();
-			return (int) l;
-		}
-		return (int) l;
-	}
-	
 	
 	private void startAnimation(View view) {
 		view.setVisibility(View.VISIBLE);
@@ -738,5 +700,25 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 			}
 		}
 		
+	};
+	private AbsListView.OnScrollListener listViewScrollListener = new AbsListView.OnScrollListener() {
+		int index;
+		int count;
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			System.out.println("onScrollStateChanged +++++  scrollState  "+scrollState);
+			if(lyricList!=null&&scrollState==0&&count!=0){//歌词不为null，滑动停止,总行数不为0
+				
+			}
+			
+		}
+		
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem,
+				int visibleItemCount, int totalItemCount) {
+			count=totalItemCount;
+			//System.out.println("onScroll----------第一条的的index "+firstVisibleItem +" 一共显示的条数  "+visibleItemCount);
+			
+		}
 	};
 }

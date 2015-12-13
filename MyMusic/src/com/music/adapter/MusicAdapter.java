@@ -54,6 +54,11 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 			}
 		}
 		Collections.sort(mMusicList, comparator);
+		mMList.clear();
+		for (BaseMusic baseMusic2 : mMusicList) {//
+			mMList.add(baseMusic2);
+		}
+		
 	}
 	
 	public List<MusicInfo> getmMusicList() {
