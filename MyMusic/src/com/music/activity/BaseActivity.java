@@ -1,6 +1,5 @@
 package com.music.activity;
 
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -31,6 +30,9 @@ public class BaseActivity extends FragmentActivity implements OnClickListener {
 	 *            []
 	 */
 	protected void setOnClick(int... ids) {
+		
+		
+		
 		int[] id = ids;
 		if (id != null && id.length > 0) {
 			for (int i : id) {
