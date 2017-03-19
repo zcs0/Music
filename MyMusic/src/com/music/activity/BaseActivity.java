@@ -2,7 +2,6 @@ package com.music.activity;
 
 import android.view.View;
 import android.view.View.OnClickListener;
-
 /**
  * @ClassName:     BaseActivity.java
  * @author         zcs
@@ -22,7 +21,6 @@ public class BaseActivity extends FragmentActivity implements OnClickListener {
 		}
 		return (T) view;
 	}
-
 	/**
 	 * 设置多个控件点击事件
 	 * 
