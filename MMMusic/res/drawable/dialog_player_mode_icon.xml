@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:drawable="@drawable/icon_playing_mode_repeat_all" android:maxLevel="1"></item>
+    <item android:drawable="@drawable/icon_playing_mode_normal"  android:maxLevel="2"></item>
+    <item android:drawable="@drawable/icon_playing_mode_shuffle" android:maxLevel="3"></item>
+    <item android:drawable="@drawable/icon_playing_mode_repeat_cur" android:maxLevel="4"></item>
+
+</level-list>

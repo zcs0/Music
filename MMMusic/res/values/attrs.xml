@@ -1,0 +1,115 @@
+<!--
+  Copyright 2011 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<resources>
+	<declare-styleable name="Theme" >
+
+        <!-- NumberPicker style. -->
+        <attr name="numberPickerStyle" format="reference" />
+
+    </declare-styleable>
+    <declare-styleable name="SlidingMenu">
+        <attr name="mode">
+            <enum name="left" value="0" />
+            <enum name="right" value="1" />
+        </attr>
+        <attr name="viewAbove" format="reference" />
+        <attr name="viewBehind" format="reference" />
+        <attr name="behindOffset" format="dimension" />
+        <attr name="behindWidth" format="dimension" />
+        <attr name="behindScrollScale" format="float" />
+        <attr name="touchModeAbove">
+            <enum name="margin" value="0" />
+            <enum name="fullscreen" value="1" />
+        </attr>
+        <attr name="touchModeBehind">
+            <enum name="margin" value="0" />
+            <enum name="fullscreen" value="1" />
+        </attr>
+        <attr name="shadowDrawable" format="reference" />
+        <attr name="shadowWidth" format="dimension" />
+        <attr name="fadeEnabled" format="boolean" />
+        <attr name="fadeDegree" format="float" />
+        <attr name="selectorEnabled" format="boolean" />
+        <attr name="selectorDrawable" format="reference" />
+    </declare-styleable>
+<declare-styleable name="NumberPicker">
+        <!-- @hide Color for the solid color background if such for optimized rendering. -->
+        <attr name="solidColor" format="color|reference" />
+        <!-- @hide The divider for making the selection area. -->
+        <attr name="selectionDivider" format="reference" />
+        <!-- @hide 上下分割线的高度. -->
+        <attr name="selectionDividerHeight" format="dimension" />
+         <!-- @hide 上下分割线的间距. -->
+        <attr name="selectionDividersDistance" format="dimension" />
+        <!-- @hide The min height of the NumberPicker. -->
+        <attr name="internalMinHeight" format="dimension" />
+        <!-- @hide The max height of the NumberPicker. -->
+        <attr name="internalMaxHeight" format="dimension" />
+        <!-- @hide The min width of the NumberPicker. -->
+        <attr name="internalMinWidth" format="dimension" />
+        <!-- @hide The max width of the NumberPicker. -->
+        <attr name="internalMaxWidth" format="dimension" />
+        <!-- @hide The layout of the number picker. -->
+        <!-- 选中后的颜色 -->
+        <attr name="selectTextColor" format="color|reference"></attr>
+        <!-- 默认字体颜色-->
+        <attr name="textColor" format="color|reference"></attr>
+        <!-- 默认显示条数-->
+        <attr name="itemCount" format="integer"></attr>
+        <!-- 默认字体大小-->
+        <attr name="textSize" format="dimension"></attr>
+        <!-- 选中时字体大小-->
+        <attr name="setlectTextSize" format="dimension"></attr>
+        <!-- 上下遮罩的衰减 -->
+        <attr name="solidColoraAtenuation" format="float"></attr>
+        <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
+        <attr name="virtualButtonPressedDrawable" format="reference" />
+    </declare-styleable>
+<declare-styleable name="LyricsLineView">
+        <!-- @hide Color for the solid color background if such for optimized rendering. -->
+        <attr name="lyric_solidColor" format="color|reference" />
+        <!-- @hide The divider for making the selection area. -->
+        <attr name="lyric_selectionDivider" format="reference" />
+        <!-- @hide 上下分割线的高度. -->
+        <attr name="lyric_selectionDividerHeight" format="dimension" />
+         <!-- @hide 上下分割线的间距. -->
+        <attr name="lyric_selectionDividersDistance" format="dimension" />
+        <!-- @hide The min height of the NumberPicker. -->
+        <attr name="lyric_internalMinHeight" format="dimension" />
+        <!-- @hide The max height of the NumberPicker. -->
+        <attr name="lyric_internalMaxHeight" format="dimension" />
+        <!-- @hide The min width of the NumberPicker. -->
+        <attr name="lyric_internalMinWidth" format="dimension" />
+        <!-- @hide The max width of the NumberPicker. -->
+        <attr name="lyric_internalMaxWidth" format="dimension" />
+        <!-- @hide The layout of the number picker. -->
+        <!-- 选中后的颜色 -->
+        <attr name="lyric_selectTextColor" format="color|reference"></attr>
+        <!-- 默认字体颜色-->
+        <attr name="lyric_textColor" format="color|reference"></attr>
+        <!-- 默认显示条数-->
+        <attr name="lyric_itemCount" format="integer"></attr>
+        <!-- 默认字体大小-->
+        <attr name="lyric_textSize" format="dimension"></attr>
+        <!-- 选中时字体大小-->
+        <attr name="lyric_setlectTextSize" format="dimension"></attr>
+        <!-- 上下遮罩的衰减 -->
+        <attr name="lyric_solidColoraAtenuation" format="float"></attr>
+        <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
+        <attr name="lyric_virtualButtonPressedDrawable" format="reference" />
+    </declare-styleable>
+</resources>
