@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.music.view.ScrollDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/md_media_player"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:content="@+id/content"
+    android:focusable="true"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ImageView
+            android:id="@+id/ll_head_img"
+            android:scaleType="centerCrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/sliding_bg"
+             />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <include
+                layout="@layout/sliding_handle" />
+
+            <include
+                layout="@layout/sliding_content" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</com.music.view.ScrollDrawerLayout>

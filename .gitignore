@@ -9,7 +9,6 @@ bin/
 gen/
 .settings/
 proguard/
-\drawable-xhdpi
 .\MyMusic\.classpath
 .\MyMusic\.settings
 .\MyMusic\bin
@@ -17,6 +16,14 @@ proguard/
 .\MyMusic\libs
 .\MyMusic\proguard-project.txt
 .\MyMusic\project.properties
+
+.\MMusic\.classpath
+.\MMusic\.settings
+.\MMusic\bin
+.\MMusic\gen
+.\MMusic\libs
+.\MMusic\proguard-project.txt
+.\MMusic\project.properties
 http.txt
 /bin
 
@@ -24,3 +31,7 @@ http.txt
 
 MyMusic/bin
 MyMusic/gen
+
+MMMusic/bin
+MMMusic/gen
+
