@@ -68,7 +68,7 @@ public class MenuScanFragment extends BaseFragment implements IConstants, OnClic
 			@Override
 			public void run() {
 				mHelper.deleteTables(getActivity());
-				MusicUtils.queryMusic(getActivity(), START_FROM_LOCAL);
+				MusicUtils.queryMusic(getActivity(), MusicType.START_FROM_LOCAL);
 				MusicUtils.queryAlbums(getActivity());
 				MusicUtils.queryArtist(getActivity());
 				MusicUtils.queryFolder(getActivity());

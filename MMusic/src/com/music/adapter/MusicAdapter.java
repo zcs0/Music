@@ -159,7 +159,7 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 					mMusicList.get(position).favorite = 0;
 					mFavoriteDao.deleteById(music._id);
 					mMusicDao.setFavoriteStateById(music._id, 0);
-					if(mFrom == START_FROM_FAVORITE) {//移除收藏
+					if(mFrom == MusicType.START_FROM_FAVORITE.getValue()) {//移除收藏
 						mMusicList.remove(position);
 						notifyDataSetChanged();
 					}

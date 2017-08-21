@@ -83,9 +83,9 @@ public class MusicListSearchActivity extends BaseActivity implements
 	private Animation mAnimIn, mAnimOut;
 	private MusicPlayBroadcast mPlayBroadcast;
 	private int mPlayState = MPS_PLAYING;
-
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreateView(Bundle savedInstanceState) {
+
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.music_search);
@@ -116,6 +116,8 @@ public class MusicListSearchActivity extends BaseActivity implements
 
 		initConnection();
 		initView();
+	
+		
 	}
 
 	private void initConnection() {
@@ -542,4 +544,6 @@ public class MusicListSearchActivity extends BaseActivity implements
 		}
 		finish();
 	}
+
+	
 }

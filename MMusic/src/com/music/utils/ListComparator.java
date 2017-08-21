@@ -9,7 +9,7 @@ import com.music.model.BaseMusic;
  * @author         zcs
  * @version        V1.0  
  * @Date           2015年12月25日 下午11:57:35 
- * @Description:   TODO(用一句话描述该文件做什么) 
+ * @Description:  按名字第一个字符进行排序
  */
 public class ListComparator implements Comparator<BaseMusic>{
 	char first_l, first_r;

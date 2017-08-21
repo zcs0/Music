@@ -40,7 +40,7 @@ import com.music.view.LyricsLineView;
  */
 public class LyricPlayerManager implements IConstants {
 	private Context content;
-	private LyricsLineView mLrcNum;
+	private LyricsLineView mLrcNumView;
 	private ServiceManager mServiceManager;
 	private SeekBar mPlaybackSeekBar;
 	private List<LyricSentence> lyricList;
@@ -73,8 +73,8 @@ public class LyricPlayerManager implements IConstants {
 		// this.mLyricDownloadManager=mLyricDownloadManager;
 		this.mLyricDownloadManager = new LyricDownloadManager(content);
 		mSp = new SPStorage(content);
-		mLrcNum = (LyricsLineView) findViewById(R.id.lyricshow);
-//		mLrcNum.startPlayer();
+		mLrcNumView = (LyricsLineView) findViewById(R.id.lyricshow);
+		mLrcNumView.startRefreshLine();
 		mPlaybackSeekBar = findViewById(R.id.playback_seekbar);
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
 		mTotalTimeTv = findViewById(R.id.totalTime_tv);
@@ -91,8 +91,8 @@ public class LyricPlayerManager implements IConstants {
 
 	private void initView() {
 		mLyricLoadHelper.setLyricListener(mLyricListener);
-		mLrcNum.setOnValueChangedListener(valueChangeListener);
-		mLrcNum.setOnScrollListener(scrollListener);
+		mLrcNumView.setOnValueChangedListener(valueChangeListener);
+		mLrcNumView.setOnScrollListener(scrollListener);
 		mPlaybackSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
 		mPlaybackSeekBar.setMax(1000);// 设置进度值最大值为1000
 		mLrcEmptyView.setOnClickListener(onClickDownLyric);// 搜索歌词
@@ -108,7 +108,7 @@ public class LyricPlayerManager implements IConstants {
 	 */
 	private void setSelectIndex(int indexOfCurSentence) {
 		if(!smf.isVisible())return;
-		if (mLrcNum == null || indexOfCurSentence < 0
+		if (mLrcNumView == null || indexOfCurSentence < 0
 				|| lyricList.size() <= indexOfCurSentence)
 			return;
 		LyricSentence lyric = lyricList.get(indexOfCurSentence);// 本次要显示的
@@ -121,14 +121,13 @@ public class LyricPlayerManager implements IConstants {
 					: indexOfCurSentence + 1;
 			lyric = lyricList.get(indexOfCurSentence);// 本次要显示的
 		}
-		int value = mLrcNum.getValue();
+		int value = mLrcNumView.getValue();
 		if (indexOfCurSentence >= value) {
-			long time = lyric.getDuringTime() - lyric.getStartTime();
-			time = time < 50 ? 300 : time;
-			mLrcNum.smoothScrollToPositionFromTop(indexOfCurSentence,
-					(int) time);
+//			long time = lyric.getDuringTime() - lyric.getStartTime();
+//			time = time < 50 ? 300 : time;
+			mLrcNumView.smoothScrollToPositionFromTop(indexOfCurSentence,500);
 		} else if (indexOfCurSentence == 0) {
-			mLrcNum.smoothScrollToPositionFromTop(indexOfCurSentence, 500);
+			mLrcNumView.smoothScrollToPositionFromTop(indexOfCurSentence, 500);
 		}
 
 	}
@@ -188,11 +187,11 @@ public class LyricPlayerManager implements IConstants {
 		}
 		// 本地有歌词，直接读取
 		// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");
-		mLrcNum.setMinValue(0);
-		mLrcNum.setMaxValue(0);
-		mLrcNum.setWrapSelectorWheel(false);// 设置不循环滚动
-		mLrcNum.setDisplayedValues(null);
-		mLrcNum.setValue(0);
+		mLrcNumView.setMinValue(0);
+		mLrcNumView.setMaxValue(0);
+		mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
+		mLrcNumView.setDisplayedValues(null);
+		mLrcNumView.setValue(0);
 //		mLrcNum.setVisibility(View.GONE);
 		mLyricLoadHelper.loadLyric(lyricFilePath);// 对歌词进行排版
 //		mLrcEmptyView.setVisibility(View.VISIBLE);
@@ -218,7 +217,7 @@ public class LyricPlayerManager implements IConstants {
 	 * 读取本地歌词文件
 	 */
 	public synchronized void loadLyric(MusicInfo playingSong) {
-		mLrcNum.setVisibility(View.GONE);
+		mLrcNumView.setVisibility(View.GONE);
 		mLrcEmptyView.setVisibility(View.GONE);
 		if (playingSong == null) {
 			return;
@@ -282,9 +281,9 @@ public class LyricPlayerManager implements IConstants {
 		public void onLyricLoaded(List<LyricSentence> lyricSentences, int index) {
 			Log.i(TAG, "加载歌词");
 			lyricList = lyricSentences;
-			mLrcNum.setVisibility(View.GONE);
-			if (lyricList == null || lyricList.size() <= 2 || mLrcNum == null){
-				mLrcNum.setVisibility(View.GONE);
+			mLrcNumView.setVisibility(View.GONE);
+			if (lyricList == null || lyricList.size() <= 2 || mLrcNumView == null){
+				mLrcNumView.setVisibility(View.GONE);
 				mLrcEmptyView.setVisibility(View.VISIBLE);
 				return;
 			}
@@ -292,12 +291,12 @@ public class LyricPlayerManager implements IConstants {
 //			for (int i = 0; i < lyricList.size(); i++) {
 //				values[i] = lyricList.get(i).getContentText();
 //			}
-			mLrcNum.setVisibility(View.VISIBLE);
+			mLrcNumView.setVisibility(View.VISIBLE);
 			mLrcEmptyView.setVisibility(View.GONE);
 			//mLrcNum.setMinValue(0);
 			//mLrcNum.setMaxValue(lyricList.size() - 1);
-			mLrcNum.setDisplayedValues(lyricSentences);
-			mLrcNum.setWrapSelectorWheel(false);// 设置不循环滚动
+			mLrcNumView.setDisplayedValues(lyricSentences);
+			mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
 			seekBarccrollToLyric(mServiceManager.position(), true);
 			// if(mServiceManager.getPlayState()){
 			// }else{
@@ -403,10 +402,10 @@ public class LyricPlayerManager implements IConstants {
 			for (int i = 0; i < lyricList.size(); i++) {
 				LyricSentence lyricSentence = lyricList.get(i);
 				if (lyricSentence.getStartTime() - progress >= 0) {
-					if (i != mLrcNum.getValue()) {// 是否是当前已显示
+					if (i != mLrcNumView.getValue()) {// 是否是当前已显示
 						i = i - 1 >= 0 ? i - 1 : 0;
-						if (i != mLrcNum.getValue()) {// 如果不是当前显示的
-							mLrcNum.smoothScrollToPositionFromTop(i, 300);
+						if (i != mLrcNumView.getValue()) {// 如果不是当前显示的
+							mLrcNumView.smoothScrollToPositionFromTop(i, 500);
 						}
 					}
 					break;
@@ -527,6 +526,15 @@ public class LyricPlayerManager implements IConstants {
 		cancleBtn.setOnClickListener(btnListener);
 		dialog.setContentView(view);
 		dialog.show();
+	}
+
+	public void onPause() {
+		mLrcNumView.stopRefreshLine();
+	}
+
+	public void onResume() {
+		mLrcNumView.startRefreshLine();
+		
 	}
 
 }

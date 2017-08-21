@@ -44,7 +44,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	private TextView mPositionTv, mDurationTv;
 	private ImageButton mPlayBtn, mPauseBtn, mNextBtn, mPlayerList;
 	private ProgressBar mPlaybackProgress;
-	public Handler mHandler;
+	public Handler mHandler;//更新界面的
 	private Bitmap mDefaultAlbumIcon;
 	private ImageView mHeadIcon;
 	private PopupListAdapter popupListAdapter;
@@ -170,6 +170,14 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	 */
 	private void showPopMusicList(View v) {
 		View view = View.inflate(mActivity, R.layout.player_select_list, null);
+		view.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				popView.dismiss();
+				
+			}
+		});
 		popView = popView!=null?popView: new PopupWindow(mActivity);
 		popView.setAnimationStyle(R.style.popwin_anim_style);
 		popView.setWidth(LayoutParams.MATCH_PARENT);
@@ -192,6 +200,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 				MusicInfo musicInfo = popupListAdapter.getMusicCurrId(position);
 				mServiceManager.playById(musicInfo.songId);
 				popupListAdapter.notifyDataSetChanged();
+				popView.dismiss();
 			}
 		});
 		int mPlayingSongPosition = MusicUtils.seekPosInListById(mServiceManager.getMusicList(), mServiceManager.getCurMusicId());

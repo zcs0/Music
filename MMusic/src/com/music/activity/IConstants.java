@@ -63,32 +63,67 @@ public interface IConstants {
 	public static final String PLAY_MUSIC_INDEX = "PLAY_MUSIC_INDEX";//播放到第几个
 	
 	//歌手和专辑列表点击都会进入MMMusic 此时要传递参数表明是从哪里进入的
+	public enum MusicType{
+		/** 歌手 */
+		START_FROM_ARTIST(1,"歌手分类"),
+		/** 专辑 */
+		START_FROM_ALBUM (2,"专辑分类"),
+		/** 我的音乐	 */
+		START_FROM_LOCAL(3,"音乐列表"),
+		/** 文件夹 */
+		START_FROM_FOLDER(4,"文件夹"),
+		/** 我的最爱 */
+		START_FROM_FAVORITE(5),
+		
+		FOLDER_TO_MYMUSIC(6),
+		ALBUM_TO_MYMUSIC(7),
+		ARTIST_TO_MYMUSIC(8),
+		MENU_BACKGROUND(9);
+		
+		private int value;
+		private String title;
+
+		MusicType(int value){
+			this.value= value;
+		}
+		MusicType(int value,String str){
+			this.value= value;
+			this.title = str;
+		}
+		public int getValue(){
+			return value;
+		}
+		public String getTitle(){
+			return title==null?"":title;
+		}
+		
+		public static MusicType getType(int index){
+			switch (index) {
+			case 1:
+				return MusicType.START_FROM_ARTIST;
+			case 2:
+				return MusicType.START_FROM_ALBUM;
+			case 3:
+				return MusicType.START_FROM_LOCAL;
+			case 4:
+				return MusicType.START_FROM_FOLDER;
+			case 5:
+				return MusicType.START_FROM_FAVORITE;
+			case 6:
+				return MusicType.FOLDER_TO_MYMUSIC;
+			case 7:
+				return MusicType.ALBUM_TO_MYMUSIC;
+			case 8:
+				return MusicType.ARTIST_TO_MYMUSIC;
+			case 9:
+				return MusicType.MENU_BACKGROUND;
+			default:
+				return MusicType.START_FROM_ARTIST;
+			}
+		}
+		
+	}
 	public static final String FROM = "from";
-	/**
-	 * 歌手
-	 */
-	public static final int START_FROM_ARTIST = 1;
-	/**
-	 * 专辑
-	 */
-	public static final int START_FROM_ALBUM = 2;
-	/**
-	 * 我的音乐
-	 */
-	public static final int START_FROM_LOCAL = 3;
-	/**
-	 * 文件夹
-	 */
-	public static final int START_FROM_FOLDER = 4;
-	/**
-	 * 我的最爱
-	 */
-	public static final int START_FROM_FAVORITE = 5;
 	
-	public static final int FOLDER_TO_MYMUSIC = 6;
-	public static final int ALBUM_TO_MYMUSIC = 7;
-	public static final int ARTIST_TO_MYMUSIC = 8;
-	
-	public static final int MENU_BACKGROUND = 9;
 	
 }

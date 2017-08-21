@@ -12,7 +12,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -35,7 +34,9 @@ import android.widget.LinearLayout;
 import android.widget.Scroller;
 import android.widget.TextView;
 
+import com.music.MusicApp;
 import com.music.R;
+import com.music.activity.IConstants;
 import com.music.model.LyricSentence;
 public class LyricsLineView extends LinearLayout {
 
@@ -172,6 +173,8 @@ public class LyricsLineView extends LinearLayout {
     }
 
     private static final TwoDigitFormatter sTwoDigitFormatter = new TwoDigitFormatter();
+
+	protected static boolean isShowLineLyrice = false;
 
     /**
      * @hide
@@ -467,8 +470,10 @@ public class LyricsLineView extends LinearLayout {
      * The keycode of the last handled DPAD down event.
      */
     private int mLastHandledDownDpadKeyCode = -1;
-
+    /**选中后的颜色*/
 	private int mSelectTextColor;
+	/** 选中后进度颜色*/
+	private int mSelectTextOldColor;
 
 	private int mTextColor;
 
@@ -584,7 +589,9 @@ public class LyricsLineView extends LinearLayout {
         SELECTOR_MIDDLE_ITEM_INDEX = SELECTOR_WHEEL_ITEM_COUNT/2;
         mSelectorIndices = new int[SELECTOR_WHEEL_ITEM_COUNT];
         mSelectTextColor = attributesArray.getColor(R.styleable.NumberPicker_selectTextColor, -1);//选中后字体颜色
+        mSelectTextOldColor = attributesArray.getColor(R.styleable.NumberPicker_selectTextOldColor, -1);//选中后字体颜色
         mSelectTextColor = mSelectTextColor==-1?mTextColor:mSelectTextColor;
+        mSelectTextOldColor = mSelectTextOldColor==-1?mTextColor:mSelectTextOldColor;
         mTextSize=  attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_textSize, 15);//字体大小
         mSetlectTextSize=  attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_setlectTextSize, -1);//选中时字体大小
         mSetlectTextSize = mSetlectTextSize<=0?mTextSize:mSetlectTextSize;
@@ -667,21 +674,30 @@ public class LyricsLineView extends LinearLayout {
 //            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
 //        }
     }
-    
+    /**
+	 * 高亮歌词画笔
+	 */
+	private Paint paintHL;
+	private Paint paintHLED;
     private void init(Context cxt){
     	mPaintForTimeLine = new Paint();
 		mPaintForTimeLine.setDither(true);
 		mPaintForTimeLine.setAntiAlias(true);
 		paintHL = new Paint();
-		paintHL.setColor(Color.rgb(255, 255, 255));
+//		paintHL.setColor(Color.rgb(255, 255, 255));
 		paintHL.setDither(true);
 		paintHL.setAntiAlias(true);
-
+		paintHL.setColor(mSelectTextColor);
+		paintHL.setTextSize(mSetlectTextSize);
+		
 		paintHLED = new Paint();
 		paintHLED.setDither(true);
 		paintHLED.setAntiAlias(true);
+		
+		paintHLED.setColor(mSelectTextOldColor);
+		paintHLED.setTextSize(mSetlectTextSize);
     }
-
+//    int position = 0;
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (!mHasSelectorWheel) {
@@ -1199,6 +1215,7 @@ public class LyricsLineView extends LinearLayout {
      * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMinValue(int minValue) {
+    	
         if (mMinValue == minValue) {
             return;
         }
@@ -1332,13 +1349,10 @@ public class LyricsLineView extends LinearLayout {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
             if(mValue==selectorIndex){//被选中的
-//            	lyricSentence = mDisplayedValues.get(selectorIndex);
             	mSelectorWheelPaint.setColor(mSelectTextColor);//设置被选中的颜色
             	mSelectorWheelPaint.setTextSize(mSetlectTextSize);//设置被选中的大小
             	canvas.save();
-            	//canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
             	drawNowLyrice(canvas,scrollSelectorValue,selectorIndex,x,y);//绘制被选中的一行，字体
-            	
             }else{
             	mSelectorWheelPaint.setColor(mTextColor);//设置默认颜色
             	mSelectorWheelPaint.setTextSize(mTextSize);//设置默认大小
@@ -1351,12 +1365,7 @@ public class LyricsLineView extends LinearLayout {
  		if (true) {
  			mPaintForTimeLine.setColor(Color.rgb(110, 232, 77));
  			mPaintForTimeLine.setTextSize(40);
-// 			timeStr = kscLyricsParser.timeParserString(progress);
-// 			FontMetrics fm = mPaintForTimeLine.getFontMetrics();
-// 			int height = (int) Math.ceil(fm.descent - fm.top) + 2;
  			float yy = getHeight() / 2 + getScrollY();
-// 			drawBackground(canvas, timeStr, 0, y + height);
-// 			canvas.drawText(timeStr, 0, yy + height, mPaintForTimeLine);
  			canvas.drawLine(0, yy, getWidth(), yy, mPaintForTimeLine);
  		}
 
@@ -1375,30 +1384,15 @@ public class LyricsLineView extends LinearLayout {
             mSelectionDivider.draw(canvas);
         }
     }
-    /**
-	 * 高亮歌词画笔
-	 */
-	private Paint paintHL;
-	private Paint paintHLED;
+    
 	LyricSentence lyricSentence;
 	private int progress = 0;
     private void drawNowLyrice(Canvas canvas,String lyric, int position, float x, float y) {
-    	float pri = 0;
-    	if(mDisplayedValues!=null){
-	    	LyricSentence l = mDisplayedValues.get(position);
-	    	if(lyricSentence==l){
-	    		long duringTime = l.getDuringTime();//下一行的开始时间
-	    		long startTime = l.getStartTime();//本行的开始时间
-	    		long time = duringTime - startTime;//总用的时间
-	    		progress +=updateUItime;
-	    		if(time>progress)
-	    			pri = progress/(float)time;
-	    	}else{
-	    		lyricSentence = l;
-	    		progress = 0;
-	    	}
+    	if(mDisplayedValues!=null&&mDisplayedValues.size()>position){
+    		lyricSentence = mDisplayedValues.get(position);
+    	}else{
+    		lyricSentence = null;
     	}
-    	System.out.println(pri);
     	paintHL.setTextSize(mSetlectTextSize);
 		paintHLED.setTextSize(mSetlectTextSize);
 		
@@ -1409,16 +1403,35 @@ public class LyricsLineView extends LinearLayout {
 		int width = getWidth();
 		canvas.drawText(lyric, x, y, paintHL);
 		
+		int position2 = MusicApp.mServiceManager.position();//播放位置
+		float pp = 0;
+		//如果每句有进度
+		if(mScrollState == OnScrollListener.SCROLL_STATE_IDLE&&lyricSentence!=null&&lyricSentence.getIntervalTime()!=null&&lyricSentence.getIntervalTime().length>0){
+			int lyriceLong = 0;//一句话的总时长//  作曲：程振兴 1270
+			for (String i : lyricSentence.getIntervalTime()) {
+				if(i!=null&&!i.isEmpty())
+					lyriceLong+=Integer.valueOf(i);
+			}
+			long startTime = lyricSentence.getStartTime();//开始时间//2124
+			int pos = (int) (position2 - startTime);//当前句进度//3210
+			float f = pos/(float)lyriceLong;//2
+			pp = width*f;
+			//canvas.clipRect(width*f, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+			//canvas.clipRect(width*f, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+		}else if(lyricSentence!=null){
+			long startTime = lyricSentence.getStartTime();
+			long duringTime = lyricSentence.getDuringTime();
+			int pos = (int) (position2 - startTime);//当前句进度//3210
+			float f = pos/(float)(duringTime-startTime);//2
+			pp = width*f;
+		}
 		if(width>measureText){//屏幕大于字体宽度
-    		canvas.clipRect(width/2, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
-    	}else{
-    		width = (int) (measureText-width);//字体宽度-屏幕宽度
-    		canvas.clipRect(width/2, 0, width+measureText,  y+mSelectorElementHeight,Region.Op.INTERSECT);
-    	}
-		
-		//canvas.clipRect(measureText+x/2, 0, getWidth(), y+mSelectorElementHeight, Region.Op.INTERSECT);//设置显示范围
+			canvas.clipRect(pp, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+		}else{
+			width = (int) (measureText-width);//字体宽度-屏幕宽度
+			canvas.clipRect(pp, 0, width+measureText,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+		}
 		canvas.drawText(lyric, x, y, paintHLED);
-		
 		canvas.restore();
 		
 	}
@@ -1541,6 +1554,7 @@ public class LyricsLineView extends LinearLayout {
         if (mValue == current) {//如果选中是的同一个
             return;
         }
+//        position = 0;
         // Wrap around the values if we go past the start or end
         if (mWrapSelectorWheel) {
             current = getWrappedSelectorIndex(current);
@@ -1596,6 +1610,7 @@ public class LyricsLineView extends LinearLayout {
     	 if (mValue == position) {//如果选中是的同一个
              return;
          }
+//    	 this.position = 0;
     	 if (mWrapSelectorWheel) {//如是循环显示获得真正的位置
     		 position = getWrappedSelectorIndex(position);
          } else {
@@ -2124,19 +2139,27 @@ public class LyricsLineView extends LinearLayout {
         return String.format(Locale.getDefault(), "%d", value);
     }
 	/**
-	 * 开始更新播放字体颜色
+	 * 刷新每一行的进度
 	 */
-	public void startPlayer(){
+	public void startRefreshLine(){
+		isShowLineLyrice = true;
 		post(new Runnable() {
 			@Override
 			public void run() {
-				updateShow();
-				new Handler().postDelayed(this, updateUItime);
+				int position2 = MusicApp.mServiceManager.position();//播放位置
+				if(position2>0&&MusicApp.mServiceManager.getPlayState()==IConstants.MPS_PLAYING){
+					updateShow();
+				}
+				if(isShowLineLyrice){//如果显示每一句的进度
+					postDelayed(this, 50);
+				}
+				
 			}
 		});
-//		new Handler().post();
 	}
-	private final int updateUItime = 100;
+	public void stopRefreshLine(){
+		isShowLineLyrice = false;
+	}
 	private void updateShow(){
 		if(mScrollState==OnScrollListener.SCROLL_STATE_IDLE){
 			invalidate();

@@ -55,15 +55,6 @@ public class PlayQueueActivity extends BaseActivity implements OnItemClickListen
 			R.drawable.icon_sequence, R.drawable.icon_shuffle,
 			R.drawable.icon_single_repeat };
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		setContentView(R.layout.playqueue);
-		initView();
-		
-		initConnection();
-	}
 	
 	private void initConnection() {
 		mServiceConnection = new ServiceConnection() {
@@ -201,5 +192,12 @@ public class PlayQueueActivity extends BaseActivity implements OnItemClickListen
 			e.printStackTrace();
 		}
 		finish();
+	}
+
+	@Override
+	protected void onCreateView(Bundle savedInstanceState) {
+		setContentView(R.layout.playqueue);
+		initView();
+		initConnection();
 	}
 }

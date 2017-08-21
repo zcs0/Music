@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,15 +25,13 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
+import com.music.adapter.MyGridViewAdapter;
 import com.music.aidl.IMediaService;
 import com.music.db.AlbumInfoDao;
 import com.music.db.ArtistInfoDao;
@@ -47,7 +46,6 @@ import com.music.storage.SPStorage;
 import com.music.uimanager.MainBottomUIManager;
 import com.music.uimanager.SlidingManagerFragment;
 import com.music.uimanager.UIManager;
-import com.music.uimanager.UIManager.OnRefreshListener;
 import com.music.utils.ListComparator;
 import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
@@ -62,7 +60,7 @@ import com.z.netUtil.ImageUtil.ImageLoader;
  *
  */
 public class MainFragment extends BaseFragment implements IConstants,
-		IOnServiceConnectComplete, OnRefreshListener, OnTouchListener {
+		IOnServiceConnectComplete, OnTouchListener {
 
 	private GridView mGridView;
 	private MyGridViewAdapter mAdapter;
@@ -111,23 +109,22 @@ public class MainFragment extends BaseFragment implements IConstants,
 		imageLoad.setCachePath(pPStorage.getHeadPath());
 		imageLoad.setBoolCache(true);
 		pPStorage.setHeadPath(pPStorage.getHeadPath());
-		mView = inflater.inflate(R.layout.frame_main1, container, false);
+		mView = inflater.inflate(R.layout.frame_main, container, false);
 		mGridView = (GridView) mView.findViewById(R.id.gv_view);
 		mView.findViewById(R.id.btn_menu).setOnClickListener(this);
-		mAdapter = new MyGridViewAdapter();
+		mAdapter = new MyGridViewAdapter(this.getActivity());//歌曲分类
 		mView.setOnTouchListener(this);
 		mBottomLayout = mView.findViewById(R.id.rl_bottomLayout);//底部音乐控制
-
-		MusicApp.mServiceManager.connectService();
+		
 		MusicApp.mServiceManager.setOnServiceConnectComplete(this);
 
 		mGridView.setAdapter(mAdapter);
 		
 		mUIManager = new UIManager(getActivity(), mView,mServiceManager);//中间显示的管理
-		mUIManager.setOnRefreshListener(this);
-		
 		mBottomUIManager = new MainBottomUIManager(getActivity(), mView);//底部播放管理
-		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面
+		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面，显示歌词进度，人物图片
+		
+		//开始一个定时器，监听播放进度
 		mMusicTimer = new MusicTimer(mSdm.mHandler, mBottomUIManager.mHandler);//播放界面，和底部刷新播放时间的监听
 		mSdm.setMusicTimer(mMusicTimer);
 		mPlayBroadcast = new MusicPlayBroadcast();//接收播放的广播
@@ -155,191 +152,136 @@ public class MainFragment extends BaseFragment implements IConstants,
 				beginTransaction2.show(mSdm);
 				beginTransaction2.commit();
 				mSdm.startPhotoPlayer();
-				
 			}
 		});
 		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
 		MusicInfo oldMusic = (MusicInfo) mMusicDao.getMusicInfoBySongId(lastPlayerId+"");
 		
-//		mSdm.loadLyric(musicInfoBySongId);
 		if(oldMusic!=null){//获得上次最播放的一首歌曲
 			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
 			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
 		}
-		/**
-		 * 选择不同类型的音乐
-		 */
+		
+		showSelectOption(mGridView);//进入选择的音乐类型界面
+		defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
+		return mView;
+	}
+	/**
+	 * 选中一种类型后，进度界面
+	 * @param mGridView
+	 */
+	private void showSelectOption(GridView mGridView) {
 		mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				int from = -1;
+				MusicType from = MusicType.ALBUM_TO_MYMUSIC;
 				switch (position) {
 				case 0:// 我的音乐
-					from = START_FROM_LOCAL;
+					from = MusicType.START_FROM_LOCAL;
 					break;
 				case 1:// 我的最爱
-					from = START_FROM_FAVORITE;
+					from = MusicType.START_FROM_FAVORITE;
 					break;
 				case 2:// 文件夹
-					from = START_FROM_FOLDER;
+					from = MusicType.START_FROM_FOLDER;
 					break;
 				case 3:// 歌手
-					from = START_FROM_ARTIST;
+					from = MusicType.START_FROM_ARTIST;
 					break;
 				case 4:// 专辑
-					from = START_FROM_ALBUM;
+					from = MusicType.START_FROM_ALBUM;
 					break;
 				}
 				mUIManager.setContentType(from);//通知打开音乐类型
 				
 			}
 		});
-		defaultArtwork = BitmapFactory.decodeResource(getResources(),
-				R.drawable.img_album_background);
-		return mView;
 	}
 	/**
 	 * 主界面几个音乐分类
 	 * @author ZCS
 	 *
 	 */
-	private class MyGridViewAdapter extends BaseAdapter {
-
-		private int[] drawable = new int[] { R.drawable.icon_local_music,
-				R.drawable.icon_favorites, R.drawable.icon_folder_plus,
-				R.drawable.icon_artist_plus, R.drawable.icon_album_plus };
-		private String[] name = new String[] { "我的音乐", "我的最爱", "文件夹", "歌手",
-				"专辑" };
-		private int musicNum = 0, artistNum = 0, albumNum = 0, folderNum = 0, favoriteNum = 0;
-
-		@Override
-		public int getCount() {
-			return 5;
-		}
-
-		@Override
-		public Object getItem(int arg0) {
-			return null;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		public void setNum(int music_num, int artist_num, int album_num,
-				int folder_num, int favorite_num) {
-			musicNum = music_num;
-			artistNum = artist_num;
-			albumNum = album_num;
-			folderNum = folder_num;
-			favoriteNum = favorite_num;
-			notifyDataSetChanged();
-		}
-
-		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
-
-			ViewHolder holder;
-			if (convertView == null) {
-				holder = new ViewHolder();
-				convertView = getActivity().getLayoutInflater().inflate(
-						R.layout.main_gridview_item, null);
-				holder.iv = (ImageView) convertView
-						.findViewById(R.id.gridview_item_iv);
-				holder.nameTv = (TextView) convertView
-						.findViewById(R.id.gridview_item_name);
-				holder.numTv = (TextView) convertView
-						.findViewById(R.id.gridview_item_num);
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolder) convertView.getTag();
-			}
-			switch (position) {
-			case 0:// 我的音乐
-				holder.numTv.setText(musicNum + "");
-				break;
-			case 1:// 我的最爱
-				holder.numTv.setText(favoriteNum + "");
-				break;
-			case 2:// 文件夹
-				holder.numTv.setText(folderNum + "");
-				break;
-			case 3:// 歌手
-				holder.numTv.setText(artistNum + "");
-				break;
-			case 4:// 专辑
-				holder.numTv.setText(albumNum + "");
-				break;
-			}
-			holder.iv.setImageResource(drawable[position]);
-			holder.nameTv.setText(name[position]);
-
-			return convertView;
-		}
-
-		private class ViewHolder {
-			ImageView iv;
-			TextView nameTv, numTv;
-		}
-	}
 	@Override
 	public void onServiceConnectComplete(IMediaService service) {
 		// service绑定成功会执行到这里
 		refreshNum();
 		
-		
-		int type = pPStorage.getLastPlayerListType();//最后次的type
-		String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
+		final int type = pPStorage.getLastPlayerListType();//最后次的type
+		final String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
 		if(type<=0)return;
-		List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
-		switch (type) {
-		case START_FROM_LOCAL:// 我的音乐
-			queryMusic = MusicUtils.queryMusic(getActivity(), type);
-			break;
-		case START_FROM_FAVORITE://我的最爱
-			queryMusic = MusicUtils.queryFavorite(getActivity());
-			break;
-		case START_FROM_FOLDER://文件夹
-			queryMusic = MusicUtils.queryMusic(getActivity(),"", info,START_FROM_FOLDER);
-//			queryMusic = MusicUtils.queryFolder(getActivity());
-			break;
-		case START_FROM_ARTIST://歌手
-			queryMusic = MusicUtils.queryMusic(getActivity(),"", info,START_FROM_ARTIST);
-			break;
-		case START_FROM_ALBUM:// 专辑
-			queryMusic = MusicUtils.queryMusic(getActivity(),"", info + "",START_FROM_ALBUM);
-			break;
-		}
-		
-		List<MusicInfo> musicList = new ArrayList<MusicInfo>();
-		for (BaseMusic baseMusic : queryMusic) {
-			if(baseMusic instanceof MusicInfo){
-				musicList.add((MusicInfo)baseMusic);
+		setPlayerList(MusicType.getType(type), info);//得到并设置最后一次播放时的列表
+	}
+	private void setPlayerList(final MusicType type, final String info) {
+		new AsyncTask<Void, Void, List<MusicInfo> >(){
+			@Override
+			protected List<MusicInfo>  doInBackground(Void... params) {
+				List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
+				switch (type) {
+				case START_FROM_LOCAL:// 我的音乐
+					queryMusic = MusicUtils.queryMusic(getActivity(), type);
+					break;
+				case START_FROM_FAVORITE://我的最爱
+					queryMusic = MusicUtils.queryFavorite(getActivity());
+					break;
+				case START_FROM_FOLDER://文件夹
+					queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
+					break;
+				case START_FROM_ARTIST://歌手
+					queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
+					break;
+				case START_FROM_ALBUM:// 专辑
+					queryMusic = MusicUtils.queryMusic(getActivity(),"", info + "",type);
+					break;
+				}
+				
+				List<MusicInfo> musicList = new ArrayList<MusicInfo>();
+				for (BaseMusic baseMusic : queryMusic) {
+					if(baseMusic instanceof MusicInfo){
+						musicList.add((MusicInfo)baseMusic);
+					}
+				}
+				
+				if(musicList!=null&&musicList.size()>0){
+					Collections.sort(musicList, new ListComparator());//按名字排序后显示
+					
+				}
+				return musicList;
 			}
-		}
-		
-		if(musicList!=null&&musicList.size()>0){
-			Collections.sort(musicList, new ListComparator());//排序后显示
-			int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
-			mServiceManager.refreshMusicList(musicList,lastPlayerId);
-		}
-		
+			protected void onPostExecute(List<MusicInfo> result) {
+				int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
+				mServiceManager.refreshMusicList(result,lastPlayerId);
+			};
+			
+		}.execute();
 	}
 	/**
 	 * 显示音乐分类的个数
 	 */
 	public void refreshNum() {
-		int musicCount = mMusicDao.getDataCount();
-		int artistCount = mArtistDao.getDataCount();
-		int albumCount = mAlbumDao.getDataCount();
-		int folderCount = mFolderDao.getDataCount();
-		int favoriteCount = mFavoriteDao.getDataCount();
+		new AsyncTask<Void, Void, Void>() {
+			int musicCount;
+			int artistCount;
+			int folderCount;
+			int albumCount;
+			int favoriteCount;
+			@Override
+			protected Void doInBackground(Void... params) {
+				musicCount = mMusicDao.getDataCount();
+				artistCount = mArtistDao.getDataCount();
+				albumCount = mAlbumDao.getDataCount();
+				folderCount = mFolderDao.getDataCount();
+				favoriteCount = mFavoriteDao.getDataCount();
+				return null;
+			}
+			protected void onPostExecute(Void result) {
+				mAdapter.setNum(musicCount, artistCount, albumCount, folderCount, favoriteCount);
+				
+			};
+		}.execute();
 		
-		mAdapter.setNum(musicCount, artistCount, albumCount, folderCount, favoriteCount);
+		
 	}
 	MusicInfo music;
 	private class MusicPlayBroadcast extends BroadcastReceiver {
@@ -427,10 +369,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 			}
 		};
 	};
-	@Override
-	public void onRefresh() {
-		refreshNum();
-	}
 
 	int oldY = 0;
 	private View mView;

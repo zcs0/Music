@@ -6,7 +6,6 @@ package com.music.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -19,7 +18,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,7 +44,6 @@ import com.z.utils.LogUtils;
  * @author 
  *
  */
-@SuppressLint("HandlerLeak")
 public class MainContentActivity extends BaseActivity implements IConstants {
 
 	public static final String ALARM_CLOCK_BROADCAST = "alarm_clock_broadcast";
@@ -64,21 +61,16 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	public interface OnBackListener {
 		public abstract void onBack();
 	}
-
 	@Override
-	protected void onCreate(Bundle arg0) {
-		super.onCreate(arg0);
-		DisplayMetrics metric = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metric);
-		mScreenWidth = metric.widthPixels;
+	protected void onCreateView(Bundle savedInstanceState) {
+		mScreenWidth = getWindowManager().getDefaultDisplay().getWidth();//metric.widthPixels;
 		initSDCard();//设置SD卡监听
 		mServiceManager = MusicApp.mServiceManager;
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(ALARM_CLOCK_BROADCAST);
 		registerReceiver(mAlarmReceiver, filter);
 
-		setContentView(R.layout.frame_main);
-//		ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
+		setContentView(R.layout.activity_main);
 		
 		mSplashScreen = new SplashScreen(this);//引导界面
 		mSplashScreen.show(R.drawable.image_splash_background,
@@ -110,13 +102,15 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 				super.handleMessage(msg);
 				mSplashScreen.removeSplashScreen();
 				mMainFragment.refreshNum();//刷新音乐分类的个数
+				dismissLoadingDialog();
 			}
 		};
 
-		getData();
-		
+		getData();//从数据库中读取
 	}
-
+	/**
+	 * 监听SD的状态
+	 */
 	private void initSDCard() {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.setPriority(1000);// 设置最高优先级
@@ -135,14 +129,14 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	 * 读取本地文件到数据库
 	 */
 	private void getData() {
-//		proDialog.show();
-//		proDialog.setTitle("读取中...");
+		showLoadingDialog("读取中...");
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(), 500);
+		//读取数据库中的数据，如果不存在，读取SD中的音乐
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				LogUtils.w(TAG, "开始读取音乐...");
-				MusicUtils.queryMusic(MainContentActivity.this,START_FROM_LOCAL);
+				MusicUtils.queryMusic(MainContentActivity.this,MusicType.START_FROM_LOCAL);
 				MusicUtils.queryAlbums(MainContentActivity.this);
 				MusicUtils.queryArtist(MainContentActivity.this);
 				MusicUtils.queryFolder(MainContentActivity.this);
@@ -206,7 +200,6 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	 * 显示睡眠dialog
 	 */
 	public void showSleepDialog() {
-
 		if (MusicApp.mIsSleepClockSetting) {
 			cancleSleepClock();
 			Toast.makeText(getApplicationContext(), "已取睡眠模式！",
@@ -318,5 +311,6 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 //		cancleSleepClock();
 //		System.exit(0);
 	}
+	
 
 }

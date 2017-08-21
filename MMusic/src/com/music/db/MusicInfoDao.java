@@ -83,15 +83,19 @@ public class MusicInfoDao implements IConstants {
 		}
 		return null;
 	}
-	public List<BaseMusic> getMusicInfoByType(String selection, int type) {
+	public List<BaseMusic> getMusicInfoByType(String selection, MusicType type) {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "";
-		if(type == START_FROM_ARTIST) {
+		switch (type) {
+		case START_FROM_ARTIST:
 			sql = "select * from " + TABLE_MUSIC + " where artist = ? order by musicname ";
-		} else if(type == START_FROM_ALBUM) {
+			break;
+		case START_FROM_ALBUM:
 			sql = "select * from " + TABLE_MUSIC + " where albumid = ? order by musicname ";
-		} else if(type == START_FROM_FOLDER) {
+			break;
+		case START_FROM_FOLDER:
 			sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicname ";
+			break;
 		}
 		return parseCursor(db.rawQuery(sql, new String[]{ selection }));
 	}

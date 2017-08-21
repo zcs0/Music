@@ -195,7 +195,7 @@ public class MusicUtils implements IConstants {
 	 * @param from 不同的界面进来要做不同的查询
 	 * @return
 	 */
-	public static List<BaseMusic> queryMusic(Context context, int from) {
+	public static List<BaseMusic> queryMusic(Context context, MusicType from) {
 		return queryMusic(context, null, null, from);
 	}
 	/**
@@ -207,7 +207,7 @@ public class MusicUtils implements IConstants {
 	 * @return
 	 */
 	public static List<BaseMusic> queryMusic(Context context,
-			String selections, String selection, int from) {
+			String selections, String selection, MusicType from) {
 		if(mMusicInfoDao == null) {
 			mMusicInfoDao = new MusicInfoDao(context);
 		}
@@ -241,8 +241,7 @@ public class MusicUtils implements IConstants {
 			}
 		case START_FROM_ARTIST://歌手
 			if (mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfoByType(selection,
-						START_FROM_ARTIST);
+				return mMusicInfoDao.getMusicInfoByType(selection,from);
 			} else {
 //				return getMusicList(cr.query(uri, proj_music,
 //						select.toString(), null,
@@ -251,20 +250,17 @@ public class MusicUtils implements IConstants {
 		case START_FROM_ALBUM:
 			if (mMusicInfoDao.hasData()) {
 				return mMusicInfoDao.getMusicInfoByType(selection,
-						START_FROM_ALBUM);
+						from);
 			}
 		case START_FROM_FOLDER:
 			if(mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfoByType(selection, START_FROM_FOLDER);
+				return mMusicInfoDao.getMusicInfoByType(selection, from);
 			}
 			default:
 				return null;
 		}
 
 	}
-//	public BaseMusic getMusicInfoBySongId(String songId){
-//		
-//	}
 	public static ArrayList<BaseMusic> getMusicList(Cursor cursor) {
 		if (cursor == null) {
 			return null;

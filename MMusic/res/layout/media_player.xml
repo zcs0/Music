@@ -26,10 +26,10 @@
             android:orientation="vertical" >
 
             <include
-                layout="@layout/sliding_handle" />
+                layout="@layout/sliding_handle" android:contentDescription="顶部显示信息" />
 
             <include
-                layout="@layout/sliding_content" />
+                layout="@layout/sliding_content" android:contentDescription="中间显示信息" />
         </LinearLayout>
     </RelativeLayout>
 

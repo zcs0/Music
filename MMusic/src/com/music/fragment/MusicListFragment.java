@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -37,7 +39,6 @@ import com.music.model.FolderInfo;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
-import com.music.uimanager.MusicUIManager;
 import com.music.uimanager.SlidingManagerFragment;
 import com.music.uimanager.UIManager;
 import com.music.utils.ListComparator;
@@ -54,7 +55,7 @@ import com.music.viewpagerlistener.ViewPagerOnPageChangeListener;
  */
 public class MusicListFragment extends BaseFragment implements IConstants {
 
-	private int mFrom=-1;
+	private IConstants.MusicType mFrom=IConstants.MusicType.START_FROM_ARTIST;
 	private UIManager mUIManager;
 	private BaseMusic mBaseMusic;
 	private View mView;
@@ -108,41 +109,54 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	 * 创建Adapter
 	 */
 	private void createAdapter() {
-		if(mFrom<=0||listView==null)return;
-		switch (mFrom) {
-		case START_FROM_LOCAL:// 我的音乐
-			tv_title.setText("音乐列表");
-			queryMusic = MusicUtils.queryMusic(mActivity, mFrom);
-			Collections.sort(queryMusic, new ListComparator());//排序后显示
-			musicAdapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
-			break;
-		case START_FROM_FAVORITE://我的最爱
-			tv_title.setText("我的最爱");
-			queryMusic = MusicUtils.queryFavorite(mActivity);
-			Collections.sort(queryMusic, new ListComparator());//排序后显示
-			MusicAdapter adapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
-			adapter.setData(queryMusic,START_FROM_FAVORITE);
-			musicAdapter = adapter;
-			break;
-		case START_FROM_FOLDER://文件夹
-			tv_title.setText("文件夹");
-			queryMusic = MusicUtils.queryFolder(mActivity);
-			musicAdapter = new FolderBrowserAdapter(mActivity, mServiceManager, queryMusic);
-			break;
-		case START_FROM_ARTIST://歌手
-			tv_title.setText("歌手分类");
-			queryMusic = MusicUtils.queryArtist(mActivity);
-			musicAdapter = new ArtistBrowserAdapter(mActivity, mServiceManager, queryMusic);
-			break;
-		case START_FROM_ALBUM:// 专辑
-			tv_title.setText("专辑分类");
-			queryMusic = MusicUtils.queryAlbums(mActivity);
-			musicAdapter = new AlbumBrowserAdapter(mActivity, mServiceManager, queryMusic);
-			break;
-		}
-		if(musicAdapter!=null&&listView!=null){
-			listView.setAdapter(musicAdapter);
-		}
+		if(mFrom.getValue()<=0||listView==null)return;
+		tv_title.setText(mFrom.getTitle());
+		new AsyncTask<Void, Void, BaseAdapter>() {
+			@Override
+			protected BaseAdapter doInBackground(Void... params) {
+				BaseAdapter adapter2 = null;
+				switch (mFrom) {
+				case START_FROM_LOCAL:// 我的音乐
+					queryMusic = MusicUtils.queryMusic(mActivity, mFrom);
+					Collections.sort(queryMusic, new ListComparator());//排序后显示
+					musicAdapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
+					adapter2 = musicAdapter;
+					break;
+				case START_FROM_FAVORITE://我的最爱
+					queryMusic = MusicUtils.queryFavorite(mActivity);
+					Collections.sort(queryMusic, new ListComparator());//排序后显示
+					MusicAdapter adapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
+					adapter.setData(queryMusic,mFrom.getValue());
+					musicAdapter = adapter;
+					adapter2 = adapter;
+					break;
+				case START_FROM_FOLDER://文件夹
+					queryMusic = MusicUtils.queryFolder(mActivity);
+					musicAdapter = new FolderBrowserAdapter(mActivity, mServiceManager, queryMusic);
+					adapter2 = musicAdapter;
+					break;
+				case START_FROM_ARTIST://歌手
+					queryMusic = MusicUtils.queryArtist(mActivity);
+					musicAdapter = new ArtistBrowserAdapter(mActivity, mServiceManager, queryMusic);
+					adapter2 = musicAdapter;
+					break;
+				case START_FROM_ALBUM:// 专辑
+					queryMusic = MusicUtils.queryAlbums(mActivity);
+					musicAdapter = new AlbumBrowserAdapter(mActivity, mServiceManager, queryMusic);
+					adapter2 = musicAdapter;
+					break;
+				}
+				return adapter2;
+			}
+			@Override
+			protected void onPostExecute(BaseAdapter result) {
+				if(musicAdapter!=null&&listView!=null){
+					listView.setAdapter(musicAdapter);
+				}
+			}
+		}.execute();
+		
+		
 	}
 	/**
 	 * 查找控件
@@ -188,7 +202,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 				BaseMusic baseMusic = mList.get(position);
 				//BaseMusic baseMusic = queryMusic.get(position);
 				if(baseMusic instanceof MusicInfo){//如果是一个可播放的文件
-					pPStorage.setLastPlayerListType(mFrom);//保存类型（程序两次进入时，查看的列表）
+					pPStorage.setLastPlayerListType(mFrom.getValue());//保存类型（程序两次进入时，查看的列表）
 					ArrayList<MusicInfo> mMusicList  = new ArrayList<MusicInfo>();
 					for (BaseMusic list : mList) {
 						mMusicList.add((MusicInfo)list);
@@ -200,17 +214,16 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 				}else{
 					List<BaseMusic> queryMusic=null;
 					if(baseMusic instanceof FolderInfo){//如果是个文件夹信息
-						queryMusic = MusicUtils.queryMusic(mActivity,"", baseMusic.folderPath,START_FROM_FOLDER);
+						queryMusic = MusicUtils.queryMusic(mActivity,"", baseMusic.folderPath,MusicType.START_FROM_FOLDER);
 						pPStorage.setLastPlayerMusicInfo(baseMusic.folderPath);
 						System.out.println(baseMusic.folderPath);
 					}else if(baseMusic instanceof ArtistInfo){//歌手
-						queryMusic = MusicUtils.queryMusic(mActivity,"", ((ArtistInfo)baseMusic).artist_name,START_FROM_ARTIST);
+						queryMusic = MusicUtils.queryMusic(mActivity,"", ((ArtistInfo)baseMusic).artist_name,MusicType.START_FROM_ARTIST);
 						pPStorage.setLastPlayerMusicInfo(((ArtistInfo)baseMusic).artist_name);
 						System.out.println(((ArtistInfo)baseMusic).artist_name);
 					}else if(baseMusic instanceof AlbumInfo){// 专辑
-						queryMusic = MusicUtils.queryMusic(mActivity,"", ((AlbumInfo)baseMusic).album_id + "",START_FROM_ALBUM);
+						queryMusic = MusicUtils.queryMusic(mActivity,"", ((AlbumInfo)baseMusic).album_id + "",MusicType.START_FROM_ALBUM);
 						pPStorage.setLastPlayerMusicInfo(((AlbumInfo)baseMusic).album_id+"");
-						System.out.println(((AlbumInfo)baseMusic).album_id);
 					}
 					if(queryMusic!=null&&queryMusic.size()>0){
 						musicAdapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
@@ -219,6 +232,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 				}
 			}
 		});
+		//搜索按钮
 		mSearchBtn.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -238,7 +252,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	 * @param from
 	 * @param data
 	 */
-	public void show(FragmentActivity activity, UIManager manager, int from,
+	public void show(FragmentActivity activity, UIManager manager, MusicType from,
 			BaseMusic data) {
 		this.mBaseMusic = data;
 		this.mFrom = from;
@@ -280,7 +294,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	 * 设置展示的数据
 	 * @param baseMusic
 	 */
-	public void setBaseMusic(int type,BaseMusic baseMusic) {
+	public void setBaseMusic(MusicType type,BaseMusic baseMusic) {
 		this.mFrom = type;
 		this.baseMusic = baseMusic;
 		

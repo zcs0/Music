@@ -39,9 +39,6 @@ import com.music.storage.SPStorage;
  */
 public class UIManager implements IConstants {
 
-	public interface OnRefreshListener {
-		public void onRefresh();
-	}
 
 	private FragmentActivity mActivity;
 	private View mView;
@@ -51,7 +48,6 @@ public class UIManager implements IConstants {
 	//private ViewPager mViewPager;
 	private List<View> mListViews, mListViewsSub;
 
-	private OnRefreshListener mRefreshListener;
 	private MainContentActivity mMainActivity;
 	
 	private View mMainLayout;
@@ -78,7 +74,7 @@ public class UIManager implements IConstants {
 	 * 设置进入时的类型
 	 * @param type
 	 */
-	public void setContentType(int type) {
+	public void setContentType(MusicType type) {
 		// 此处可以根据传递过来的view和type分开来处理
 		setContentType(type, null);
 	}
@@ -91,7 +87,7 @@ public class UIManager implements IConstants {
 	 * @param type
 	 * @param baseMusic
 	 */
-	public void setContentType(int type, BaseMusic baseMusic) {
+	public void setContentType(MusicType type, BaseMusic baseMusic) {
 		mListViews = new ArrayList<View>();
 		//显示中间和标题区域
 		findViewById(R.id.rl_file_list).setVisibility(View.VISIBLE);
@@ -152,9 +148,6 @@ public class UIManager implements IConstants {
 			e.printStackTrace();
 		}
 		return bitmap;
-	}
-	public void setOnRefreshListener(OnRefreshListener listener) {
-		mRefreshListener = listener;
 	}
 	public void unChangeBgReceiver(){
 		mActivity.unregisterReceiver(mReceiver);

@@ -28,16 +28,6 @@ public class MenuSettingActivity extends BaseActivity {
 	public ViewPager mViewPager;
 	private List<Fragment> mFragmentList = new ArrayList<Fragment>();
 	
-	@Override
-	protected void onCreate(Bundle arg0) {
-		super.onCreate(arg0);
-		
-		setContentView(R.layout.menu_setting);
-		
-		mViewPager = (ViewPager) findViewById(R.id.viewPager);
-
-		initViewPager();
-	}
 	
 	private void initViewPager() {
 		Fragment leftFragment = new LeftFragment();
@@ -121,5 +111,15 @@ public class MenuSettingActivity extends BaseActivity {
 		if(mViewPager.isShown()) {
 			mViewPager.setCurrentItem(0, true);
 		}
+	}
+
+	@Override
+	protected void onCreateView(Bundle savedInstanceState) {
+		setContentView(R.layout.menu_setting);
+		
+		mViewPager = (ViewPager) findViewById(R.id.viewPager);
+
+		initViewPager();
+	
 	}
 }

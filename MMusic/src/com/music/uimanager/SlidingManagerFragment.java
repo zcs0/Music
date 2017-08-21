@@ -55,7 +55,7 @@ import com.z.netUtil.ImageUtil.ImageLoader;
 /**
  * 播放界面
  * 
- * @author longdw(longdawei1988@gmail.com)
+ * @author 
  *
  */
 @SuppressLint({ "HandlerLeak", "ValidFragment" })
@@ -73,13 +73,11 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	/**
 	 * 歌词显示
 	 */
-//	private ListView mListView;//歌曲列表
 	private LinearLayout mVolumeLayout;
 	private Activity mActivity;
 	private ScrollDrawerLayout mView;
 	private ServiceManager mServiceManager;
 	private SeekBar  mVolumeSeekBar;//播放进度条，声音大小控制
-//	public Handler mHandler;
 	private boolean mPlayAuto = true;
 	/**
 	 * 歌词
@@ -91,11 +89,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	private int mCurVolume;//当前音量
 
 	private Animation view_in, view_out;
-	// private LrcUtil mLrcUtil;
-	// private LrcView mLrcView;
-	
 	private GridView mGridView;
-
 	private ImageButton mShowMoreBtn;
 
 	private ImageView mMoveIv;
@@ -107,8 +101,6 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	private MusicAdapter mAdapter;;
 	private MusicTimer mMusicTimer;
 	private int mProgress;
-//	private LyricDownloadManager mLyricDownloadManager;
-	//private LyricLoadHelper mLyricLoadHelper;
 	private LyricAdapter mLyricAdapter;
 	private int mScreenWidth;
 
@@ -123,15 +115,11 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		this.mActivity = getActivity();
-		
 		mFavoriteDao = new FavoriteInfoDao(mActivity);
 		mMusicDao = new MusicInfoDao(mActivity);
-//		mLyricDownloadManager = new LyricDownloadManager(mActivity);
 		DisplayMetrics metric = new DisplayMetrics();
 		mActivity.getWindowManager().getDefaultDisplay().getMetrics(metric);
 		mScreenWidth = metric.widthPixels;
-		// mLrcUtil = new LrcUtil();
-		
 		view_in = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
 		view_out = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
 		
@@ -149,7 +137,9 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+		if(lyricManager!=null){
+			lyricManager.onResume();
+		}
 	}
 	/**
 	 * 播放界面
@@ -166,7 +156,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 		mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);//最大音量
 		mCurVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);//当前音量
 		mView = (ScrollDrawerLayout) View.inflate(mActivity, layout_view, null);
-		lyricManager = new LyricPlayerManager(mActivity,this,sm,mView);
+		lyricManager = new LyricPlayerManager(mActivity,this,sm,mView);//设置歌词显示
 		//mView = View.inflate(mActivity, R.layout.main_music_list, null);
 		initView();
 	}
@@ -256,6 +246,14 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 			mPlayBtn.setVisibility(View.GONE);
 			mPauseBtn.setVisibility(View.VISIBLE);
 		}
+	}
+	
+	@Override
+	public void onPause() {
+		if(lyricManager!=null){
+			lyricManager.onPause();
+		}
+		super.onPause();
 	}
 
 	private View findViewById(int id) {
