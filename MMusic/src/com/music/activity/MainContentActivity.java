@@ -3,7 +3,6 @@
  */
 package com.music.activity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +27,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.music.MusicApp;
@@ -41,6 +38,7 @@ import com.music.service.ServiceManager;
 import com.music.slidemenu.SlidingMenu;
 import com.music.utils.MusicUtils;
 import com.music.utils.SplashScreen;
+import com.z.utils.LogUtils;
 
 /**
  * 主类，首次进入应用会到这里
@@ -61,6 +59,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	private MusicInfoDao mMusicDao;
 	private SplashScreen mSplashScreen;
 	private int mScreenWidth;
+	protected String TAG="MainContentActivity";
 //	private MusicIntentReceiver bluetoothReceiver;//蓝牙控制
 	public interface OnBackListener {
 		public abstract void onBack();
@@ -72,7 +71,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		DisplayMetrics metric = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metric);
 		mScreenWidth = metric.widthPixels;
-		initSDCard();
+		initSDCard();//设置SD卡监听
 		mServiceManager = MusicApp.mServiceManager;
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(ALARM_CLOCK_BROADCAST);
@@ -81,7 +80,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		setContentView(R.layout.frame_main);
 //		ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
 		
-		mSplashScreen = new SplashScreen(this);
+		mSplashScreen = new SplashScreen(this);//引导界面
 		mSplashScreen.show(R.drawable.image_splash_background,
 				SplashScreen.SLIDE_LEFT);
 		// set the Above View
@@ -116,8 +115,6 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 
 		getData();
 		
-		
-		
 	}
 
 	private void initSDCard() {
@@ -144,12 +141,12 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				
-				MusicUtils.queryMusic(MainContentActivity.this,
-						START_FROM_LOCAL);
+				LogUtils.w(TAG, "开始读取音乐...");
+				MusicUtils.queryMusic(MainContentActivity.this,START_FROM_LOCAL);
 				MusicUtils.queryAlbums(MainContentActivity.this);
 				MusicUtils.queryArtist(MainContentActivity.this);
 				MusicUtils.queryFolder(MainContentActivity.this);
+				LogUtils.w(TAG, "开始结束音乐...");
 				mHandler.sendEmptyMessage(1);
 			}
 		}).start();
@@ -205,7 +202,9 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 			}
 		}
 	};
-
+	/**
+	 * 显示睡眠dialog
+	 */
 	public void showSleepDialog() {
 
 		if (MusicApp.mIsSleepClockSetting) {

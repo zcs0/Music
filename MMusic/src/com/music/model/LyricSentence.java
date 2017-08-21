@@ -18,12 +18,16 @@ public class LyricSentence {
 	/** 每个时间戳对应的一行歌词文本,如“[00.03.21.56]还记得许多年前的春天”中的“还记得许多年前的春天” */
 	private String contentText = "";
 
+	private String[] intervalTime;
+
 	public LyricSentence(long time, String text) {
 		startTime = time;
-		contentText = text;
-		
+		setContentText(text);
 	}
-
+	/**
+	 * 本句的开始时间
+	 * @return
+	 */
 	public long getStartTime() {
 		return startTime;
 	}
@@ -31,19 +35,31 @@ public class LyricSentence {
 	public void setStartTime(long startTime) {
 		this.startTime = startTime;
 	}
-
+	/**
+	 * 本句的文本信息
+	 * @return
+	 */
 	public String getContentText() {
 		return contentText;
 	}
 
 	public void setContentText(String contentText) {
-		this.contentText = contentText;
+		String line = contentText.replaceAll("<[0-9]+>", "");
+		this.contentText = line;
+		this.intervalTime = contentText.split("\\D+");
+		//<138>忘<153>记<202>时<152>间 <204>- <203>胡<153>歌
 	}
-
+	/**
+	 * 下一句的开始时间
+	 * @return
+	 */
 	public long getDuringTime() {
 		return duringTime;
 	}
-
+	/**
+	 * 下一句的开始时间
+	 * @param duringTime
+	 */
 	public void setDuringTime(long duringTime) {
 		this.duringTime = duringTime;
 	}

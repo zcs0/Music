@@ -29,7 +29,6 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SlidingDrawer.OnDrawerCloseListener;
 import android.widget.SlidingDrawer.OnDrawerOpenListener;
@@ -51,7 +50,7 @@ import com.music.storage.SPStorage;
 import com.music.utils.MusicTimer;
 import com.music.utils.TimerTasks;
 import com.music.view.ScrollDrawerLayout;
-import com.netUtil.ImageUtil.ImageLoad;
+import com.z.netUtil.ImageUtil.ImageLoader;
 
 /**
  * 播放界面
@@ -65,7 +64,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 		OnDrawerCloseListener {
 	private int photoIndex = 0;//音乐图片播放的下标
 	private MusicInfo mCurrentMusicInfo;//当前音乐
-	private ImageLoad imageLoad;//图片加载工
+	private ImageLoader imageLoad;//图片加载工
 	final int layout_view = R.layout.media_player;
 	private View mSliding;
 	private TextView mMusicNameTv, mArtistTv, mCurTimeTv, mTotalTimeTv;
@@ -479,7 +478,7 @@ public class SlidingManagerFragment extends BaseFragment implements OnClickListe
 	 * @param music
 	 * @param imageLoad
 	 */
-	public void setBackgroundImage(MusicInfo music, ImageLoad imageLoad){
+	public void setBackgroundImage(MusicInfo music, ImageLoader imageLoad){
 		this.mCurrentMusicInfo =music;
 		this.imageLoad= imageLoad;
 		mheadImg.setImageResource(R.drawable.sliding_bg);

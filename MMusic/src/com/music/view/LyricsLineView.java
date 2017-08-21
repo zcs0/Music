@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -1309,15 +1310,34 @@ public class LyricsLineView extends LinearLayout {
 
         // draw the selector wheel
         int[] selectorIndices = mSelectorIndices;
+        if(false){
+        	String text = "没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息";
+        	Paint p = new Paint();
+        	int width = getWidth();
+        	p.setTextAlign(Align.CENTER);
+        	float measureText = p.measureText(text);
+        	p.setColor(Color.RED);
+        	canvas.drawText(text, x, y, p);
+        	if(width>measureText){//屏幕大于字体宽度
+        		canvas.clipRect(width/2, 0, width, 50f);
+        	}else{
+        		width = (int) (measureText-width);//字体宽度-屏幕宽度
+        		canvas.clipRect(width/2, 0, width, 50f);
+        	}
+        	p.setColor(Color.CYAN);
+        	canvas.drawText(text, x, y, p);
+        	return;
+        }
         for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
             if(mValue==selectorIndex){//被选中的
+//            	lyricSentence = mDisplayedValues.get(selectorIndex);
             	mSelectorWheelPaint.setColor(mSelectTextColor);//设置被选中的颜色
             	mSelectorWheelPaint.setTextSize(mSetlectTextSize);//设置被选中的大小
             	canvas.save();
             	//canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
-            	drawNowLyrice(canvas,scrollSelectorValue,x,y);
+            	drawNowLyrice(canvas,scrollSelectorValue,selectorIndex,x,y);//绘制被选中的一行，字体
             	
             }else{
             	mSelectorWheelPaint.setColor(mTextColor);//设置默认颜色
@@ -1337,7 +1357,7 @@ public class LyricsLineView extends LinearLayout {
  			float yy = getHeight() / 2 + getScrollY();
 // 			drawBackground(canvas, timeStr, 0, y + height);
 // 			canvas.drawText(timeStr, 0, yy + height, mPaintForTimeLine);
- 			canvas.drawLine(0, yy+10, getWidth(), yy, mPaintForTimeLine);
+ 			canvas.drawLine(0, yy, getWidth(), yy, mPaintForTimeLine);
  		}
 
         // 中间字体的上下分割线
@@ -1359,31 +1379,45 @@ public class LyricsLineView extends LinearLayout {
 	 * 高亮歌词画笔
 	 */
 	private Paint paintHL;
-
 	private Paint paintHLED;
-    private void drawNowLyrice(Canvas canvas, String lineLyrics, float x, float y) {
-    	float textX = 0;
+	LyricSentence lyricSentence;
+	private int progress = 0;
+    private void drawNowLyrice(Canvas canvas,String lyric, int position, float x, float y) {
+    	float pri = 0;
+    	if(mDisplayedValues!=null){
+	    	LyricSentence l = mDisplayedValues.get(position);
+	    	if(lyricSentence==l){
+	    		long duringTime = l.getDuringTime();//下一行的开始时间
+	    		long startTime = l.getStartTime();//本行的开始时间
+	    		long time = duringTime - startTime;//总用的时间
+	    		progress +=updateUItime;
+	    		if(time>progress)
+	    			pri = progress/(float)time;
+	    	}else{
+	    		lyricSentence = l;
+	    		progress = 0;
+	    	}
+    	}
+    	System.out.println(pri);
     	paintHL.setTextSize(mSetlectTextSize);
 		paintHLED.setTextSize(mSetlectTextSize);
-		paintHLED.setColor(Color.RED);
-		paintHL.setColor(Color.WHITE);
-		Paint paintD = new Paint();
-		paintD.setAntiAlias(true);                           //设置画笔为无锯齿
-		paintD.setColor(Color.WHITE);                        //设置画笔颜色
-		paintD.setTextSize(mSetlectTextSize); 
-		Paint paintReg = new Paint();
-		paintReg.setAntiAlias(true);                           //设置画笔为无锯齿
-		paintReg.setColor(Color.RED);                        //设置画笔颜色
-		paintReg.setTextSize(mSetlectTextSize); 
 		
+		paintHL.setTextAlign(Align.CENTER);
+		paintHLED.setTextAlign(Align.CENTER);
+		float measureText = paintHL.measureText(lyric);
+		//int width = (int) (measureText*pri);//字体需显示的百分比宽度
+		int width = getWidth();
+		canvas.drawText(lyric, x, y, paintHL);
 		
-		paintReg.setTextAlign(Align.CENTER);
-		paintD.setTextAlign(Align.CENTER);
-		float measureText = paintD.measureText(lineLyrics);
-		System.out.println(measureText);
-		canvas.drawText(lineLyrics, x, y, paintD);
-		canvas.clipRect(800, 0, getWidth(), y+mSelectorElementHeight, Region.Op.INTERSECT);//设置显示范围
-		canvas.drawText(lineLyrics, x, y, paintReg);
+		if(width>measureText){//屏幕大于字体宽度
+    		canvas.clipRect(width/2, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+    	}else{
+    		width = (int) (measureText-width);//字体宽度-屏幕宽度
+    		canvas.clipRect(width/2, 0, width+measureText,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+    	}
+		
+		//canvas.clipRect(measureText+x/2, 0, getWidth(), y+mSelectorElementHeight, Region.Op.INTERSECT);//设置显示范围
+		canvas.drawText(lyric, x, y, paintHLED);
 		
 		canvas.restore();
 		
@@ -1495,6 +1529,7 @@ public class LyricsLineView extends LinearLayout {
         setValueInternal(value, true);
         
     }
+    
     /**
      * Sets the current value of this NumberPicker.
      *
@@ -1504,7 +1539,6 @@ public class LyricsLineView extends LinearLayout {
      */
     private void setValueInternal(int current, boolean notifyChange) {
         if (mValue == current) {//如果选中是的同一个
-        	System.out.println(current);
             return;
         }
         // Wrap around the values if we go past the start or end
@@ -1514,12 +1548,6 @@ public class LyricsLineView extends LinearLayout {
             current = Math.max(current, mMinValue);
             current = Math.min(current, mMaxValue);
         }
-//        Paint paint = new Paint();
-//        paint.setAntiAlias(true);
-//        paint.setTextAlign(Align.CENTER);
-//        paint.setTextSize(mTextSize);
-//        paint.setColor(textColor);
-//        mSelectorWheelPaint = paint;
         int previous = mValue;
         mValue = current;
         updateInputTextView();
@@ -1559,6 +1587,11 @@ public class LyricsLineView extends LinearLayout {
             }
         }
     }
+     /**
+      * 设置显示位置
+      * @param position 行号
+      * @param duration 时长
+      */
      public void smoothScrollToPositionFromTop(int position,int duration){
     	 if (mValue == position) {//如果选中是的同一个
              return;
@@ -1655,6 +1688,7 @@ public class LyricsLineView extends LinearLayout {
 
     /**
      * Flings the selector with the given <code>velocityY</code>.
+     * 飞到指定位置
      */
     private void fling(int velocityY) {
         mPreviousScrollerY = 0;
@@ -1715,6 +1749,7 @@ public class LyricsLineView extends LinearLayout {
     /**
      * Ensures we have a cached string representation of the given <code>
      * selectorIndex</code> to avoid multiple instantiations of the same string.
+     * 把数据封闭到一个集合中去
      */
     private void ensureCachedScrollSelectorValue(int selectorIndex) {
         SparseArray<String> cache = mSelectorIndexToStringCache;
@@ -2088,4 +2123,24 @@ public class LyricsLineView extends LinearLayout {
 	static private String formatNumberWithLocale(int value) {
         return String.format(Locale.getDefault(), "%d", value);
     }
+	/**
+	 * 开始更新播放字体颜色
+	 */
+	public void startPlayer(){
+		post(new Runnable() {
+			@Override
+			public void run() {
+				updateShow();
+				new Handler().postDelayed(this, updateUItime);
+			}
+		});
+//		new Handler().post();
+	}
+	private final int updateUItime = 100;
+	private void updateShow(){
+		if(mScrollState==OnScrollListener.SCROLL_STATE_IDLE){
+			invalidate();
+		}
+	}
+	
 }

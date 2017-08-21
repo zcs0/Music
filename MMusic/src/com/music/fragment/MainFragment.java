@@ -52,7 +52,7 @@ import com.music.utils.ListComparator;
 import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
 import com.music.utils.PhotoReadUtils;
-import com.netUtil.ImageUtil.ImageLoad;
+import com.z.netUtil.ImageUtil.ImageLoader;
 
 /**
  * 首页内容
@@ -106,7 +106,7 @@ public class MainFragment extends BaseFragment implements IConstants,
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mActivity = getActivity();
-		imageLoad = new ImageLoad(getActivity());
+		imageLoad = new ImageLoader(getActivity());
 		pPStorage = new SPStorage(getActivity());
 		imageLoad.setCachePath(pPStorage.getHeadPath());
 		imageLoad.setBoolCache(true);
@@ -435,7 +435,7 @@ public class MainFragment extends BaseFragment implements IConstants,
 	int oldY = 0;
 	private View mView;
 	private SPStorage pPStorage;
-	private ImageLoad imageLoad;
+	private ImageLoader imageLoad;
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 //		int bottomTop = mBottomLayout.getTop();

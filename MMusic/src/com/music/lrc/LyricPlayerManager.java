@@ -74,6 +74,7 @@ public class LyricPlayerManager implements IConstants {
 		this.mLyricDownloadManager = new LyricDownloadManager(content);
 		mSp = new SPStorage(content);
 		mLrcNum = (LyricsLineView) findViewById(R.id.lyricshow);
+//		mLrcNum.startPlayer();
 		mPlaybackSeekBar = findViewById(R.id.playback_seekbar);
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
 		mTotalTimeTv = findViewById(R.id.totalTime_tv);

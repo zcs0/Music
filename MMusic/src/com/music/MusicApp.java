@@ -8,9 +8,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
-import com.CrashHandler;
 import com.music.activity.IConstants;
 import com.music.service.ServiceManager;
+import com.z.CrashHandler;
+;
 
 public class MusicApp extends Application implements IConstants{
 	
@@ -26,8 +27,8 @@ public class MusicApp extends Application implements IConstants{
 		sp = getSharedPreferences(SP_NAME,Context.MODE_WORLD_WRITEABLE);
 		lrcPath = sp.getString(LYRIC_DEFAULE_PATH, "/lrc");
 		lrcPathUse = sp.getString(LYRIC_SAVE_PATH, "");
-		mServiceManager = new ServiceManager(this);
-		CrashHandler crashHandler = CrashHandler.getInstance();
+		mServiceManager = new ServiceManager(this);//服务管理
+		CrashHandler crashHandler = CrashHandler.getInstance(null);
 		crashHandler.init(getApplicationContext());
 		initPath();
 	}

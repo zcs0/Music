@@ -116,8 +116,8 @@ public class LyricLoadHelper {
 					// 逐行分析歌词文本
 					while ((line = br.readLine()) != null) {
 						Log.i(TAG, "lyric line:" + line);
-						line = line.replaceAll("<[0-9]+>", "");
-						parseLine(line);
+//						line = line.replaceAll("<[0-9]+>", "");
+						parseLine(line);//装载每一条
 					}
 
 					// 按时间排序句子集合
@@ -139,11 +139,9 @@ public class LyricLoadHelper {
 							});
 
 					for (int i = 0; i < mLyricSentences.size() - 1; i++) {
-						mLyricSentences.get(i).setDuringTime(
-								mLyricSentences.get(i + 1).getStartTime());
+						mLyricSentences.get(i).setDuringTime(mLyricSentences.get(i + 1).getStartTime());//下句的开始时间
 					}
-					mLyricSentences.get(mLyricSentences.size() - 1)
-							.setDuringTime(Integer.MAX_VALUE);
+					mLyricSentences.get(mLyricSentences.size() - 1).setDuringTime(Integer.MAX_VALUE);//设置最后一句时长为最长
 					fr.close();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -253,7 +251,6 @@ public class LyricLoadHelper {
 		// 寻找出本行所有时间戳，存入times中
 		while (matcher.find()) {
 			// 匹配的是中括号里的字符串，如01:02.3，01:11:22.33
-
 			String s = matcher.group();
 			index = line.indexOf("[" + s + "]");
 			if (lastIndex != -1 && index - lastIndex > lastLength + 2) {
@@ -274,7 +271,6 @@ public class LyricLoadHelper {
 			times.add(s);
 			lastIndex = index;
 			lastLength = s.length();
-
 			Log.i(TAG, "time match--->" + s);
 		}
 		// 如果列表为空，则表示本行没有分析出任何标签
