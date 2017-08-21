@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import com.music.model.MusicInfo;
 import com.music.model.PhotoUrlInfo;
 import com.music.model.PhotoUrlInfo.PicUrl;
+import com.z.utils.JSONUtils;
 
 /**
  * @ClassName: LyricRead.java
@@ -100,7 +101,7 @@ public class PhotoReadUtils {
 	}
 
 	public static PhotoUrlInfo jsonToUrlList(String str) {
-		return JsonParser.toObject(str, PhotoUrlInfo.class);
+		return JSONUtils.jsonToObj(str, PhotoUrlInfo.class);
 	}
 
 }

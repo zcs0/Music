@@ -44,7 +44,6 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.uimanager.MainBottomUIManager;
-import com.music.uimanager.SlidingManagerFragment;
 import com.music.uimanager.UIManager;
 import com.music.utils.ListComparator;
 import com.music.utils.MusicTimer;
