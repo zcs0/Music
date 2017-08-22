@@ -74,6 +74,7 @@ public class LyricPlayerManager implements IConstants {
 		this.mLyricDownloadManager = new LyricDownloadManager(content);
 		mSp = new SPStorage(content);
 		mLrcNumView = (LyricsLineView) findViewById(R.id.lyricshow);
+		mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
 		mLrcNumView.startRefreshLine();
 		mPlaybackSeekBar = findViewById(R.id.playback_seekbar);
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
@@ -187,13 +188,14 @@ public class LyricPlayerManager implements IConstants {
 		}
 		// 本地有歌词，直接读取
 		// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");
+		mLrcNumView.setDisplayedValues(null);
 		mLrcNumView.setMinValue(0);
 		mLrcNumView.setMaxValue(0);
-		mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
-		mLrcNumView.setDisplayedValues(null);
+		
 		mLrcNumView.setValue(0);
+		
 //		mLrcNum.setVisibility(View.GONE);
-		mLyricLoadHelper.loadLyric(lyricFilePath);// 对歌词进行排版
+		mLyricLoadHelper.loadLyric(lyricFilePath);// 对歌词进行排版(按播放时间排序)
 //		mLrcEmptyView.setVisibility(View.VISIBLE);
 		if (!TextUtils.isEmpty(lyricFilePath)) {
 			
@@ -296,7 +298,8 @@ public class LyricPlayerManager implements IConstants {
 			//mLrcNum.setMinValue(0);
 			//mLrcNum.setMaxValue(lyricList.size() - 1);
 			mLrcNumView.setDisplayedValues(lyricSentences);
-			mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
+//			mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
+			mLrcNumView.setValue(0);
 			seekBarccrollToLyric(mServiceManager.position(), true);
 			// if(mServiceManager.getPlayState()){
 			// }else{

@@ -392,7 +392,7 @@ public class LyricsLineView extends LinearLayout {
      * Flag whether the selector should wrap around.
      * 是否是一直转
      */
-    private boolean mWrapSelectorWheel;
+    private boolean mWrapSelectorWheel = false;
 
     /**
      * The back ground color used to optimize scroller fading.
@@ -749,7 +749,7 @@ public class LyricsLineView extends LinearLayout {
 //        System.out.println("moveToFinalScrollerPosition mCurrentScrollOffset"+mCurrentScrollOffset+"amountToScroll"+amountToScroll+"mSelectorElementHeight"+mSelectorElementHeight);
         int futureScrollOffset = (mCurrentScrollOffset + amountToScroll) % mSelectorElementHeight;
         int overshootAdjustment = mInitialScrollOffset - futureScrollOffset;
-        if (overshootAdjustment != 0) {
+        if (overshootAdjustment != 0&&!enableInvalidate) {
             if (Math.abs(overshootAdjustment) > mSelectorElementHeight / 2) {
                 if (overshootAdjustment > 0) {
                     overshootAdjustment -= mSelectorElementHeight;
@@ -1034,6 +1034,7 @@ public class LyricsLineView extends LinearLayout {
             incrementSelectorIndices(selectorIndices);
             setValueInternal(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX], true);
         }
+        System.out.println(mSelectorIndices.length);
     }
 
    
@@ -1226,8 +1227,8 @@ public class LyricsLineView extends LinearLayout {
         if (mMinValue > mValue) {
             mValue = mMinValue;
         }
-        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
-        setWrapSelectorWheel(wrapSelectorWheel);
+//        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
+//        setWrapSelectorWheel(wrapSelectorWheel);
         initializeSelectorWheelIndices();
         updateInputTextView();
         tryComputeMaxWidth();
@@ -1238,7 +1239,7 @@ public class LyricsLineView extends LinearLayout {
      * Returns the max value of the picker.
      *
      * @return The max value.
-     */
+     */ 
     public int getMaxValue() {
         return mMaxValue;
     }
@@ -1264,8 +1265,8 @@ public class LyricsLineView extends LinearLayout {
         if (mMaxValue < mValue) {
             mValue = mMaxValue;
         }
-        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
-        setWrapSelectorWheel(wrapSelectorWheel);
+//        boolean wrapSelectorWheel = mMaxValue - mMinValue > mSelectorIndices.length;
+//        setWrapSelectorWheel(wrapSelectorWheel);
         initializeSelectorWheelIndices();
         updateInputTextView();
         tryComputeMaxWidth();
@@ -1292,6 +1293,8 @@ public class LyricsLineView extends LinearLayout {
      * 设置要显示的值
      */
     public void setDisplayedValues(List<LyricSentence> displayedValues) {
+    	mSelectorIndices = new int[SELECTOR_WHEEL_ITEM_COUNT];
+//    	invalidate();
         if (mDisplayedValues == displayedValues) {
             return;
         }
@@ -1322,13 +1325,13 @@ public class LyricsLineView extends LinearLayout {
             super.onDraw(canvas);
             return;
         }
-        float x = (getRight() - getLeft()) / 2;
+        float x = (getRight() - getLeft()) / 2;//从中间开始绘制
         float y = mCurrentScrollOffset;//从y开始画
-
-        // draw the selector wheel
-        int[] selectorIndices = mSelectorIndices;
-        if(false){
-        	String text = "没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息没有信息";
+        //如果没有数据
+        if(mDisplayedValues==null||mDisplayedValues.size()<=0){
+//        	mCurrentScrollOffset = 0;
+//        	y = 0;
+        	String text = "没有要显示的歌词";
         	Paint p = new Paint();
         	int width = getWidth();
         	p.setTextAlign(Align.CENTER);
@@ -1345,6 +1348,10 @@ public class LyricsLineView extends LinearLayout {
         	canvas.drawText(text, x, y, p);
         	return;
         }
+        
+
+        // draw the selector wheel
+        int[] selectorIndices = mSelectorIndices;
         for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
@@ -1404,7 +1411,7 @@ public class LyricsLineView extends LinearLayout {
 		canvas.drawText(lyric, x, y, paintHL);
 		
 		int position2 = MusicApp.mServiceManager.position();//播放位置
-		float pp = 0;
+		float pp = 0;//得到该显示的宽度
 		//如果每句有进度
 		if(mScrollState == OnScrollListener.SCROLL_STATE_IDLE&&lyricSentence!=null&&lyricSentence.getIntervalTime()!=null&&lyricSentence.getIntervalTime().length>0){
 			int lyriceLong = 0;//一句话的总时长//  作曲：程振兴 1270
@@ -1428,8 +1435,12 @@ public class LyricsLineView extends LinearLayout {
 		if(width>measureText){//屏幕大于字体宽度
 			canvas.clipRect(pp, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
 		}else{
-			width = (int) (measureText-width);//字体宽度-屏幕宽度
-			canvas.clipRect(pp, 0, width+measureText,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+			float leftMarg = (measureText-width)/2;//计算左边未显示区域
+			if(leftMarg<pp){//如果进度大于左路边距离
+				canvas.clipRect(pp-leftMarg/2, 0, width,  y+mSelectorElementHeight,Region.Op.INTERSECT);
+			}
+			//width = (int) (measureText-width);//字体宽度-屏幕宽度
+			
 		}
 		canvas.drawText(lyric, x, y, paintHLED);
 		canvas.restore();
@@ -1496,7 +1507,6 @@ public class LyricsLineView extends LinearLayout {
      * these indices.重置选择指数和清除这些指标的缓存字符串表示
      */
     private void initializeSelectorWheelIndices() {
-//    	System.out.println("initializeSelectorWheelIndices--------------------");
         mSelectorIndexToStringCache.clear();
         int[] selectorIndices = mSelectorIndices;
         int current = getValue();
@@ -1582,6 +1592,7 @@ public class LyricsLineView extends LinearLayout {
      */
      private void changeValueByOne(boolean increment) {
 //    	 System.out.println("changeValueByOne  "+increment);
+    	 if(!enableInvalidate)return;
         if (mHasSelectorWheel) {
             if (!moveToFinalScrollerPosition(mFlingScroller)) {
                 moveToFinalScrollerPosition(mAdjustScroller);
@@ -1607,7 +1618,7 @@ public class LyricsLineView extends LinearLayout {
       * @param duration 时长
       */
      public void smoothScrollToPositionFromTop(int position,int duration){
-    	 if (mValue == position) {//如果选中是的同一个
+    	 if (mValue == position||!enableInvalidate) {//如果选中是的同一个,或者不让刷新
              return;
          }
 //    	 this.position = 0;
@@ -1631,21 +1642,10 @@ public class LyricsLineView extends LinearLayout {
         } 
     	 
     	 
-//    	 int pos = position-mValue;//所在到达的位置-已所在的位置
-////    	 scrollTo(0, 3*mSelectorElementHeight);
-//    	 mValue = position;//记录选中的值
-//    	 pos = pos*mSelectorElementHeight+(mSelectorTextGapHeight/2);//要移动的距离
-////    	//pos= pos+(mSelectorTextGapHeight/2);//得到一个item的中部
-////    	 
-////    	 pos+=getScrollY();
-////    	// x位置，y位置，x要移动的距离，y要移动的距离,动画时间
-//    	 mFlingScroller2.startScroll(getScrollX(), getScrollY(), 0, pos,Math.abs(duration));
-//    	 invalidate();
-//    	 
-    	 
      }
      //TODO 问题所在
-    private void initializeSelectorWheel() {
+     private void initializeSelectorWheel() {
+    	mSelectorIndices = new int[SELECTOR_WHEEL_ITEM_COUNT];
         initializeSelectorWheelIndices();
         int[] selectorIndices = mSelectorIndices;
         int totalTextHeight = selectorIndices.length * mTextSize;//文字总高度108-144
@@ -1706,8 +1706,8 @@ public class LyricsLineView extends LinearLayout {
      * 飞到指定位置
      */
     private void fling(int velocityY) {
+    	if(!enableInvalidate)return;//未启用刷新
         mPreviousScrollerY = 0;
-
         if (velocityY > 0) {
             mFlingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
         } else {
@@ -1921,6 +1921,10 @@ public class LyricsLineView extends LinearLayout {
             , '\u06f9'
     };
 
+	private Runnable updateThread;
+
+	private boolean enableInvalidate;
+
     /**
      * Filter for accepting only valid indices or prefixes of the string
      * representation of valid indices.
@@ -1996,9 +2000,10 @@ public class LyricsLineView extends LinearLayout {
      * 是否一个作了调整。
      */
     private boolean ensureScrollWheelAdjusted() {
+    	if(!enableInvalidate)return false;
         // adjust to the closest value
         int deltaY = mInitialScrollOffset - mCurrentScrollOffset;
-        if (deltaY != 0) {
+        if (deltaY != 0 && !enableInvalidate) {
             mPreviousScrollerY = 0;
             if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
                 deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;
@@ -2143,27 +2148,44 @@ public class LyricsLineView extends LinearLayout {
 	 */
 	public void startRefreshLine(){
 		isShowLineLyrice = true;
-		post(new Runnable() {
-			@Override
-			public void run() {
-				int position2 = MusicApp.mServiceManager.position();//播放位置
-				if(position2>0&&MusicApp.mServiceManager.getPlayState()==IConstants.MPS_PLAYING){
-					updateShow();
+		if(updateThread==null)
+			updateThread = new Runnable() {
+				@Override
+				public void run() {
+					int position2 = MusicApp.mServiceManager.position();//播放位置
+					if(position2>0&&MusicApp.mServiceManager.getPlayState()==IConstants.MPS_PLAYING){
+						updateShow();
+					}
+					if(isShowLineLyrice){//如果显示每一句的进度
+						postDelayed(this, 50);
+					}
+					
 				}
-				if(isShowLineLyrice){//如果显示每一句的进度
-					postDelayed(this, 50);
-				}
-				
-			}
-		});
+			};
+		post(updateThread);
 	}
 	public void stopRefreshLine(){
 		isShowLineLyrice = false;
+		updateThread = null;
 	}
 	private void updateShow(){
 		if(mScrollState==OnScrollListener.SCROLL_STATE_IDLE){
 			invalidate();
 		}
 	}
-	
+	/**
+	 * 重写父类的刷新方法
+	 */
+	public void invalidate() {
+		if(enableInvalidate)
+			super.invalidate();
+		
+	}
+	/**
+	 * 是否启用可刷新界面
+	 * @param b
+	 */
+	public void setEnableInvalidate(boolean b){
+		this.enableInvalidate = b;
+	}
 }

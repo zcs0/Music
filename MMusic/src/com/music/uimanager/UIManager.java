@@ -103,7 +103,7 @@ public class UIManager implements IConstants {
 	}
 	private void initBroadCast() {
 		mReceiver = new ChangeBgReceiver();
-		IntentFilter filter = new IntentFilter(BROADCAST_CHANGEBG);
+		IntentFilter filter = new IntentFilter(BROADCAST_CHANGEBG);//背景底图
 		mActivity.registerReceiver(mReceiver, filter);
 	}
 	/**
@@ -123,6 +123,11 @@ public class UIManager implements IConstants {
 			mSp.savePath("004.jpg");
 		}
 	}
+	/**
+	 * 修改背景底图的监听
+	 * @author zcs
+	 *
+	 */
 	private class ChangeBgReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {

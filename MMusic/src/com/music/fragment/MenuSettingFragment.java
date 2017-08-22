@@ -13,10 +13,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.CheckedTextView;
 import android.widget.ImageButton;
@@ -35,7 +33,7 @@ import com.music.storage.SPStorage;
  * @author
  *
  */
-public class MenuSettingFragment extends BaseFragment implements
+public class MenuSettingFragment extends MusicFragment implements
 		OnClickListener, IConstants {
 
 	private LinearLayout mAdviceLayout, mAboutLayout;
@@ -53,18 +51,6 @@ public class MenuSettingFragment extends BaseFragment implements
 		};
 	};
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		mActivity = getActivity();
-		View view = inflater.inflate(R.layout.menu_setting_fragment, container,
-				false);
-		mSp = new SPStorage(getActivity());
-
-		initView(view);
-
-		return view;
-	}
 
 	private void initView(View view) {
 		mAboutLayout = (LinearLayout) view
@@ -249,6 +235,19 @@ public class MenuSettingFragment extends BaseFragment implements
 			}
 		}
 		return fileList;
+	}
+
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.menu_setting_fragment;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mActivity = getActivity();
+		mSp = new SPStorage(getActivity());
+		initView(view);
 	}
 	
 	

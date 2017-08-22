@@ -4,9 +4,7 @@
 package com.music.fragment;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.music.R;
 
@@ -15,13 +13,17 @@ import com.music.R;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class RightFragment extends BaseFragment {
+public class RightFragment extends MusicFragment {
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.viewpager_trans_layout;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
 		
-		return inflater.inflate(R.layout.viewpager_trans_layout, container, false);
 	}
 
 }

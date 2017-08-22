@@ -15,7 +15,7 @@ public interface IConstants {
 	public static final String BROADCAST_NAME = "com.music.broadcast";
 	public static final String SERVICE_NAME = "com.music.service.MediaService";
 	public static final String BROADCAST_QUERY_COMPLETE_NAME = "com.music.querycomplete.broadcast";
-	public static final String BROADCAST_CHANGEBG = "com.music.changebg";//背景地图
+	public static final String BROADCAST_CHANGEBG = "com.music.changebg";//背景底图
 	public static final String BROADCAST_SHAKE = "com.music.shake";
 	public static final String PAUSE_BROADCAST_NAME = "com.music.pause.broadcast";//暂停
 	public static final String NEXT_BROADCAST_NAME = "com.music.next.broadcast";//下一首

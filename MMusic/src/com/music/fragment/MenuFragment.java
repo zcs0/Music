@@ -6,10 +6,8 @@ package com.music.fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.music.MusicApp;
@@ -28,7 +26,7 @@ import com.music.slidemenu.SlidingMenu.OnOpenedListener;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuFragment extends BaseFragment implements OnClickListener,
+public class MenuFragment extends MusicFragment implements OnClickListener,
 		IConstants, OnOpenedListener {
 
 	private TextView mMediaCountTv;
@@ -42,17 +40,6 @@ public class MenuFragment extends BaseFragment implements OnClickListener,
 	private int modeDrawable[] = { R.drawable.icon_list_reapeat,
 			R.drawable.icon_sequence, R.drawable.icon_shuffle,
 			R.drawable.icon_single_repeat };
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-
-		View view = inflater.inflate(R.layout.frame_menu1, container, false);
-		initView(view);
-		mServiceManager = MusicApp.mServiceManager;
-
-		return view;
-	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -133,5 +120,18 @@ public class MenuFragment extends BaseFragment implements OnClickListener,
 	public void onOpened() {
 		mCurMode = mServiceManager.getPlayMode();
 		initPlayMode();
+	}
+
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.frame_menu1;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		initView(view);
+		mServiceManager = MusicApp.mServiceManager;
+		
 	}
 }

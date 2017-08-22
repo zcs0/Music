@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -13,7 +14,6 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -52,12 +52,12 @@ import com.music.viewpagerlistener.ViewPagerOnPageChangeListener;
  * @Date 2015年12月7日 下午5:42:37
  * @Description: 用来展示音乐的列表
  */
-public class MusicListFragment extends BaseFragment implements IConstants {
+public class MusicListFragment extends MusicFragment implements IConstants {
 
 	private IConstants.MusicType mFrom=IConstants.MusicType.START_FROM_ARTIST;
 	private UIManager mUIManager;
 	private BaseMusic mBaseMusic;
-	private View mView;
+//	private View mView;
 	private ViewPager mViewPager;
 	private List<View> mListViews = new ArrayList<View>();
 	private LayoutInflater mInflater;
@@ -83,26 +83,6 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	private TextView tv_title;
 	private SPStorage pPStorage;
 	private ImageButton mSearchBtn;
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		mActivity = getActivity();
-		mView = View.inflate(getActivity(), R.layout.fragment_list_item, null);
-		pPStorage = new SPStorage(getActivity());
-		mListViews.add(new TextView(mActivity));
-		mListViews.add(createView());
-		mViewPager = findViewById(R.id.vp_file_list);
-		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
-		mViewPager.setCurrentItem(1, true);
-		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(
-				mViewPager));
-		initView();//初始化控件
-		createAdapter();//创建Adapter
-		initListViewStatus();
-		return mView;
-	}
 	
 	/**
 	 * 创建Adapter
@@ -157,22 +137,15 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 		
 		
 	}
-	/**
-	 * 查找控件
-	 * @param ids
-	 * @return
-	 */
-	private <T extends View> T findViewById(int ids) {
-		View view = mView.findViewById(ids);
-		if(view==null&&contentView!=null){
-			view = contentView.findViewById(ids);
-		}
-		return (T) view;
-	}
 	
-	private View createView(){
+	private View createView2(){
 		contentView = contentView!=null?contentView:View.inflate(mActivity, layout_music , null);
 		return contentView;
+	}
+	@Override
+	public <T extends View> T findViewById(int layoutId) {
+		// TODO Auto-generated method stub
+		return (T) contentView.findViewById(layoutId);
 	}
 	private void initView(){
 		mSearchBtn = (ImageButton) findViewById(R.id.searchBtn);//搜索
@@ -251,7 +224,7 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 	 * @param from
 	 * @param data
 	 */
-	public void show(FragmentActivity activity, UIManager manager, MusicType from,
+	private void show(FragmentActivity activity, UIManager manager, MusicType from,
 			BaseMusic data) {
 		this.mBaseMusic = data;
 		this.mFrom = from;
@@ -307,6 +280,33 @@ public class MusicListFragment extends BaseFragment implements IConstants {
 		
 	}
 
-	
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.fragment_list_item;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mActivity = getActivity();
+		pPStorage = new SPStorage(getActivity());
+		mListViews.add(new TextView(mActivity));
+		mListViews.add(createView2());//添加真正列表显示页
+		mViewPager = super.findViewById(R.id.vp_file_list);
+		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
+		mViewPager.setCurrentItem(1, true);
+		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(
+				mViewPager));
+		initView();//初始化控件
+		createAdapter();//创建Adapter
+		initListViewStatus();
+		
+		SPStorage mSp = new SPStorage(mActivity);
+		String mDefaultBgPath = mSp.getPath();
+		Bitmap bitmap = getBitmapByPath(mDefaultBgPath);
+		if(bitmap != null) {
+			view.setBackgroundDrawable(new BitmapDrawable(mActivity.getResources(), bitmap));
+		}
+	}
 
 }

@@ -19,11 +19,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentTransaction;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
@@ -58,13 +56,12 @@ import com.z.netUtil.ImageUtil.ImageLoader;
  * @author 
  *
  */
-public class MainFragment extends BaseFragment implements IConstants,
+public class MainFragment extends MusicFragment implements IConstants,
 		IOnServiceConnectComplete, OnTouchListener {
 
 	private GridView mGridView;
 	private MyGridViewAdapter mAdapter;
 	protected IMediaService mService;
-
 	
 	private MusicInfoDao mMusicDao;
 	private ArtistInfoDao mArtistDao;
@@ -81,16 +78,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 	private FolderInfoDao mFolderDao;
 	private Bitmap defaultArtwork;
 	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mMusicDao = new MusicInfoDao(getActivity());
-		mFolderDao = new FolderInfoDao(getActivity());
-		mArtistDao = new ArtistInfoDao(getActivity());
-		mAlbumDao = new AlbumInfoDao(getActivity());
-		mFavoriteDao = new FavoriteInfoDao(getActivity());
-		
-	}
 	/**
 	 * 设置音乐的管理者
 	 * @param mServiceManager
@@ -99,72 +86,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 		this.mServiceManager = mServiceManager;
 	}
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		mActivity = getActivity();
-		imageLoad = new ImageLoader(getActivity());
-		pPStorage = new SPStorage(getActivity());
-		imageLoad.setCachePath(pPStorage.getHeadPath());
-		imageLoad.setBoolCache(true);
-		pPStorage.setHeadPath(pPStorage.getHeadPath());
-		mView = inflater.inflate(R.layout.frame_main, container, false);
-		mGridView = (GridView) mView.findViewById(R.id.gv_view);
-		mView.findViewById(R.id.btn_menu).setOnClickListener(this);
-		mAdapter = new MyGridViewAdapter(this.getActivity());//歌曲分类
-		mView.setOnTouchListener(this);
-		mBottomLayout = mView.findViewById(R.id.rl_bottomLayout);//底部音乐控制
-		
-		MusicApp.mServiceManager.setOnServiceConnectComplete(this);
-
-		mGridView.setAdapter(mAdapter);
-		
-		mUIManager = new UIManager(getActivity(), mView,mServiceManager);//中间显示的管理
-		mBottomUIManager = new MainBottomUIManager(getActivity(), mView);//底部播放管理
-		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面，显示歌词进度，人物图片
-		
-		//开始一个定时器，监听播放进度
-		mMusicTimer = new MusicTimer(mSdm.mHandler, mBottomUIManager.mHandler);//播放界面，和底部刷新播放时间的监听
-		mSdm.setMusicTimer(mMusicTimer);
-		mPlayBroadcast = new MusicPlayBroadcast();//接收播放的广播
-		
-		//添加一个播放的广播监听
-		IntentFilter filter = new IntentFilter(BROADCAST_NAME);
-		filter.addAction(BROADCAST_NAME);
-		getActivity().registerReceiver(mPlayBroadcast, filter);
-		if(mServiceManager.getPlayState()==MPS_PLAYING){//如果进入时已经正在播放
-			mMusicTimer.startTimer();
-//			mServiceManager.rePlay();
-			mServiceManager.sendBroadcast();
-			mSdm.loadLyric(mServiceManager.getCurMusic());
-		}
-		FragmentTransaction beginTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-		beginTransaction.replace(R.id.rl_media_paly, mSdm).commit();
-		hide(getActivity(), mSdm);
-		mBottomLayout.setOnClickListener(new View.OnClickListener() {//显示播放
-			@Override
-			public void onClick(View arg0) {
-				mView.findViewById(R.id.rl_media_paly).setVisibility(View.VISIBLE);
-				FragmentTransaction beginTransaction2 = getActivity().getSupportFragmentManager().beginTransaction();
-				beginTransaction2.setCustomAnimations(R.anim.push_bottom_in, R.anim.push_bottom_out,R.anim.push_bottom_in, R.anim.push_bottom_out);
-				beginTransaction2.addToBackStack("");
-				beginTransaction2.show(mSdm);
-				beginTransaction2.commit();
-				mSdm.startPhotoPlayer();
-			}
-		});
-		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
-		MusicInfo oldMusic = (MusicInfo) mMusicDao.getMusicInfoBySongId(lastPlayerId+"");
-		
-		if(oldMusic!=null){//获得上次最播放的一首歌曲
-			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
-			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
-		}
-		
-		showSelectOption(mGridView);//进入选择的音乐类型界面
-		defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
-		return mView;
-	}
 	/**
 	 * 选中一种类型后，进度界面
 	 * @param mGridView
@@ -304,35 +225,29 @@ public class MainFragment extends BaseFragment implements IConstants,
 					mBottomUIManager.refreshUI(0, music.duration, music);
 					mBottomUIManager.showPlay(true);
 					break;
-				case MPS_PAUSE:
+				case MPS_PAUSE://暂停
 					mMusicTimer.stopTimer();
-					mSdm.refreshUI(mServiceManager.position(), music.duration,
-							music);
-					mSdm.showPlay(true);
-					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,
-							music);
-					mBottomUIManager.showPlay(true);
+					mSdm.refreshUI(mServiceManager.position(), music.duration,music);
+					mSdm.showPlay(false);
+					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,music);
+					mBottomUIManager.showPlay(false);
 					mSdm.stopPhotoPlayer();
 //					mServiceManager.cancelNotification();//Notification弹出的消失
 					break;
-				case MPS_PLAYING:
+				case MPS_PLAYING://播放中
 					mMusicTimer.startTimer();
-					mSdm.refreshUI(mServiceManager.position(), music.duration,
-							music);
-					mSdm.showPlay(false);
-
-					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,
-							music);
-					mBottomUIManager.showPlay(false);
-					
+					mSdm.refreshUI(mServiceManager.position(), music.duration,music);
+					mSdm.showPlay(true);
+					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,music);
+					mBottomUIManager.showPlay(true);
 					mSdm.startPhotoPlayer();
 					break;
-				case MPS_PREPARE:
+				case MPS_PREPARE://准备就绪
 					mMusicTimer.stopTimer();
 					mSdm.refreshUI(0, music.duration, music);
-					mSdm.showPlay(true);
+					mSdm.showPlay(false);
 					mBottomUIManager.refreshUI(0, music.duration, music);
-					mBottomUIManager.showPlay(true);
+					mBottomUIManager.showPlay(false);
 					mBottomUIManager.showImage(music);//小头像
 					mSdm.loadLyric(music);// 读取歌词文件
 					mSdm.setBackgroundImage(music,imageLoad);//背景为空
@@ -370,7 +285,6 @@ public class MainFragment extends BaseFragment implements IConstants,
 	};
 
 	int oldY = 0;
-	private View mView;
 	private SPStorage pPStorage;
 	private ImageLoader imageLoad;
 	@Override
@@ -416,5 +330,78 @@ public class MainFragment extends BaseFragment implements IConstants,
 	public void unPlayBroadcast(){
 		getActivity().unregisterReceiver(mPlayBroadcast);
 		mUIManager.unChangeBgReceiver();
+	}
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.frame_main;
+	}
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mMusicDao = new MusicInfoDao(getActivity());
+		mFolderDao = new FolderInfoDao(getActivity());
+		mArtistDao = new ArtistInfoDao(getActivity());
+		mAlbumDao = new AlbumInfoDao(getActivity());
+		mFavoriteDao = new FavoriteInfoDao(getActivity());
+		mActivity = getActivity();
+		imageLoad = new ImageLoader(getActivity());
+		pPStorage = new SPStorage(getActivity());
+		imageLoad.setCachePath(pPStorage.getHeadPath());
+		imageLoad.setBoolCache(true);
+		pPStorage.setHeadPath(pPStorage.getHeadPath());
+		mGridView = (GridView) findViewById(R.id.gv_view);
+		findViewById(R.id.btn_menu).setOnClickListener(this);
+		mAdapter = new MyGridViewAdapter(this.getActivity());//歌曲分类
+		view.setOnTouchListener(this);
+		mBottomLayout = findViewById(R.id.rl_bottomLayout);//底部音乐控制
+		
+		MusicApp.mServiceManager.setOnServiceConnectComplete(this);
+
+		mGridView.setAdapter(mAdapter);
+		
+		mUIManager = new UIManager(getActivity(), view,mServiceManager);//中间显示的管理
+		mBottomUIManager = new MainBottomUIManager(getActivity(), view);//底部播放管理
+		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面，显示歌词进度，人物图片
+		
+		//开始一个定时器，监听播放进度
+		mMusicTimer = new MusicTimer(mSdm.getHandler(), mBottomUIManager.mHandler);//播放界面，和底部刷新播放时间的监听
+		mSdm.setMusicTimer(mMusicTimer);
+		mPlayBroadcast = new MusicPlayBroadcast();//接收播放的广播
+		
+		//添加一个播放的广播监听
+		IntentFilter filter = new IntentFilter(BROADCAST_NAME);
+		filter.addAction(BROADCAST_NAME);
+		getActivity().registerReceiver(mPlayBroadcast, filter);
+		if(mServiceManager.getPlayState()==MPS_PLAYING){//如果进入时已经正在播放
+			mMusicTimer.startTimer();
+//			mServiceManager.rePlay();
+			mServiceManager.sendBroadcast();
+			mSdm.loadLyric(mServiceManager.getCurMusic());
+		}
+		FragmentTransaction beginTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+		beginTransaction.replace(R.id.rl_media_paly, mSdm).commit();
+		hide(getActivity(), mSdm);
+		mBottomLayout.setOnClickListener(new View.OnClickListener() {//显示播放
+			@Override
+			public void onClick(View arg0) {
+				findViewById(R.id.rl_media_paly).setVisibility(View.VISIBLE);
+				FragmentTransaction beginTransaction2 = getActivity().getSupportFragmentManager().beginTransaction();
+				beginTransaction2.setCustomAnimations(R.anim.push_bottom_in, R.anim.push_bottom_out,R.anim.push_bottom_in, R.anim.push_bottom_out);
+				beginTransaction2.addToBackStack("");
+				beginTransaction2.show(mSdm);
+				beginTransaction2.commit();
+				mSdm.startPhotoPlayer();
+			}
+		});
+		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
+		MusicInfo oldMusic = (MusicInfo) mMusicDao.getMusicInfoBySongId(lastPlayerId+"");
+		
+		if(oldMusic!=null){//获得上次最播放的一首歌曲
+			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
+			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
+		}
+		
+		showSelectOption(mGridView);//进入选择的音乐类型界面
+		defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
 	}
 }

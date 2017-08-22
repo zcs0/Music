@@ -102,9 +102,9 @@ public class PopupListAdapter extends BaseAdapter implements OnClickListener,
 			viewHolder.iv_player_state.setVisibility(View.VISIBLE);
 			viewHolder.tv_sequence_number.setVisibility(View.GONE);
 			if (mServiceManager.getPlayState() == MPS_PLAYING) {//如果正在播放
-				viewHolder.iv_player_state.setSelected(true);
+				viewHolder.iv_player_state.setSelected(true);//设置为在暂停
 			} else {
-				viewHolder.iv_player_state.setSelected(false);
+				viewHolder.iv_player_state.setSelected(false);//设置为播放
 			}
 		} else {
 			

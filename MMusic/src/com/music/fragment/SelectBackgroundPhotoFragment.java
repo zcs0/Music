@@ -15,7 +15,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -36,7 +35,12 @@ import com.music.storage.SPStorage;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuBackgroundFragment extends BaseFragment implements
+/**
+ * 选择背景图片
+ * @author zcs
+ *
+ */
+public class SelectBackgroundPhotoFragment extends MusicFragment implements
 		OnItemClickListener, IConstants, OnClickListener {
 
 	private ImageButton mBackBtn;
@@ -51,20 +55,6 @@ public class MenuBackgroundFragment extends BaseFragment implements
 		String path;
 	}
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-
-		View view = inflater.inflate(R.layout.menu_background_fragment,
-				container, false);
-		mSp = new SPStorage(getActivity());
-		mDefaultBgPath = mSp.getPath();
-
-		getData();
-		initView(view);
-
-		return view;
-	}
 
 	private void getData() {
 		AssetManager am = getActivity().getAssets();
@@ -176,5 +166,21 @@ public class MenuBackgroundFragment extends BaseFragment implements
 			((MenuBackgroundActivity) getActivity()).mViewPager.setCurrentItem(
 					0, true);
 		}
+	}
+
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.menu_background_fragment;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mSp = new SPStorage(getActivity());
+		mDefaultBgPath = mSp.getPath();
+
+		getData();
+		initView(view);
+		
 	}
 }

@@ -68,6 +68,11 @@ public class ScrollDrawerLayout extends LinearLayout {
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
+//		View view = findViewById(R.id.lyricshow);
+//		if(view!=null){
+//			LyricsLineView v = (LyricsLineView) view;
+//			v.setEnableInvalidate(false);
+//		}
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			detector.onTouchEvent(event);
@@ -75,6 +80,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 			downY = event.getRawY();
 			break;
 		case MotionEvent.ACTION_MOVE:
+			
 			moveX = event.getRawX();
 			moveY = event.getRawY();
 			float x = downX - event.getRawX();
@@ -89,7 +95,7 @@ public class ScrollDrawerLayout extends LinearLayout {
 				return isScroll;
 			}
 			break;
-		case MotionEvent.ACTION_UP:
+		default:
 
 			break;
 		}
@@ -154,11 +160,16 @@ public class ScrollDrawerLayout extends LinearLayout {
 
 	@Override
 	public void computeScroll() {
+//		View view = findViewById(R.id.lyricshow);
 		if (scroller.computeScrollOffset()) {
 			int currY = scroller.getCurrY();//速度下的距离
 //			System.out.println("速度下的距离   "+currY);
 			scrollTo(0, currY);
 			invalidate();// 继续刷新页面
+//			if(view!=null){
+//				LyricsLineView v = (LyricsLineView) view;
+//				v.setEnableInvalidate(false);
+//			}
 		}else{//移动完成
 			if(scrollStateListener!=null&&!isTouch){//滑动停止时
 				boolean isShow = true;
@@ -166,6 +177,11 @@ public class ScrollDrawerLayout extends LinearLayout {
 					isShow=false;
 				}
 				scrollStateListener.scrollEnd(getScrollX(),getScrollY(),isShow);
+//				View view = findViewById(R.id.lyricshow);
+//				if(view!=null&&getScrollY()==0){
+//					LyricsLineView v = (LyricsLineView) view;
+//					v.setEnableInvalidate(true);
+//				}
 			}
 		}
 	}

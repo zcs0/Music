@@ -15,7 +15,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 
 import com.music.R;
 import com.music.fragment.LeftFragment;
-import com.music.fragment.MenuBackgroundFragment;
+import com.music.fragment.SelectBackgroundPhotoFragment;
 import com.music.fragment.RightFragment;
 
 /**
@@ -32,7 +32,7 @@ public class MenuBackgroundActivity extends BaseActivity {
 	private void initViewPager() {
 		Fragment leftFragment = new LeftFragment();
 		Fragment rightFragment = new RightFragment();
-		Fragment menuFragment = new MenuBackgroundFragment();
+		Fragment menuFragment = new SelectBackgroundPhotoFragment();
 
 		mFragmentList.add(leftFragment);
 		mFragmentList.add(menuFragment);

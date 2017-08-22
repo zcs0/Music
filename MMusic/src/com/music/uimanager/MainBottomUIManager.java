@@ -42,7 +42,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	private ServiceManager mServiceManager;
 	private AlwaysMarqueeTextView mMusicNameTv, mArtistTv;
 	private TextView mPositionTv, mDurationTv;
-	private ImageButton mPlayBtn, mPauseBtn, mNextBtn, mPlayerList;
+	private ImageButton playerAndPause, mNextBtn, mPlayerList;
 	private ProgressBar mPlaybackProgress;
 	public Handler mHandler;//更新界面的
 	private Bitmap mDefaultAlbumIcon;
@@ -74,13 +74,11 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 		mPositionTv = (TextView) findViewById(R.id.position_tv2);
 		mDurationTv = (TextView) findViewById(R.id.duration_tv2);
 
-		mPlayBtn = (ImageButton) findViewById(R.id.btn_play2);
-		mPauseBtn = (ImageButton) findViewById(R.id.btn_pause2);
+		playerAndPause = (ImageButton) findViewById(R.id.btn_player_and_pause);
 		mNextBtn = (ImageButton) findViewById(R.id.btn_playNext2);
 		mPlayerList = (ImageButton) findViewById(R.id.btn_player_list);
 
-		mPlayBtn.setOnClickListener(this);
-		mPauseBtn.setOnClickListener(this);
+		playerAndPause.setOnClickListener(this);
 		mNextBtn.setOnClickListener(this);
 		mPlayerList.setOnClickListener(this);
 
@@ -137,25 +135,24 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 //				.getResources(), bitmap));
 		refreshSeekProgress(tempCurTime, tempTotalTime);
 	}
-
+	/**
+	 * true为播放中
+	 * @param flag true:正在播放，false为已经停止
+	 */
 	public void showPlay(boolean flag) {
-		if (flag) {
-			mPlayBtn.setVisibility(View.VISIBLE);
-			mPauseBtn.setVisibility(View.GONE);
-		} else {
-			mPlayBtn.setVisibility(View.GONE);
-			mPauseBtn.setVisibility(View.VISIBLE);
-		}
+		playerAndPause.setSelected(flag);
 	}
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.btn_play2:
-			mServiceManager.rePlay();
-			break;
-		case R.id.btn_pause2:
-			mServiceManager.pause();
+		case R.id.btn_player_and_pause:
+			playerAndPause.setSelected(!playerAndPause.isSelected());
+			if(mServiceManager.getPlayState()==IConstants.MPS_PLAYING){//正在播放中
+				mServiceManager.pause();
+			}else{
+				mServiceManager.rePlay();
+			}
 			break;
 		case R.id.btn_playNext2:
 			mServiceManager.next();
@@ -166,7 +163,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 		}
 	}
 	/**
-	 * 主界面的弹出播放列表
+	 * 主界面的弹出最近播放列表
 	 */
 	private void showPopMusicList(View v) {
 		View view = View.inflate(mActivity, R.layout.player_select_list, null);

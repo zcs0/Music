@@ -4,19 +4,23 @@
 package com.music.fragment;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.music.R;
 
-public class LeftFragment extends BaseFragment {
+public class LeftFragment extends MusicFragment {
 	
+
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.viewpager_trans_layout;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		// TODO Auto-generated method stub
 		
-		return inflater.inflate(R.layout.viewpager_trans_layout, container, false);
 	}
 
 }

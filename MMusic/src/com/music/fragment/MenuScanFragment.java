@@ -7,10 +7,8 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -25,7 +23,7 @@ import com.music.utils.MusicUtils;
  * @author longdw(longdawei1988@gmail.com)
  *
  */
-public class MenuScanFragment extends BaseFragment implements IConstants, OnClickListener {
+public class MenuScanFragment extends MusicFragment implements IConstants, OnClickListener {
 
 	private Button mScanBtn;
 	private ImageButton mBackBtn;
@@ -37,29 +35,6 @@ public class MenuScanFragment extends BaseFragment implements IConstants, OnClic
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mHelper = new DatabaseHelper(getActivity());
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-
-		View view = inflater.inflate(R.layout.menu_scan_fragment, container,
-				false);
-		mScanBtn = (Button) view.findViewById(R.id.scanBtn);
-		mBackBtn = (ImageButton) view.findViewById(R.id.backBtn);
-		mScanBtn.setOnClickListener(this);
-		mBackBtn.setOnClickListener(this);
-
-		mHandler = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				super.handleMessage(msg);
-				mProgress.dismiss();
-				((MenuScanActivity)getActivity()).mViewPager.setCurrentItem(0, true);
-			}
-		};
-
-		return view;
 	}
 
 	private void getData() {
@@ -89,5 +64,28 @@ public class MenuScanFragment extends BaseFragment implements IConstants, OnClic
 		} else if(v == mBackBtn) {
 			((MenuScanActivity)getActivity()).mViewPager.setCurrentItem(0, true);
 		}
+	}
+
+	@Override
+	public int createView() {
+		// TODO Auto-generated method stub
+		return R.layout.menu_scan_fragment;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mScanBtn = (Button) view.findViewById(R.id.scanBtn);
+		mBackBtn = (ImageButton) view.findViewById(R.id.backBtn);
+		mScanBtn.setOnClickListener(this);
+		mBackBtn.setOnClickListener(this);
+
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				mProgress.dismiss();
+				((MenuScanActivity)getActivity()).mViewPager.setCurrentItem(0, true);
+			}
+		};
 	}
 }
