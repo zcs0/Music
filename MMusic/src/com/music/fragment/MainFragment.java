@@ -262,14 +262,11 @@ public class MainFragment extends MusicFragment implements IConstants,
 							}
 						};
 					}.start();
-					Bitmap bitmap = MusicUtils.getCachedArtwork(getActivity(),
-							music.albumId, defaultArtwork);
 					// 更新顶部notification
-					mServiceManager.updateNotification(bitmap, music.musicName,
-							music.artist);
 					break;
 				}
-				
+				Bitmap bitmap = MusicUtils.getCachedArtwork(getActivity(),music.albumId, defaultArtwork);
+				mServiceManager.updateNotification(bitmap, music.musicName,music.artist,playState);
 			}
 		}
 	}

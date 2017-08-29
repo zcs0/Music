@@ -337,8 +337,9 @@ public class ServiceManager implements IConstants {
 	 * @param bitmap
 	 * @param title
 	 * @param name
+	 * @param playState 播放状态
 	 */
-	public void updateNotification(Bitmap bitmap, String title, String name) {
+	public void updateNotification(Bitmap bitmap, String title, String name,int playState) {
 		try {
 			mService.updateNotification(bitmap, title, name);
 		} catch (RemoteException e) {

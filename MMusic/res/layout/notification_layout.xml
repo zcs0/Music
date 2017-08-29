@@ -53,7 +53,7 @@
         android:layout_toRightOf="@+id/image" >
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/tv_notifi_title"
             style="@style/TTNotificationTitle"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
             style="@style/TTNotificationText"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
+            android:layout_below="@+id/tv_notifi_title"
             android:ellipsize="none"
             android:fadingEdge="horizontal"
             android:fadingEdgeLength="8.0dip"

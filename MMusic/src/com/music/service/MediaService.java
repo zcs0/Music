@@ -85,13 +85,13 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 	 * @param title
 	 * @param name
 	 */
-	private void updateNotification(Bitmap bitmap, String title, String name) {
+	private void updateNotification(Bitmap bitmap, String title, String name,int state) {
 		Intent intent = new Intent(getApplicationContext(),
 				MainContentActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(),
 				0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		rv = new RemoteViews(this.getPackageName(), R.layout.notification);
+		rv = new RemoteViews(this.getPackageName(), R.layout.notification_layout);
 		Notification notification = new Notification();
 		notification.icon = R.drawable.ic_launcher;
 		notification.tickerText = title;
@@ -104,29 +104,35 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		} else {
 			rv.setImageViewResource(R.id.image, R.drawable.img_album_background);
 		}
-		rv.setTextViewText(R.id.title, title);
+		rv.setTextViewText(R.id.tv_notifi_title, title);
 		rv.setTextViewText(R.id.text, name);
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
 		//此处action不能是一样的 如果一样的 接受的flag参数只是第一个设置的值
 		Intent pauseIntent = new Intent(PAUSE_BROADCAST_NAME);//暂停
 		pauseIntent.putExtra("FLAG", PAUSE_FLAG);
 		PendingIntent pausePIntent = PendingIntent.getBroadcast(this, 0, pauseIntent, 0);
-		rv.setOnClickPendingIntent(R.id.iv_pause, pausePIntent);
+		rv.setOnClickPendingIntent(R.id.iv_pause, pausePIntent);//点击事件
+		if(state==MPS_PLAYING){//播放中//nc_player_normal
+			rv.setImageViewResource(R.id.iv_pause, R.drawable.nc_pause_normal);
+		}else{
+			rv.setImageViewResource(R.id.iv_pause, R.drawable.nc_player_normal);
+			
+		}
 		
 		Intent nextIntent = new Intent(NEXT_BROADCAST_NAME);//下一首
 		nextIntent.putExtra("FLAG", NEXT_FLAG);
 		PendingIntent nextPIntent = PendingIntent.getBroadcast(this, 0, nextIntent, 0);
-		rv.setOnClickPendingIntent(R.id.iv_next, nextPIntent);
+		rv.setOnClickPendingIntent(R.id.iv_next, nextPIntent);//点击事件
 		
 		Intent preIntent = new Intent(PRE_BROADCAST_NAME);//上一首
 		preIntent.putExtra("FLAG", PRE_FLAG);
 		PendingIntent prePIntent = PendingIntent.getBroadcast(this, 0, preIntent, 0);
-		rv.setOnClickPendingIntent(R.id.iv_previous, prePIntent);
+		rv.setOnClickPendingIntent(R.id.iv_previous, prePIntent);//点击事件
 		
 		Intent exit = new Intent(EXIT_BROADCAST_NAME);
 		exit.putExtra("FLAG", EXIT_FLAG);
 		PendingIntent i = PendingIntent.getBroadcast(this, 0, exit, 0);
-		rv.setOnClickPendingIntent(R.id.iv_exit, i);
+		rv.setOnClickPendingIntent(R.id.iv_exit, i);//点击事件
 		
 		startForeground(NOTIFICATION_ID, notification);
 	}
@@ -290,7 +296,8 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		@Override
 		public void updateNotification(Bitmap bitmap, String title, String name)
 				throws RemoteException {
-			MediaService.this.updateNotification(bitmap, title, name);
+			
+			MediaService.this.updateNotification(bitmap, title,name, getPlayState());
 		}
 
 		@Override
