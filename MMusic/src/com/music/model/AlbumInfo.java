@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
+/**
+ * 专辑
+ * @author zcs
+ *
+ */
 public class AlbumInfo extends BaseMusic implements Parcelable {
 	
 	//专辑名称
@@ -54,5 +58,10 @@ public class AlbumInfo extends BaseMusic implements Parcelable {
 			return new AlbumInfo[size];
 		}
 	};
+
+	@Override
+	public String getTitle() {
+		return album_name;
+	}
 
 }

@@ -104,5 +104,9 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	public void setFavorite(int favorite) {
 		this.favorite = favorite;
 	}
+	@Override
+	public String getTitle() {
+		return musicName;
+	}
 
 }

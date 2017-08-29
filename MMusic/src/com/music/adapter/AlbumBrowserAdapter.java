@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.music.R;
+import com.music.activity.IConstants.MusicType;
 import com.music.model.AlbumInfo;
 import com.music.model.BaseMusic;
 import com.music.service.ServiceManager;
@@ -23,19 +24,22 @@ import com.music.service.ServiceManager;
 public class AlbumBrowserAdapter extends IBaseAdapter{
 	private List<AlbumInfo> mAlbumList = new ArrayList<AlbumInfo>();
 	private ServiceManager mServiceManager;
-	public AlbumBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
+	public AlbumBrowserAdapter(Context context, ServiceManager sm) {
 		this.mContext = context;
 		this.mServiceManager = sm;
-		this.mMList = baseMusic;
-		mMList = baseMusic;
 		mAlbumList.clear();
-		if(baseMusic==null)return;
-		for (BaseMusic bm : baseMusic) {
+		
+		
+	}
+	@Override
+	public void setData(List<BaseMusic> list, MusicType from) {
+		for (BaseMusic bm : list) {
 			if(bm instanceof AlbumInfo){
 				mAlbumList.add((AlbumInfo)bm);
 			}
 		}
 		
+		super.setData(list, from);
 	}
 	@Override
 	public int getCount() {

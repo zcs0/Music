@@ -13,7 +13,7 @@ import android.os.Environment;
 public interface IConstants {
 	
 	public static final String BROADCAST_NAME = "com.music.broadcast";
-	public static final String SERVICE_NAME = "com.music.service.MediaService";
+	public static final String SERVICE_NAME = "com.music.service.MediaService";//蓝牙监听
 	public static final String BROADCAST_QUERY_COMPLETE_NAME = "com.music.querycomplete.broadcast";
 	public static final String BROADCAST_CHANGEBG = "com.music.changebg";//背景底图
 	public static final String BROADCAST_SHAKE = "com.music.shake";

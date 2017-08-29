@@ -6,8 +6,10 @@ package com.music.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-/*
+/**
  * 文件夹信息
+ * @author zcs
+ *
  */
 public class FolderInfo extends BaseMusic implements Parcelable {
 
@@ -41,5 +43,10 @@ public class FolderInfo extends BaseMusic implements Parcelable {
 			return new FolderInfo[size];
 		}
 	};
+
+	@Override
+	public String getTitle() {
+		return folderPath;
+	}
 
 }

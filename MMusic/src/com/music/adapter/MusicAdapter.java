@@ -4,7 +4,6 @@
 package com.music.adapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
@@ -22,7 +21,6 @@ import com.music.interfaces.IQueryFinished;
 import com.music.model.BaseMusic;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
-import com.music.utils.ListComparator;
 import com.music.utils.MusicUtils;
 
 /**
@@ -40,42 +38,32 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 //	private IQueryFinished mIQueryFinished;
 	private FavoriteInfoDao mFavoriteDao;
 	private MusicInfoDao mMusicDao;
-	private int mFrom;
+	
 
 	class ViewHolder {
 		TextView musicNameTv, artistTv, durationTv;
 		ImageView playStateIconIv, favoriteIv;
 	}
-	public MusicAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
-		mMusicList = new ArrayList<MusicInfo>();
+	public MusicAdapter(Context context, ServiceManager sm) {
 		this.mContext = context;
-		this.mMList = baseMusic;
-//		this.mServiceManager = sm;
-		if(baseMusic==null)return;
 		mFavoriteDao = new FavoriteInfoDao(context);
 		mMusicDao = new MusicInfoDao(context);
-		for (BaseMusic bm : baseMusic) {
-			if(bm instanceof MusicInfo){
-				mMusicList.add((MusicInfo)bm);
-			}
-		}
-//		Collections.sort(mMusicList, comparator);
-		mMList.clear();
-		for (BaseMusic baseMusic2 : mMusicList) {//
-			mMList.add(baseMusic2);
-		}
-		Collections.sort(mMList, new ListComparator());
-		
+		mMList = null;
 	}
 	
 	public List<MusicInfo> getmMusicList() {
 		return mMusicList;
 	}
 
-
-	public void setData(List<BaseMusic> list, int from) {
-		setData(list);
-		this.mFrom = from;
+	public void setData(List<BaseMusic> list, IConstants.MusicType from) {
+		super.setData(list,from);
+		mMusicList = new ArrayList<MusicInfo>();
+		if(list==null)return;
+		for (BaseMusic bm : list) {
+			if(bm instanceof MusicInfo){
+				mMusicList.add((MusicInfo)bm);
+			}
+		}
 	}
 //
 //	public void refreshPlayingList() {
@@ -159,7 +147,7 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 					mMusicList.get(position).favorite = 0;
 					mFavoriteDao.deleteById(music._id);
 					mMusicDao.setFavoriteStateById(music._id, 0);
-					if(mFrom == MusicType.START_FROM_FAVORITE.getValue()) {//移除收藏
+					if(mFrom == MusicType.START_FROM_FAVORITE) {//移除收藏
 						mMusicList.remove(position);
 						notifyDataSetChanged();
 					}

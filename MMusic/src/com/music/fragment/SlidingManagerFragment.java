@@ -426,7 +426,8 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 	 */
 	public void loadLyric(MusicInfo music) {
 		this.mCurrentMusicInfo =music;
-		lyricManager.loadLyric(music);
+		if(lyricManager!=null)
+			lyricManager.loadLyric(music);
 		
 	}
 	

@@ -24,17 +24,24 @@ import com.music.service.ServiceManager;
 public class FolderBrowserAdapter extends IBaseAdapter implements IConstants{
 	private List<FolderInfo> mMusicList = new ArrayList<FolderInfo>();
 	private ServiceManager mServiceManager;
-	public FolderBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
+	public FolderBrowserAdapter(Context context, ServiceManager sm) {
 		this.mContext = context;
-		this.mMList = baseMusic;
-		mMusicList = new ArrayList<FolderInfo>();
+		
 		this.mServiceManager = sm;
-		if(baseMusic==null)return;
-		for (BaseMusic bm : baseMusic) {
+		
+	}
+	
+	@Override
+	public void setData(List<BaseMusic> list, IConstants.MusicType from) {
+		super.setData(list, from);
+		if(list==null)return;
+		mMusicList = new ArrayList<FolderInfo>();
+		for (BaseMusic bm : list) {
 			if(bm instanceof FolderInfo){
 				mMusicList.add((FolderInfo)bm);
 			}
 		}
+		
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import com.music.R;
 import com.music.db.MusicInfoDao;
 import com.music.fragment.MainFragment;
 import com.music.fragment.MenuFragment;
+import com.music.service.BluetoothIntentReceiver;
 import com.music.service.ServiceManager;
 import com.music.slidemenu.SlidingMenu;
 import com.music.utils.MusicUtils;
@@ -107,6 +108,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		};
 
 		getData();//从数据库中读取
+//		sendBluetooth();
 	}
 	/**
 	 * 监听SD的状态
@@ -311,6 +313,34 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 //		cancleSleepClock();
 //		System.exit(0);
 	}
-	
+	//蓝牙
+		private void sendBluetooth(){
+					IntentFilter intent = new IntentFilter();
+					intent.setPriority(Integer.MAX_VALUE);
+//					intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
+					intent.addAction("android.media.AUDIO_BECOMING_NOISY");
+					intent.addAction("android.intent.action.MEDIA_BUTTON");
+					intent.addAction("android.intent.action.VOICE_COMMAND");
+//					intent.addAction("android.intent.action.ACTION_SCREEN_ON");//锁屏时会自动退出程序
+//					intent.addAction("android.intent.action.SCREEN_OFF");//锁屏时会自动退出程序
+					intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
+					intent.addAction("android.intent.action.ACTION_SHUTDOWN");
+					intent.addAction("android.intent.action.BOOT_COMPLETED");
+					intent.addAction("android.permission.BLUETOOTH");
+					intent.addAction("android.permission.BLUETOOTH_ADMIN");
+					intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
+					intent.addAction("android.media.AUDIO_BECOMING_NOISY");
+					intent.addAction("android.intent.action.MEDIA_BUTTON");
+					intent.addAction("android.intent.action.VOICE_COMMAND");
+					intent.addAction("android.intent.action.ACTION_SCREEN_ON");
+					intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
+					intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
+					intent.addAction("android.intent.action.ACTION_SHUTDOWN");
+					intent.addAction("android.intent.action.BOOT_COMPLETED");
+					intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
+					BluetoothIntentReceiver bluetoothReceiver = new BluetoothIntentReceiver();
+					registerReceiver(bluetoothReceiver, intent);
+//					bluetoothReceiver.abortBroadcast();//中断下一个接收
+		}
 
 }

@@ -54,7 +54,10 @@ public class SPStorage implements IConstants {
 		mEditor.putBoolean(SP_AUTO_DOWNLOAD_LYRIC, auto);
 		mEditor.commit();
 	}
-	
+	/**
+	 * 自动搜索网络歌词
+	 * @return
+	 */
 	public boolean getAutoLyric() {
 		return mSp.getBoolean(SP_AUTO_DOWNLOAD_LYRIC, false);
 	}

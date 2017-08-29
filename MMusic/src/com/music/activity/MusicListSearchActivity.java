@@ -85,9 +85,6 @@ public class MusicListSearchActivity extends BaseActivity implements
 	private int mPlayState = MPS_PLAYING;
 	@Override
 	protected void onCreateView(Bundle savedInstanceState) {
-
-		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.music_search);
 
 		mPlayBroadcast = new MusicPlayBroadcast();

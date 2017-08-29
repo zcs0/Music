@@ -146,13 +146,16 @@ public class MainFragment extends MusicFragment implements IConstants,
 					queryMusic = MusicUtils.queryFavorite(getActivity());
 					break;
 				case START_FROM_FOLDER://文件夹
-					queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
+					queryMusic = MusicUtils.queryFolder(mActivity);
+					//queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
 					break;
 				case START_FROM_ARTIST://歌手
-					queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
+					queryMusic = MusicUtils.queryArtist(mActivity);
+					//queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
 					break;
 				case START_FROM_ALBUM:// 专辑
-					queryMusic = MusicUtils.queryMusic(getActivity(),"", info + "",type);
+					queryMusic = MusicUtils.queryAlbums(mActivity);
+//					queryMusic = MusicUtils.queryMusic(getActivity(),"", info + "",type);
 					break;
 				}
 				
@@ -162,10 +165,8 @@ public class MainFragment extends MusicFragment implements IConstants,
 						musicList.add((MusicInfo)baseMusic);
 					}
 				}
-				
 				if(musicList!=null&&musicList.size()>0){
-					Collections.sort(musicList, new ListComparator());//按名字排序后显示
-					
+					Collections.sort(musicList, new ListComparator(type));//按名字排序后显示
 				}
 				return musicList;
 			}

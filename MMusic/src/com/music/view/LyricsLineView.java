@@ -749,7 +749,7 @@ public class LyricsLineView extends LinearLayout {
 //        System.out.println("moveToFinalScrollerPosition mCurrentScrollOffset"+mCurrentScrollOffset+"amountToScroll"+amountToScroll+"mSelectorElementHeight"+mSelectorElementHeight);
         int futureScrollOffset = (mCurrentScrollOffset + amountToScroll) % mSelectorElementHeight;
         int overshootAdjustment = mInitialScrollOffset - futureScrollOffset;
-        if (overshootAdjustment != 0&&!enableInvalidate) {
+        if (overshootAdjustment != 0&&enableInvalidate) {
             if (Math.abs(overshootAdjustment) > mSelectorElementHeight / 2) {
                 if (overshootAdjustment > 0) {
                     overshootAdjustment -= mSelectorElementHeight;
@@ -1331,21 +1331,19 @@ public class LyricsLineView extends LinearLayout {
         if(mDisplayedValues==null||mDisplayedValues.size()<=0){
 //        	mCurrentScrollOffset = 0;
 //        	y = 0;
-        	String text = "没有要显示的歌词";
+        	String text = "等待加载歌词中";
         	Paint p = new Paint();
+        	p.setTextSize(mSetlectTextSize);
         	int width = getWidth();
         	p.setTextAlign(Align.CENTER);
         	float measureText = p.measureText(text);
-        	p.setColor(Color.RED);
-        	canvas.drawText(text, x, y, p);
-        	if(width>measureText){//屏幕大于字体宽度
-        		canvas.clipRect(width/2, 0, width, 50f);
-        	}else{
-        		width = (int) (measureText-width);//字体宽度-屏幕宽度
-        		canvas.clipRect(width/2, 0, width, 50f);
-        	}
-        	p.setColor(Color.CYAN);
-        	canvas.drawText(text, x, y, p);
+        	p.setColor(Color.YELLOW);
+        	
+        	canvas.drawText(text, x, getHeight()/2, p);
+        	//上下点从0，width/2右侧，getHeight()/2+10屏幕中间+10
+    		canvas.clipRect(0, 0, width/2, getHeight()/2+10, Region.Op.INTERSECT);//设置显示范围
+    		p.setColor(Color.CYAN);
+    		canvas.drawText(text, x, getHeight()/2, p);
         	return;
         }
         
@@ -1373,7 +1371,7 @@ public class LyricsLineView extends LinearLayout {
  			mPaintForTimeLine.setColor(Color.rgb(110, 232, 77));
  			mPaintForTimeLine.setTextSize(40);
  			float yy = getHeight() / 2 + getScrollY();
- 			canvas.drawLine(0, yy, getWidth(), yy, mPaintForTimeLine);
+ 			canvas.drawLine(0, yy+mSetlectTextSize/2, getWidth(), yy+mSetlectTextSize/2, mPaintForTimeLine);
  		}
 
         // 中间字体的上下分割线
@@ -1923,7 +1921,7 @@ public class LyricsLineView extends LinearLayout {
 
 	private Runnable updateThread;
 
-	private boolean enableInvalidate;
+	private boolean enableInvalidate = true;
 
     /**
      * Filter for accepting only valid indices or prefixes of the string
@@ -2000,10 +1998,9 @@ public class LyricsLineView extends LinearLayout {
      * 是否一个作了调整。
      */
     private boolean ensureScrollWheelAdjusted() {
-    	if(!enableInvalidate)return false;
         // adjust to the closest value
         int deltaY = mInitialScrollOffset - mCurrentScrollOffset;
-        if (deltaY != 0 && !enableInvalidate) {
+        if (deltaY != 0 && enableInvalidate) {
             mPreviousScrollerY = 0;
             if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
                 deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;

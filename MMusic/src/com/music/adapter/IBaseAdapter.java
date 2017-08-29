@@ -1,14 +1,13 @@
 package com.music.adapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
 import android.widget.BaseAdapter;
 
+import com.music.activity.IConstants;
 import com.music.model.BaseMusic;
-import com.music.utils.ListComparator;
 
 /**
  * @ClassName:     IBaseAdapter.java
@@ -20,6 +19,7 @@ import com.music.utils.ListComparator;
 public abstract class IBaseAdapter extends BaseAdapter {
 	protected Context mContext;
 	protected List<BaseMusic> mMList = new ArrayList<BaseMusic>();
+	protected IConstants.MusicType mFrom;
 	/**
 	 * 当数据库中有数据的时候会调用该方法来更新列表
 	 * 
@@ -27,9 +27,17 @@ public abstract class IBaseAdapter extends BaseAdapter {
 	 */
 	public void setData(List<BaseMusic> list) {
 		mMList = list;
-		if(list==null||list.size()<=0)return;
+//		if(list==null||list.size()<=0)return;
 		// 为list排序
-		Collections.sort(mMList, new ListComparator());
+//		Collections.sort(mMList, new ListComparator());
+		notifyDataSetChanged();
+	}
+	public void setData(List<BaseMusic> list,IConstants.MusicType from) {
+		this.mFrom = from;
+		mMList = list;
+//		if(list==null||list.size()<=0)return;
+		// 为list排序
+//		Collections.sort(mMList, new ListComparator());
 		notifyDataSetChanged();
 	}
 	

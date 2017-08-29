@@ -1,7 +1,6 @@
 package com.music.adapter;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 import android.app.Dialog;
@@ -21,7 +20,6 @@ import com.music.activity.IConstants;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.uimanager.MainBottomUIManager;
-import com.music.utils.ListComparator;
 
 /**
  * @ClassName: PopAdapter.java
@@ -44,7 +42,7 @@ public class PopupListAdapter extends BaseAdapter implements OnClickListener,
 		this.mainBottomUIManager = mainBottomUIManager;
 		this.mServiceManager = mServiceManager;
 		this.mMusicList = mServiceManager.getMusicList();
-		Collections.sort(mMusicList, new ListComparator());
+//		Collections.sort(mMusicList, new ListComparator());
 	}
 
 	@Override

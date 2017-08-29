@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -43,6 +42,7 @@ import com.music.uimanager.UIManager;
 import com.music.utils.ListComparator;
 import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
+import com.music.view.QuickLocationRightView;
 import com.music.viewpagerlistener.ViewPagerOnPageChangeListener;
 
 /**
@@ -83,54 +83,84 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 	private TextView tv_title;
 	private SPStorage pPStorage;
 	private ImageButton mSearchBtn;
-	
+	private QuickLocationRightView quickBar;
+	@Override
+	public int createView() {
+		return R.layout.fragment_list_item;
+	}
+
+	@Override
+	public void initView(Bundle bundle, View view) {
+		mActivity = getActivity();
+		pPStorage = new SPStorage(getActivity());
+		mListViews.add(new TextView(mActivity));
+		mListViews.add(createView2());//添加真正列表显示页
+		mViewPager = super.findViewById(R.id.vp_file_list);
+		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
+		mViewPager.setCurrentItem(1, true);
+		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(
+				mViewPager));
+		initView();//初始化控件
+		quickBar = (QuickLocationRightView) findViewById(R.id.rightCharacterListView);
+		createAdapter();//创建Adapter
+		initListViewStatus();
+		
+		SPStorage mSp = new SPStorage(mActivity);
+		String mDefaultBgPath = mSp.getPath();
+		Bitmap bitmap = getBitmapByPath(mDefaultBgPath);
+		if(bitmap != null) {
+			view.setBackgroundDrawable(new BitmapDrawable(mActivity.getResources(), bitmap));
+		}
+	}
 	/**
 	 * 创建Adapter
 	 */
 	private void createAdapter() {
 		if(mFrom.getValue()<=0||listView==null)return;
 		tv_title.setText(mFrom.getTitle());
-		new AsyncTask<Void, Void, BaseAdapter>() {
+		new AsyncTask<Void, Void, IBaseAdapter>() {
 			@Override
-			protected BaseAdapter doInBackground(Void... params) {
-				BaseAdapter adapter2 = null;
+			protected IBaseAdapter doInBackground(Void... params) {
+				IBaseAdapter adapter = null;
 				switch (mFrom) {
 				case START_FROM_LOCAL:// 我的音乐
 					queryMusic = MusicUtils.queryMusic(mActivity, mFrom);
-					Collections.sort(queryMusic, new ListComparator());//排序后显示
-					musicAdapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
-					adapter2 = musicAdapter;
+					adapter = new MusicAdapter(mActivity, mServiceManager);
 					break;
 				case START_FROM_FAVORITE://我的最爱
 					queryMusic = MusicUtils.queryFavorite(mActivity);
-					Collections.sort(queryMusic, new ListComparator());//排序后显示
-					MusicAdapter adapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
-					adapter.setData(queryMusic,mFrom.getValue());
-					musicAdapter = adapter;
-					adapter2 = adapter;
+					adapter = new MusicAdapter(mActivity, mServiceManager);
 					break;
 				case START_FROM_FOLDER://文件夹
 					queryMusic = MusicUtils.queryFolder(mActivity);
-					musicAdapter = new FolderBrowserAdapter(mActivity, mServiceManager, queryMusic);
-					adapter2 = musicAdapter;
+					adapter = new FolderBrowserAdapter(mActivity, mServiceManager);
 					break;
 				case START_FROM_ARTIST://歌手
 					queryMusic = MusicUtils.queryArtist(mActivity);
-					musicAdapter = new ArtistBrowserAdapter(mActivity, mServiceManager, queryMusic);
-					adapter2 = musicAdapter;
+					adapter = new ArtistBrowserAdapter(mActivity, mServiceManager);
 					break;
 				case START_FROM_ALBUM:// 专辑
 					queryMusic = MusicUtils.queryAlbums(mActivity);
-					musicAdapter = new AlbumBrowserAdapter(mActivity, mServiceManager, queryMusic);
-					adapter2 = musicAdapter;
+					adapter = new AlbumBrowserAdapter(mActivity, mServiceManager);
 					break;
 				}
-				return adapter2;
+				Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+				List<String> listString = new ArrayList<String>();
+				for (BaseMusic list : queryMusic) {
+					String title = list.getTitle();
+					if(title==null||title.isEmpty())continue;
+						listString.add(title);
+				}
+				quickBar.setData(listString);
+				adapter.setData(queryMusic, mFrom);
+				return adapter;
 			}
 			@Override
-			protected void onPostExecute(BaseAdapter result) {
-				if(musicAdapter!=null&&listView!=null){
+			protected void onPostExecute(IBaseAdapter result) {
+				if(result!=null&&listView!=null){
+					musicAdapter = result;
 					listView.setAdapter(musicAdapter);
+					quickBar.setListView(listView);
 				}
 			}
 		}.execute();
@@ -198,7 +228,8 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 						pPStorage.setLastPlayerMusicInfo(((AlbumInfo)baseMusic).album_id+"");
 					}
 					if(queryMusic!=null&&queryMusic.size()>0){
-						musicAdapter = new MusicAdapter(mActivity, mServiceManager, queryMusic);
+						musicAdapter = new MusicAdapter(mActivity, mServiceManager);
+						musicAdapter.setData(queryMusic);
 						listView.setAdapter(musicAdapter);
 					}
 				}
@@ -280,33 +311,6 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 		
 	}
 
-	@Override
-	public int createView() {
-		// TODO Auto-generated method stub
-		return R.layout.fragment_list_item;
-	}
-
-	@Override
-	public void initView(Bundle bundle, View view) {
-		mActivity = getActivity();
-		pPStorage = new SPStorage(getActivity());
-		mListViews.add(new TextView(mActivity));
-		mListViews.add(createView2());//添加真正列表显示页
-		mViewPager = super.findViewById(R.id.vp_file_list);
-		mViewPager.setAdapter(new DataPagerAdapter(mListViews));
-		mViewPager.setCurrentItem(1, true);
-		mViewPager.setOnPageChangeListener(new ViewPagerOnPageChangeListener(
-				mViewPager));
-		initView();//初始化控件
-		createAdapter();//创建Adapter
-		initListViewStatus();
-		
-		SPStorage mSp = new SPStorage(mActivity);
-		String mDefaultBgPath = mSp.getPath();
-		Bitmap bitmap = getBitmapByPath(mDefaultBgPath);
-		if(bitmap != null) {
-			view.setBackgroundDrawable(new BitmapDrawable(mActivity.getResources(), bitmap));
-		}
-	}
+	
 
 }

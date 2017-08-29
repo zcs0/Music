@@ -9,7 +9,7 @@ import java.util.List;
  * @Date           2015年12月8日 上午10:07:00 
  * @Description:   文件夹和文件的父类
  */
-public class BaseMusic {
+public abstract class BaseMusic {
 	public static String KEY_FOLDER_NAME = "folder_name";
 	public static String KEY_FOLDER_PATH = "folder_path";
 	public static final String KEY_ALBUM_NAME = "album_name";
@@ -26,4 +26,10 @@ public class BaseMusic {
 	 * 音乐名
 	 */
 	public String musicName;
+	/**
+	 * 显示标识
+	 * @return
+	 */
+	public abstract String getTitle();
+	
 }

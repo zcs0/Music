@@ -53,7 +53,7 @@ public class ServiceManager implements IConstants {
 		};
 	}
 	/**
-	 * 绑定服务
+	 * 绑定服务 蓝牙
 	 */
 	public void connectService() {
 		Intent intent = new Intent(IConstants.SERVICE_NAME/*"com.music.service.MediaService"*/);

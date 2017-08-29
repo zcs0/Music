@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.music.R;
+import com.music.activity.IConstants.MusicType;
 import com.music.model.ArtistInfo;
 import com.music.model.BaseMusic;
 import com.music.service.ServiceManager;
@@ -24,16 +25,25 @@ public class ArtistBrowserAdapter extends IBaseAdapter {
 
 	List<ArtistInfo> mArtistList = new ArrayList<ArtistInfo>();
 	private ServiceManager mServiceManager;
-	public ArtistBrowserAdapter(Context context, ServiceManager sm,List<BaseMusic> baseMusic) {
+	public ArtistBrowserAdapter(Context context, ServiceManager sm) {
 		this.mContext = context;
 		this.mServiceManager = sm;
-		this.mMList = baseMusic;
 		mArtistList.clear();
-		for (BaseMusic bm : baseMusic) {
+		
+	}
+	@Override
+	public void setData(List<BaseMusic> list) {
+		if(list==null) return;
+		for (BaseMusic bm : list) {
 			if(bm instanceof ArtistInfo){
 				mArtistList.add((ArtistInfo)bm);
 			}
 		}
+	}
+	@Override
+	public void setData(List<BaseMusic> list, MusicType from) {
+		setData(list);
+		super.setData(list, from);
 	}
 
 	@Override

@@ -16,7 +16,6 @@
 
 package com.music.service;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,7 +34,6 @@ import com.music.activity.IConstants;
  * headphones. This class works because we are declaring it in a
  * &lt;receiver&gt; tag in AndroidManifest.xml.
  */
-@SuppressLint("InlinedApi")
 public class BluetoothIntentReceiver extends BroadcastReceiver  implements IConstants{
 	private static final String LOG_TAG = "MusicIntentReceiver";
 	private Context mContext;

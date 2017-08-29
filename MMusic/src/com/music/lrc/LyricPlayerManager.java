@@ -1,13 +1,11 @@
 package com.music.lrc;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +28,7 @@ import com.music.storage.SPStorage;
 import com.music.utils.LyricReadUtil;
 import com.music.utils.MusicTimer;
 import com.music.view.LyricsLineView;
+import com.z.utils.LogUtils;
 
 /**
  * @ClassName: LyricPlayerManager.java
@@ -52,7 +51,7 @@ public class LyricPlayerManager implements IConstants {
 	/**
 	 * 搜索歌词按钮
 	 */
-	private View mLrcEmptyView;
+	private TextView mLrcEmptyView;
 	private int mProgress;
 	private SPStorage mSp;
 	private TextView mCurTimeTv, mTotalTimeTv;
@@ -64,7 +63,9 @@ public class LyricPlayerManager implements IConstants {
 	protected int newVals;
 	protected boolean mPlayAuto;
 	private SlidingManagerFragment smf;
+//	private MusicInfo musicInfo;
 
+	String lyricFilePath = null;
 	public LyricPlayerManager(Context content, SlidingManagerFragment slidingManagerFragment, ServiceManager sm, View view) {
 		this.content = content;
 		this.mView = view;
@@ -80,6 +81,7 @@ public class LyricPlayerManager implements IConstants {
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
 		mTotalTimeTv = findViewById(R.id.totalTime_tv);
 		mLrcEmptyView = findViewById(R.id.lyric_empty);// 搜索歌词
+		mLrcEmptyView.setText("没有歌词,点击手动下载");
 		mLyricLoadHelper = new LyricLoadHelper();
 		initView();
 	}
@@ -96,8 +98,20 @@ public class LyricPlayerManager implements IConstants {
 		mLrcNumView.setOnScrollListener(scrollListener);
 		mPlaybackSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
 		mPlaybackSeekBar.setMax(1000);// 设置进度值最大值为1000
-		mLrcEmptyView.setOnClickListener(onClickDownLyric);// 搜索歌词
+		mLrcNumView.setVisibility(View.GONE);//默认显示歌词部分不显示
+		mLrcEmptyView.setVisibility(View.VISIBLE);
 		// mPlaybackSeekBar.setOnSeekBarChangeListener(l);
+		mLrcEmptyView.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (mCurrentMusicInfo == null) {
+					return;
+				}
+				showLrcDialog();
+				
+			}
+		});// 搜索歌词
 
 	}
 
@@ -140,101 +154,82 @@ public class LyricPlayerManager implements IConstants {
 	 * @param artist
 	 */
 	public void loadLyricByHand(String musicName, String artist) {
-		String lyricFilePath = MusicApp.lrcPath + "/" + musicName + ".lrc";
-		File lyricfile = new File(lyricFilePath);
-		if (!lyricfile.exists()) {
-			lyricFilePath = MusicApp.lrcPath + "/" + musicName + ".txt";
-			lyricfile = new File(lyricFilePath);
-		}
-		if (lyricfile.exists()) {
-			// 本地有歌词，直接读取
-			// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");
-			mLyricLoadHelper.loadLyric(lyricFilePath);
-		} else {
-			// mIsLyricDownloading = true;
-			// 尝试网络获取歌词
-			// Log.i(TAG, "loadLyric()--->本地无歌词，尝试从网络获取");
-			new LyricDownloadAsyncTask().execute(musicName, artist);
-
-		}
+		if(TextUtils.isEmpty(artist)&&TextUtils.isEmpty(artist))return;
+		mLrcEmptyView.setText("正在搜索歌词...");
+		MusicInfo info = new MusicInfo();
+		info.musicName = musicName;
+		info.artist = artist;
+		isNet = true;
+		loadLyric(info);;
 	}
-
-	private Handler handler2 = new Handler() {// 显示歌词
-		public void handleMessage(Message msg) {
-			int id = msg.what;
-//			System.out.println("********************* "+msg.obj+""+id+"         "+lyricFilePath);
-			showLyric(msg.obj);
-//			if(id !=musicInfo.songId){
-//			}
-//			if(lyricFilePath==null||id!=musicInfo.songId){
-//			}
-//			if(id!=musicInfo.songId){
-//				showLyric(msg.obj);
-//			}
-		};
-	};
-	private MusicInfo musicInfo;
-
-	String lyricFilePath = null;
+	
+	boolean isNet = false;
 	/**
-	 * 显示歌词，歌曲第一次播放时
-	 * 
-	 * @param lyricFilePath
-	 */
-	private void showLyric(Object path) {
-		System.out.println("加载歌词"+path);
-		if (path != null) {
-			lyricFilePath = (String) path;
-		}
-		// 本地有歌词，直接读取
-		// Log.i(TAG, "loadLyric()--->本地有歌词，直接读取");
-		mLrcNumView.setDisplayedValues(null);
-		mLrcNumView.setMinValue(0);
-		mLrcNumView.setMaxValue(0);
-		
-		mLrcNumView.setValue(0);
-		
-//		mLrcNum.setVisibility(View.GONE);
-		mLyricLoadHelper.loadLyric(lyricFilePath);// 对歌词进行排版(按播放时间排序)
-//		mLrcEmptyView.setVisibility(View.VISIBLE);
-		if (!TextUtils.isEmpty(lyricFilePath)) {
-			
-		} else {
-			
-			if (mSp.getAutoLyric()) {
-				// mIsLyricDownloading = true;
-				// 尝试网络获取歌词
-				// Log.i(TAG, "loadLyric()--->本地无歌词，尝试从网络获取");
-				new LyricDownloadAsyncTask().execute(musicInfo.musicName,
-						musicInfo.artist);
-			} else {
-				// 设置歌词为空
-				mLyricLoadHelper.loadLyric(null);
-			}
-		}
-	}
-	boolean isRead=false;
-	Thread thread;
-	/**
-	 * 读取本地歌词文件
+	 * 读取歌词
 	 */
 	public synchronized void loadLyric(MusicInfo playingSong) {
-		mLrcNumView.setVisibility(View.GONE);
-		mLrcEmptyView.setVisibility(View.GONE);
-		if (playingSong == null) {
-			return;
-		}
-//		System.out.println("正在选择的是=================="+playingSong.musicName);
-		if(musicInfo!=null&&musicInfo.songId==playingSong.songId)return;//如果些歌词已加载过
-		this.musicInfo = playingSong;
-		new Thread() {
-			public void run() {
-				readFileLyrc();
-			};
-		}.start();
+		//如果些歌词已加载过
+		if (playingSong == null||(mCurrentMusicInfo!=null&&mCurrentMusicInfo.songId==playingSong.songId)) return;
+		readLyric(playingSong);
 
 	}
-	private synchronized void readFileLyrc() {
+	private void readLyric(MusicInfo playingSong) {
+		mLrcNumView.setVisibility(View.GONE);//默认显示歌词部分不显示
+		mLrcEmptyView.setVisibility(View.VISIBLE);
+		this.mCurrentMusicInfo = playingSong;
+		new AsyncTask<MusicInfo, Void, ArrayList<LyricSentence>>(){
+			@Override
+			protected ArrayList<LyricSentence> doInBackground(MusicInfo... params) {
+				MusicInfo info = params[0];
+				String readFileLyrc = readFileLyrc(info);
+				ArrayList<LyricSentence> loadLyric = mLyricLoadHelper.loadLyric(readFileLyrc);// 对歌词进行排版(按播放时间排序)
+				if(loadLyric==null||loadLyric.size()<=0){
+					if (mSp.getAutoLyric()||isNet) {//从网络加载
+						LogUtils.i(TAG, "loadLyric()--->本地无歌词，尝试从网络获取");
+						//网络歌词保存路径
+						String lyricFilePath = mLyricDownloadManager.searchLyricFromWeb(info.musicName,info.artist, info.musicName);
+						
+						if(TextUtils.isEmpty(lyricFilePath)){
+							return null;
+						}
+						return mLyricLoadHelper.loadLyric(lyricFilePath);
+					} else {
+						// 设置歌词为空
+						mLyricLoadHelper.loadLyric(null);
+					}
+				}
+				return loadLyric;
+			}
+			protected void onPostExecute(java.util.ArrayList<LyricSentence> result) {
+				if(isNet){
+					mLrcEmptyView.setText("没有找歌词,点击再次搜索");
+				}
+				isNet = false;
+				lyricList = result;
+				LogUtils.i(TAG, "加载歌词");
+				if(result!=null&&result.size()>0){
+					mLrcNumView.setVisibility(View.VISIBLE);
+					mLrcEmptyView.setVisibility(View.GONE);
+					mLrcNumView.setDisplayedValues(lyricList);
+					seekBarccrollToLyric(mServiceManager.position(), true);
+				}else{
+					mLrcNumView.setVisibility(View.GONE);
+					mLrcEmptyView.setVisibility(View.VISIBLE);
+					mLrcNumView.setDisplayedValues(null);
+				}
+				mLrcNumView.setValue(0);
+			};
+			
+			
+		}.execute(playingSong);
+	}
+	
+	
+	/**
+	 * 搜索歌词
+	 * @return
+	 */
+	private String readFileLyrc(MusicInfo musicInfo) {
 		// 取得歌曲同目录下的歌词文件绝对路径
 		List<String> pathLyric0 = LyricReadUtil.getPathLyric(
 				mSp.getUserLyricPath(), musicInfo.musicName);// 用户设置的
@@ -242,71 +237,18 @@ public class LyricPlayerManager implements IConstants {
 				musicInfo.folder, musicInfo.musicName);// 同一目录下
 		List<String> pathLyric2 = LyricReadUtil.getPathLyric(
 				MusicApp.lrcPath, musicInfo.musicName);// 默认路径下的
-		String lyricFilePath = "";
+		String path = "";
 		if (pathLyric0 != null && pathLyric0.size() > 0) {
-			lyricFilePath = pathLyric0.get(0);
+			path = pathLyric0.get(0);
 		} else if (pathLyric1 != null && pathLyric1.size() > 0) {
-			lyricFilePath = pathLyric1.get(0);
+			path = pathLyric1.get(0);
 		} else if (pathLyric2 != null && pathLyric2.size() > 0) {
-			lyricFilePath = pathLyric2.get(0);
+			path = pathLyric2.get(0);
 		}
-		Message msg = new Message();
-		msg.what = musicInfo.songId;
-		msg.obj = lyricFilePath;
-		handler2.sendMessage(msg);
-		isRead= false;
+		return path;
 	}
 
-	class LyricDownloadAsyncTask extends AsyncTask<String, Void, String> {
-
-		@Override
-		protected String doInBackground(String... params) {
-			// 从网络获取歌词，然后保存到本地
-			// String lyricFilePath = mLyricDownloadManager.searchLyricFromWeb(
-			// params[0], params[1], mCurrentMusicInfo.musicName);
-			// // 返回本地歌词路径
-			// mIsLyricDownloading = false;
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			// Log.i(TAG, "网络获取歌词完毕，歌词保存路径:" + result);
-			// 读取保存到本地的歌曲
-			mLyricLoadHelper.loadLyric(result);
-		};
-	};
-
 	private LyricListener mLyricListener = new LyricListener() {
-
-		@Override
-		public void onLyricLoaded(List<LyricSentence> lyricSentences, int index) {
-			Log.i(TAG, "加载歌词");
-			lyricList = lyricSentences;
-			mLrcNumView.setVisibility(View.GONE);
-			if (lyricList == null || lyricList.size() <= 2 || mLrcNumView == null){
-				mLrcNumView.setVisibility(View.GONE);
-				mLrcEmptyView.setVisibility(View.VISIBLE);
-				return;
-			}
-//			String values[] = new String[lyricList.size()];
-//			for (int i = 0; i < lyricList.size(); i++) {
-//				values[i] = lyricList.get(i).getContentText();
-//			}
-			mLrcNumView.setVisibility(View.VISIBLE);
-			mLrcEmptyView.setVisibility(View.GONE);
-			//mLrcNum.setMinValue(0);
-			//mLrcNum.setMaxValue(lyricList.size() - 1);
-			mLrcNumView.setDisplayedValues(lyricSentences);
-//			mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
-			mLrcNumView.setValue(0);
-			seekBarccrollToLyric(mServiceManager.position(), true);
-			// if(mServiceManager.getPlayState()){
-			// }else{
-			// mLrcNum.setValue(0);
-			// }
-			// setSelectIndex(index);
-		}
 
 		@Override
 		public void onLyricSentenceChanged(int indexOfCurSentence) {
@@ -379,7 +321,7 @@ public class LyricPlayerManager implements IConstants {
 				boolean fromUser) {
 			if (!mPlayAuto) {
 				mProgress = progress;
-				int pos = (int) (progress / 1000f * (musicInfo==null?0:musicInfo.duration));// 歌曲应该所显示的位置
+				int pos = (int) (progress / 1000f * (mCurrentMusicInfo==null?0:mCurrentMusicInfo.duration));// 歌曲应该所显示的位置
 				seekBarccrollToLyric(pos, false);
 			}
 
@@ -469,18 +411,6 @@ public class LyricPlayerManager implements IConstants {
 
 	}
 
-	private View.OnClickListener onClickDownLyric = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-			if (mCurrentMusicInfo == null) {
-				return;
-			}
-			showLrcDialog();
-
-		}
-	};
-
 	/**
 	 * 要播放的音乐
 	 * 
@@ -512,9 +442,8 @@ public class LyricPlayerManager implements IConstants {
 				if (v == okBtn) {
 					String artist = artistEt.getText().toString().trim();
 					String music = musicEt.getText().toString().trim();
-					if (TextUtils.isEmpty(artist) || TextUtils.isEmpty(music)) {
-						Toast.makeText(content, "歌手和歌曲不能为空", Toast.LENGTH_SHORT)
-								.show();
+					if (TextUtils.isEmpty(artist) && TextUtils.isEmpty(music)) {
+						Toast.makeText(content, "请输入条件", Toast.LENGTH_SHORT).show();
 					} else {
 						// 开始搜索
 						loadLyricByHand(music, artist);

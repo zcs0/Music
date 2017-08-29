@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.RemoteViews;
@@ -76,7 +75,7 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		IntentFilter filter1 = new IntentFilter(BROADCAST_NAME);
 		filter1.addAction(BROADCAST_SHAKE);
 		registerReceiver(mPlayBroadcast, filter1);
-		sendBluetooth();//打开蓝牙监听
+//		sendBluetooth();//打开蓝牙监听
 	}
 
 	
@@ -350,9 +349,8 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 	}
 	//蓝牙
 	private void sendBluetooth(){
-		
 				IntentFilter intent = new IntentFilter();
-				intent.setPriority(10000);
+				intent.setPriority(Integer.MAX_VALUE);
 //				intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
 				intent.addAction("android.media.AUDIO_BECOMING_NOISY");
 				intent.addAction("android.intent.action.MEDIA_BUTTON");
@@ -362,10 +360,21 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 				intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
 				intent.addAction("android.intent.action.ACTION_SHUTDOWN");
 				intent.addAction("android.intent.action.BOOT_COMPLETED");
+				intent.addAction("android.permission.BLUETOOTH");
+				intent.addAction("android.permission.BLUETOOTH_ADMIN");
+				intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
+				intent.addAction("android.media.AUDIO_BECOMING_NOISY");
+				intent.addAction("android.intent.action.MEDIA_BUTTON");
+				intent.addAction("android.intent.action.VOICE_COMMAND");
+				intent.addAction("android.intent.action.ACTION_SCREEN_ON");
+				intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
+				intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
+				intent.addAction("android.intent.action.ACTION_SHUTDOWN");
+				intent.addAction("android.intent.action.BOOT_COMPLETED");
 				intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
 				bluetoothReceiver = new BluetoothIntentReceiver();
-//				bluetoothReceiver.abortBroadcast();//中断下一个接收
 				registerReceiver(bluetoothReceiver, intent);
+//				bluetoothReceiver.abortBroadcast();//中断下一个接收
 	}
 
 }

@@ -38,8 +38,8 @@ public class LyricLoadHelper {
 		 * @param indexOfCurSentence
 		 *            正在播放的句子在句子集合中的索引号
 		 */
-		public abstract void onLyricLoaded(List<LyricSentence> lyricSentences,
-				int indexOfCurSentence);
+//		public abstract void onLyricLoaded(List<LyricSentence> lyricSentences,
+//				int indexOfCurSentence);
 
 		/**
 		 * 歌词变化时调用
@@ -59,7 +59,7 @@ public class LyricLoadHelper {
 
 	private LyricListener mLyricListener = null;
 
-	private boolean mHasLyric = false;
+//	private boolean mHasLyric = false;
 
 	/** 当前正在播放的歌词句子的在句子集合中的索引号 */
 	private int mIndexOfCurrentSentence = -1;
@@ -95,74 +95,58 @@ public class LyricLoadHelper {
 	 *            歌词文件路径
 	 * @return true表示存在歌词，false表示不存在歌词
 	 */
-	public boolean loadLyric(String lyricPath) {
+	public ArrayList<LyricSentence> loadLyric(String lyricPath) {
 		Log.i(TAG, "LoadLyric begin,path is:" + lyricPath);
-		mHasLyric = false;
 		mLyricSentences.clear();
+		if(lyricPath==null||!new File(lyricPath).isFile())return null;
+		File file = new File(lyricPath);
+		Log.i(TAG, "歌词文件存在");
+		try {
+			mEncoding = CharsetDetector.getEncode(new FileInputStream(file));//检查编码格式
+			FileInputStream fr = new FileInputStream(file);
+			InputStreamReader isr = new InputStreamReader(fr, mEncoding);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
 
-		if (lyricPath != null) {
-			File file = new File(lyricPath);
-			if (file.exists()) {
-				Log.i(TAG, "歌词文件存在");
-				mHasLyric = true;
-				try {
-					mEncoding = CharsetDetector.getEncode(new FileInputStream(file));//检查编码格式
-					FileInputStream fr = new FileInputStream(file);
-					InputStreamReader isr = new InputStreamReader(fr, mEncoding);
-					BufferedReader br = new BufferedReader(isr);
-
-					String line = null;
-
-					// 逐行分析歌词文本
-					while ((line = br.readLine()) != null) {
-						Log.i(TAG, "lyric line:" + line);
+			// 逐行分析歌词文本
+			while ((line = br.readLine()) != null) {
+				Log.i(TAG, "lyric line:" + line);
 //						line = line.replaceAll("<[0-9]+>", "");
-						parseLine(line);//装载每一条
-					}
-
-					// 按时间排序句子集合
-					Collections.sort(mLyricSentences,
-							new Comparator<LyricSentence>() {
-								// 内嵌，匿名的compare类
-								public int compare(LyricSentence object1,
-										LyricSentence object2) {
-									if (object1.getStartTime() > object2
-											.getStartTime()) {
-										return 1;
-									} else if (object1.getStartTime() < object2
-											.getStartTime()) {
-										return -1;
-									} else {
-										return 0;
-									}
-								}
-							});
-
-					for (int i = 0; i < mLyricSentences.size() - 1; i++) {
-						mLyricSentences.get(i).setDuringTime(mLyricSentences.get(i + 1).getStartTime());//下句的开始时间
-					}
-					mLyricSentences.get(mLyricSentences.size() - 1).setDuringTime(Integer.MAX_VALUE);//设置最后一句时长为最长
-					fr.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-				}
-			} else {
-				Log.i(TAG, "歌词文件不存在");
+				parseLine(line);//装载每一条
 			}
+
+			// 按时间排序句子集合
+			Collections.sort(mLyricSentences,new Comparator<LyricSentence>() {
+						// 内嵌，匿名的compare类
+						public int compare(LyricSentence object1,
+								LyricSentence object2) {
+							if (object1.getStartTime() > object2.getStartTime()) {
+								return 1;
+							} else if (object1.getStartTime() < object2.getStartTime()) {
+								return -1;
+							} else {
+								return 0;
+							}
+						}
+					});
+
+			for (int i = 0; i < mLyricSentences.size() - 1; i++) {
+				mLyricSentences.get(i).setDuringTime(mLyricSentences.get(i + 1).getStartTime());//下句的开始时间
+			}
+			mLyricSentences.get(mLyricSentences.size() - 1).setDuringTime(Integer.MAX_VALUE);//设置最后一句时长为最长
+			isr.close();
+			fr.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
 		}
+		return mLyricSentences;
 		// 如果有谁在监听，通知它歌词载入完啦，并把载入的句子集合也传递过去
-		if (mLyricListener != null) {
-			mLyricListener.onLyricLoaded(mLyricSentences,
-					mIndexOfCurrentSentence);
-		}
-		if (mHasLyric) {
-			Log.i(TAG, "Lyric file existed.Lyric has " + mLyricSentences.size()
-					+ " Sentences");
-		} else {
-			Log.i(TAG, "Lyric file does not existed");
-		}
-		return mHasLyric;
+//		if (mLyricListener != null) {
+//			mLyricListener.onLyricLoaded(mLyricSentences,
+//					mIndexOfCurrentSentence);
+//		}
+//		return mHasLyric;
 	}
 
 	/**
@@ -173,7 +157,7 @@ public class LyricLoadHelper {
 	 */
 	public void notifyTime(long millisecond) {
 		// Log.i(TAG, "notifyTime");
-		if (mHasLyric && mLyricSentences != null && mLyricSentences.size() != 0) {
+		if (mLyricSentences != null && mLyricSentences.size() != 0) {
 			int newLyricIndex = seekSentenceIndex(millisecond);
 			if (newLyricIndex != -1 && newLyricIndex != mIndexOfCurrentSentence) {// 如果找到的歌词和现在的不是一句。
 				if (mLyricListener != null) {

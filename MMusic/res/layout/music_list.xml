@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:quick="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_mymusic_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -41,18 +42,39 @@
             android:src="@drawable/icon_search" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/music_list_view"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@color/divider_color"
-        android:dividerHeight="0.5dip" />
+        android:layout_weight="1" >
+
+        <ListView
+            android:id="@+id/music_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/divider_color"
+            android:dividerHeight="0.5dip" />
+        <com.music.view.QuickLocationRightView
+	        android:id="@+id/rightCharacterListView"
+	        quick:backgroundColor="#20000000"
+	        quick:backgroundSelectColor="#30000000"
+	        quick:textSizeQ="15sp"
+	        quick:textSelectSize="18sp"
+	        quick:textColorQ="#000000"
+	        quick:textSelectColor="#ff0000"
+	        quick:fillet="20dp"
+	        quick:leftFillet="true"
+	        android:layout_width="20dip"
+	        android:layout_height="fill_parent"
+	        android:layout_alignParentRight="true"
+         />
+        
+        
+    </RelativeLayout>
 
     <include
-        android:visibility="gone"
         android:id="@+id/rl_bottomLayout"
-        layout="@layout/main_bottom_btn" />
+        layout="@layout/main_bottom_btn"
+        android:visibility="gone" />
     <!--
     <com.music.view.MySlidingDrawer
         android:id="@+id/slidingDrawer"

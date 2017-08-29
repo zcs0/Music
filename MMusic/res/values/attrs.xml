@@ -15,11 +15,11 @@
 -->
 
 <resources>
-	<declare-styleable name="Theme" >
+
+    <declare-styleable name="Theme">
 
         <!-- NumberPicker style. -->
         <attr name="numberPickerStyle" format="reference" />
-
     </declare-styleable>
     <declare-styleable name="SlidingMenu">
         <attr name="mode">
@@ -46,14 +46,15 @@
         <attr name="selectorEnabled" format="boolean" />
         <attr name="selectorDrawable" format="reference" />
     </declare-styleable>
-<declare-styleable name="NumberPicker">
+    <declare-styleable name="NumberPicker">
+
         <!-- @hide Color for the solid color background if such for optimized rendering. -->
         <attr name="solidColor" format="color|reference" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="selectionDivider" format="reference" />
         <!-- @hide 上下分割线的高度. -->
         <attr name="selectionDividerHeight" format="dimension" />
-         <!-- @hide 上下分割线的间距. -->
+        <!-- @hide 上下分割线的间距. -->
         <attr name="selectionDividersDistance" format="dimension" />
         <!-- @hide The min height of the NumberPicker. -->
         <attr name="internalMinHeight" format="dimension" />
@@ -66,13 +67,13 @@
         <!-- @hide The layout of the number picker. -->
         <!-- 选中后的颜色 -->
         <attr name="selectTextColor" format="color|reference"></attr>
-        <!-- 默认字体颜色-->
+        <!-- 默认字体颜色 -->
         <attr name="textColor" format="color|reference"></attr>
-        <!-- 默认显示条数-->
+        <!-- 默认显示条数 -->
         <attr name="itemCount" format="integer"></attr>
-        <!-- 默认字体大小-->
+        <!-- 默认字体大小 -->
         <attr name="textSize" format="dimension"></attr>
-        <!-- 选中时字体大小-->
+        <!-- 选中时字体大小 -->
         <attr name="setlectTextSize" format="dimension"></attr>
         <!-- 上下遮罩的衰减 -->
         <attr name="solidColoraAtenuation" format="float"></attr>
@@ -81,14 +82,15 @@
         <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
         <attr name="virtualButtonPressedDrawable" format="reference" />
     </declare-styleable>
-<declare-styleable name="LyricsLineView">
+    <declare-styleable name="LyricsLineView">
+
         <!-- @hide Color for the solid color background if such for optimized rendering. -->
         <attr name="lyric_solidColor" format="color|reference" />
         <!-- @hide The divider for making the selection area. -->
         <attr name="lyric_selectionDivider" format="reference" />
         <!-- @hide 上下分割线的高度. -->
         <attr name="lyric_selectionDividerHeight" format="dimension" />
-         <!-- @hide 上下分割线的间距. -->
+        <!-- @hide 上下分割线的间距. -->
         <attr name="lyric_selectionDividersDistance" format="dimension" />
         <!-- @hide The min height of the NumberPicker. -->
         <attr name="lyric_internalMinHeight" format="dimension" />
@@ -101,17 +103,38 @@
         <!-- @hide The layout of the number picker. -->
         <!-- 选中后的颜色 -->
         <attr name="lyric_selectTextColor" format="color|reference"></attr>
-        <!-- 默认字体颜色-->
+        <!-- 默认字体颜色 -->
         <attr name="lyric_textColor" format="color|reference"></attr>
-        <!-- 默认显示条数-->
+        <!-- 默认显示条数 -->
         <attr name="lyric_itemCount" format="integer"></attr>
-        <!-- 默认字体大小-->
+        <!-- 默认字体大小 -->
         <attr name="lyric_textSize" format="dimension"></attr>
-        <!-- 选中时字体大小-->
+        <!-- 选中时字体大小 -->
         <attr name="lyric_setlectTextSize" format="dimension"></attr>
         <!-- 上下遮罩的衰减 -->
         <attr name="lyric_solidColoraAtenuation" format="float"></attr>
         <!-- @hide The drawable for pressed virtual (increment/decrement) buttons. -->
         <attr name="lyric_virtualButtonPressedDrawable" format="reference" />
     </declare-styleable>
+    <declare-styleable name="QuickView">
+        <!-- 默认背景颜色 -->
+        <attr name="backgroundColor" format="color|reference" />
+        <!-- 选中后的背景颜色 -->
+        <attr name="backgroundSelectColor" format="color|reference" />
+        <!-- 左圆角大小 -->
+        <attr name="leftFillet" format="boolean" />
+        <!-- 右圆角大小 -->
+        <attr name="rightFillet" format="boolean" />
+        <!-- 圆角大小 -->
+        <attr name="fillet" format="dimension"/>
+        <!-- 默认字体颜色 -->
+        <attr name="textColorQ" format="color|reference"></attr>
+        <!-- 选中字体颜色 -->
+        <attr name="textSelectColor" format="color|reference"></attr>
+        <!-- 默认字体大小 -->
+        <attr name="textSizeQ" format="dimension"></attr>
+        <!-- 选中字体大小 -->
+        <attr name="textSelectSize" format="dimension"></attr>
+    </declare-styleable>
+
 </resources>

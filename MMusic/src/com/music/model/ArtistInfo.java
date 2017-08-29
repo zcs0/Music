@@ -6,7 +6,11 @@ package com.music.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
+/**
+ * 歌手
+ * @author zcs
+ *
+ */
 public class ArtistInfo extends BaseMusic implements Parcelable {
 	
 	public String artist_name;
@@ -40,6 +44,12 @@ public class ArtistInfo extends BaseMusic implements Parcelable {
 		public ArtistInfo[] newArray(int size) {
 			return new ArtistInfo[size];
 		}
-	}; 
+	};
+
+
+	@Override
+	public String getTitle() {
+		return artist_name;
+	} 
 
 }
