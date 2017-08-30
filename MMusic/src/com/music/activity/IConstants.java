@@ -73,7 +73,7 @@ public interface IConstants {
 		/** 文件夹 */
 		START_FROM_FOLDER(4,"文件夹"),
 		/** 我的最爱 */
-		START_FROM_FAVORITE(5),
+		START_FROM_FAVORITE(5,"我的收藏"),
 		
 		FOLDER_TO_MYMUSIC(6),
 		ALBUM_TO_MYMUSIC(7),

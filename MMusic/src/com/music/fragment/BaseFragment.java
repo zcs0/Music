@@ -2,8 +2,6 @@ package com.music.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -27,16 +25,16 @@ public abstract class BaseFragment extends Fragment implements
 //	private int time_sys_what = ++SystemConstants.handlerMessageBasis;
 //	protected ArticleData dataSource;
 	private EProgressDialogs dialog;
-	Handler mHandler = new Handler(){
-		@Override
-		public void handleMessage(Message msg) {
-			dismissLoadingDialog();
-			MessageUtil util = new MessageUtil();
-			String message = (String) msg.obj;
-			util.setMessage(message);
-			util.setWhat(msg.what);
-		}
-	};
+//	Handler mHandler = new Handler(){
+//		@Override
+//		public void handleMessage(Message msg) {
+//			dismissLoadingDialog();
+//			MessageUtil util = new MessageUtil();
+//			String message = (String) msg.obj;
+//			util.setMessage(message);
+//			util.setWhat(msg.what);
+//		}
+//	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

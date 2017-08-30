@@ -65,7 +65,10 @@ public class FolderInfoDao {
 		cursor.close();
 		return has;
 	}
-	
+	/**
+	 * 文件夹列表
+	 * @return
+	 */
 	public int getDataCount() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select count(*) from " + TABLE_FOLDER;

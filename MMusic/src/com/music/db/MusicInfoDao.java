@@ -14,7 +14,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.music.activity.IConstants;
 import com.music.model.BaseMusic;
 import com.music.model.MusicInfo;
-
+/**
+ * 数据库操作
+ * @author zcs
+ *
+ */
 public class MusicInfoDao implements IConstants {
 	
 	private static final String TABLE_MUSIC = "music_info";
@@ -87,13 +91,13 @@ public class MusicInfoDao implements IConstants {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "";
 		switch (type) {
-		case START_FROM_ARTIST:
+		case START_FROM_ARTIST://歌手
 			sql = "select * from " + TABLE_MUSIC + " where artist = ? order by musicname ";
 			break;
-		case START_FROM_ALBUM:
+		case START_FROM_ALBUM://专辑
 			sql = "select * from " + TABLE_MUSIC + " where albumid = ? order by musicname ";
 			break;
-		case START_FROM_FOLDER:
+		case START_FROM_FOLDER://文件夹 
 			sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicname ";
 			break;
 		}
@@ -124,7 +128,10 @@ public class MusicInfoDao implements IConstants {
 		cursor.close();
 		return has;
 	}
-	
+	/**
+	 * 歌曲列表
+	 * @return
+	 */
 	public int getDataCount() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select count(*) from " + TABLE_MUSIC;

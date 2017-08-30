@@ -71,7 +71,10 @@ public class AlbumInfoDao {
 		cursor.close();
 		return has;
 	}
-	
+	/**
+	 * 专辑
+	 * @return
+	 */
 	public int getDataCount() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select count(*) from " + TABLE_ALBUM;

@@ -67,7 +67,10 @@ public class ArtistInfoDao {
 		cursor.close();
 		return has;
 	}
-	
+	/**
+	 * 歌手列表
+	 * @return
+	 */
 	public int getDataCount() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select count(*) from " + TABLE_ARTIST;

@@ -38,7 +38,6 @@ public class ServiceManager implements IConstants {
 
 	private void initConn() {
 		mConn = new ServiceConnection() {
-
 			@Override
 			public void onServiceDisconnected(ComponentName name) {
 			}
@@ -91,7 +90,10 @@ public class ServiceManager implements IConstants {
 			}
 		}
 	}
-	
+	/**
+	 * 获得当前列表
+	 * @return
+	 */
 	public List<MusicInfo> getMusicList() {
 		List<MusicInfo> musicList = new ArrayList<MusicInfo>();
 		try {
@@ -297,7 +299,7 @@ public class ServiceManager implements IConstants {
 		return -1;
 	}
 	/**
-	 * 当前正在播放的歌词
+	 * 当前正在播放的音乐信息
 	 * @return
 	 */
 	public MusicInfo getCurMusic() {

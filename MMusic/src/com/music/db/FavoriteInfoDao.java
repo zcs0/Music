@@ -53,7 +53,10 @@ public class FavoriteInfoDao implements IConstants {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		db.delete(TABLE_FAVORITE, "_id=?", new String[]{ _id+"" });
 	}
-
+	/**
+	 * 我的收藏
+	 * @return
+	 */
 	public List<BaseMusic> getMusicInfo() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select * from " + TABLE_FAVORITE;
@@ -118,7 +121,10 @@ public class FavoriteInfoDao implements IConstants {
 		cursor.close();
 		return has;
 	}
-	
+	/**
+	 * 我的收藏
+	 * @return
+	 */
 	public int getDataCount() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select count(*) from " + TABLE_FAVORITE;

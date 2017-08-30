@@ -39,7 +39,7 @@ import com.music.storage.SPStorage;
 
 /**
  * 查询各主页信息，获取封面图片等
- * @author longdw(longdawei1988@gmail.com)
+ * @author zcs
  *
  */
 public class MusicUtils implements IConstants {
@@ -89,7 +89,11 @@ public class MusicUtils implements IConstants {
 	private static FolderInfoDao mFolderInfoDao;
 	//我的收藏信息数据库
 	private static FavoriteInfoDao mFavoriteDao;
-	
+	/**
+	 * 我的收藏
+	 * @param context
+	 * @return
+	 */
 	public static List<BaseMusic> queryFavorite(Context context) {
 		if(mFavoriteDao == null) {
 			mFavoriteDao = new FavoriteInfoDao(context);
@@ -98,7 +102,7 @@ public class MusicUtils implements IConstants {
 	}
 
 	/**
-	 * 获取包含音频文件的文件夹信息
+	 * 文件夹(获取包含音频文件的文件夹信息)
 	 * @param context
 	 * @return
 	 */
@@ -131,7 +135,7 @@ public class MusicUtils implements IConstants {
 	}
 
 	/**
-	 * 获取歌手信息
+	 * 歌手列表
 	 * @param context
 	 * @return
 	 */
@@ -153,7 +157,7 @@ public class MusicUtils implements IConstants {
 	}
 
 	/**
-	 * 获取专辑信息
+	 * 专辑列表
 	 * @param context
 	 * @return
 	 */
@@ -213,7 +217,7 @@ public class MusicUtils implements IConstants {
 		}
 		SPStorage sp = new SPStorage(context);
 		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-		ContentResolver cr = context.getContentResolver();
+		
 
 		StringBuffer select = new StringBuffer(" 1=1 ");
 		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
@@ -229,10 +233,11 @@ public class MusicUtils implements IConstants {
 		}
 		
 		switch(from) {
-		case START_FROM_LOCAL:
+		case START_FROM_LOCAL://我的音乐
 			if (mMusicInfoDao.hasData()) {
 				return mMusicInfoDao.getMusicInfo();
 			} else {
+				ContentResolver cr = context.getContentResolver();
 				List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
 						select.toString(), null,
 						MediaStore.Audio.Media.ARTIST_KEY));
@@ -247,12 +252,12 @@ public class MusicUtils implements IConstants {
 //						select.toString(), null,
 //						MediaStore.Audio.Media.ARTIST_KEY));
 			}
-		case START_FROM_ALBUM:
+		case START_FROM_ALBUM://专辑
 			if (mMusicInfoDao.hasData()) {
 				return mMusicInfoDao.getMusicInfoByType(selection,
 						from);
 			}
-		case START_FROM_FOLDER:
+		case START_FROM_FOLDER://文件夹
 			if(mMusicInfoDao.hasData()) {
 				return mMusicInfoDao.getMusicInfoByType(selection, from);
 			}
@@ -292,8 +297,12 @@ public class MusicUtils implements IConstants {
 		cursor.close();
 		return musicList;
 	}
-
-	public static List<BaseMusic> getAlbumList(Cursor cursor) {
+	/**
+	 * 专辑列表
+	 * @param cursor
+	 * @return
+	 */
+	private static List<BaseMusic> getAlbumList(Cursor cursor) {
 		List<BaseMusic> list = new ArrayList<BaseMusic>();
 		while (cursor.moveToNext()) {
 			AlbumInfo info = new AlbumInfo();
@@ -309,8 +318,12 @@ public class MusicUtils implements IConstants {
 		cursor.close();
 		return list;
 	}
-
-	public static List<BaseMusic> getArtistList(Cursor cursor) {
+	/**
+	 * 歌手列表
+	 * @param cursor
+	 * @return
+	 */
+	private static List<BaseMusic> getArtistList(Cursor cursor) {
 		List<BaseMusic> list = new ArrayList<BaseMusic>();
 		while (cursor.moveToNext()) {
 			ArtistInfo info = new ArtistInfo();
@@ -323,7 +336,11 @@ public class MusicUtils implements IConstants {
 		cursor.close();
 		return list;
 	}
-
+	/**
+	 * 文件夹列表
+	 * @param cursor
+	 * @return
+	 */
 	public static List<BaseMusic> getFolderList(Cursor cursor) {
 		List<BaseMusic> list = new ArrayList<BaseMusic>();
 		while (cursor.moveToNext()) {
@@ -559,8 +576,8 @@ public class MusicUtils implements IConstants {
 	 * pfd.getFileDescriptor(); bm = BitmapFactory.decodeFileDescriptor(fd); } }
 	 * } catch (IllegalStateException ex) { } catch (FileNotFoundException ex) {
 	 * } if (bm != null) { mCachedBit = bm; } return bm; }
-	 * 
-	 * private static Bitmap getDefaultArtwork(Context context) {
+	 */ 
+	 /** private static Bitmap getDefaultArtwork(Context context) {
 	 * BitmapFactory.Options opts = new BitmapFactory.Options();
 	 * opts.inPreferredConfig = Bitmap.Config.ARGB_8888; return
 	 * BitmapFactory.decodeStream(context.getResources()
@@ -569,5 +586,39 @@ public class MusicUtils implements IConstants {
 
 	public static void clearCache() {
 		sArtCache.clear();
+	}
+
+	public static int getDataCount(Context context,MusicType type) {
+		switch (type) {
+		case START_FROM_ARTIST://歌手
+			if(mMusicInfoDao==null);
+				mArtistInfoDao = new ArtistInfoDao(context);
+			return mArtistInfoDao.getDataCount();
+		case START_FROM_ALBUM://专辑
+			if(mMusicInfoDao==null)
+				mAlbumInfoDao = new AlbumInfoDao(context);
+			return mAlbumInfoDao.getDataCount();
+		case START_FROM_LOCAL://我的音乐
+			if(mMusicInfoDao==null)
+				mMusicInfoDao = new MusicInfoDao(context);
+			return mMusicInfoDao.getDataCount();
+		case START_FROM_FOLDER://文件夹
+			if(mFolderInfoDao==null)
+				mFolderInfoDao = new FolderInfoDao(context);
+			return mFolderInfoDao.getDataCount();
+		case START_FROM_FAVORITE://我的最爱
+			if(mFavoriteDao == null)
+				mFavoriteDao = new FavoriteInfoDao(context);
+			return mFavoriteDao.getDataCount();
+			default:
+				return 0;
+		}
+		
+	}
+
+	public static MusicInfo getMusicInfoBySongId(Context context,String songId) {
+		if(mMusicInfoDao==null)
+			mMusicInfoDao = new MusicInfoDao(context);
+		return (MusicInfo) mMusicInfoDao.getMusicInfoBySongId(songId);
 	}
 }

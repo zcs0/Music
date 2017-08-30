@@ -14,7 +14,7 @@ import com.music.R;
  * @author         zcs
  * @version        V1.0  
  * @Date           2017年8月21日 上午10:00:27 
- * @Description:   TODO(用一句话描述该文件做什么) 
+ * @Description:   主页分类显示模块
  */
 public class MyGridViewAdapter extends BaseAdapter{
 	private Activity mContext;
