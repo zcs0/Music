@@ -24,6 +24,7 @@ import android.provider.MediaStore.Audio.Media;
 import android.provider.MediaStore.Files.FileColumns;
 import android.text.TextUtils;
 
+import com.music.MusicApp;
 import com.music.activity.IConstants;
 import com.music.db.AlbumInfoDao;
 import com.music.db.ArtistInfoDao;
@@ -43,7 +44,6 @@ import com.music.storage.SPStorage;
  *
  */
 public class MusicUtils implements IConstants {
-
 	private static String[] proj_music = new String[] {
 			MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
 			MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID,
@@ -66,7 +66,7 @@ public class MusicUtils implements IConstants {
 	private static final HashMap<Long, Bitmap> sArtCache = new HashMap<Long, Bitmap>();
 	private static final Uri sArtworkUri = Uri
 			.parse("content://media/external/audio/albumart");
-
+	public static boolean openCache = false;
 	static {
 		// for the cache,
 		// 565 is faster to decode and display
@@ -89,16 +89,28 @@ public class MusicUtils implements IConstants {
 	private static FolderInfoDao mFolderInfoDao;
 	//我的收藏信息数据库
 	private static FavoriteInfoDao mFavoriteDao;
+
+	private static List<BaseMusic> favoriteList;
+
+	private static List<BaseMusic> folderList;
+
+	private static List<BaseMusic> artistList;
+
+	private static List<BaseMusic> albumList;
 	/**
 	 * 我的收藏
 	 * @param context
 	 * @return
 	 */
 	public static List<BaseMusic> queryFavorite(Context context) {
+		if(openCache&&favoriteList!=null){//使用缓存
+			return favoriteList;
+		}
 		if(mFavoriteDao == null) {
 			mFavoriteDao = new FavoriteInfoDao(context);
 		}
-		return mFavoriteDao.getMusicInfo();
+		favoriteList = mFavoriteDao.getMusicInfo();
+		return favoriteList;//mFavoriteDao.getMusicInfo();
 	}
 
 	/**
@@ -107,10 +119,13 @@ public class MusicUtils implements IConstants {
 	 * @return
 	 */
 	public static List<BaseMusic> queryFolder(Context context) {
+		if(openCache&&folderList!=null){//不用全缓存或没有缓存
+			return folderList;
+		}
 		if(mFolderInfoDao == null) {
 			mFolderInfoDao = new FolderInfoDao(context);
 		}
-		SPStorage sp = new SPStorage(context);
+		SPStorage sp = MusicApp.spSD;
 		Uri uri = MediaStore.Files.getContentUri("external");
 		ContentResolver cr = context.getContentResolver();
 		StringBuilder mSelection = new StringBuilder(FileColumns.MEDIA_TYPE
@@ -126,12 +141,13 @@ public class MusicUtils implements IConstants {
 		}
 		mSelection.append(") group by ( " + FileColumns.PARENT);
 		if (mFolderInfoDao.hasData()) {
-			return mFolderInfoDao.getFolderInfo();
+			folderList = mFolderInfoDao.getFolderInfo();
+//			return mFolderInfoDao.getFolderInfo();
 		} else {
-			List<BaseMusic> list = getFolderList(cr.query(uri, proj_folder, mSelection.toString(), null, null));
-			mFolderInfoDao.saveFolderInfo(list);
-			return list;
+			folderList = getFolderList(cr.query(uri, proj_folder, mSelection.toString(), null, null));
+			mFolderInfoDao.saveFolderInfo(folderList);
 		}
+		return folderList;
 	}
 
 	/**
@@ -140,20 +156,24 @@ public class MusicUtils implements IConstants {
 	 * @return
 	 */
 	public static List<BaseMusic> queryArtist(Context context) {
+		if(openCache&&artistList!=null){//使用缓存
+			return artistList;
+		}
+		
 		if(mArtistInfoDao == null) {
 			mArtistInfoDao = new ArtistInfoDao(context);
 		}
 		Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
 		ContentResolver cr = context.getContentResolver();
 		if (mArtistInfoDao.hasData()) {
-			return mArtistInfoDao.getArtistInfo();
+			artistList = mArtistInfoDao.getArtistInfo();
 		} else {
-			List<BaseMusic> list = getArtistList(cr.query(uri, proj_artist,
+			artistList = getArtistList(cr.query(uri, proj_artist,
 					null, null, MediaStore.Audio.Artists.NUMBER_OF_TRACKS
 							+ " desc"));
-			mArtistInfoDao.saveArtistInfo(list);
-			return list;
+			mArtistInfoDao.saveArtistInfo(artistList);
 		}
+		return artistList;
 	}
 
 	/**
@@ -162,11 +182,15 @@ public class MusicUtils implements IConstants {
 	 * @return
 	 */
 	public static List<BaseMusic> queryAlbums(Context context) {
+		if(openCache&&albumList!=null){//使用缓存
+			return albumList;
+		}
+		
 		if(mAlbumInfoDao == null) {
 			mAlbumInfoDao = new AlbumInfoDao(context);
 		}
 		
-		SPStorage sp = new SPStorage(context);
+		SPStorage sp = MusicApp.spSD;;
 		
 		Uri uri = Albums.EXTERNAL_CONTENT_URI;
 		ContentResolver cr = context.getContentResolver();
@@ -183,14 +207,14 @@ public class MusicUtils implements IConstants {
 		where.append("))");
 
 		if (mAlbumInfoDao.hasData()) {
-			return mAlbumInfoDao.getAlbumInfo();
+			albumList = mAlbumInfoDao.getAlbumInfo();
 		} else {
 			// Media.ALBUM_KEY 按专辑名称排序
-			List<BaseMusic> list = getAlbumList(cr.query(uri, proj_album,
+			albumList = getAlbumList(cr.query(uri, proj_album,
 					where.toString(), null, Media.ALBUM_KEY));
-			mAlbumInfoDao.saveAlbumInfo(list);
-			return list;
+			mAlbumInfoDao.saveAlbumInfo(albumList);
 		}
+		return albumList;
 	}
 
 	/**
@@ -201,6 +225,19 @@ public class MusicUtils implements IConstants {
 	 */
 	public static List<BaseMusic> queryMusic(Context context, MusicType from) {
 		return queryMusic(context, null, null, from);
+	}
+	static List<BaseMusic> musicList;
+	/**
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static List<BaseMusic> queryMusic(Context context) {
+		if(openCache&&musicList!=null){//使用缓存
+			return musicList;
+		}
+		musicList = queryMusic(context, null, null, MusicType.START_FROM_LOCAL);
+		return musicList;
 	}
 	/**
 	 * 
@@ -215,7 +252,7 @@ public class MusicUtils implements IConstants {
 		if(mMusicInfoDao == null) {
 			mMusicInfoDao = new MusicInfoDao(context);
 		}
-		SPStorage sp = new SPStorage(context);
+		SPStorage sp = MusicApp.spSD;
 		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 		
 
@@ -591,11 +628,11 @@ public class MusicUtils implements IConstants {
 	public static int getDataCount(Context context,MusicType type) {
 		switch (type) {
 		case START_FROM_ARTIST://歌手
-			if(mMusicInfoDao==null);
+			if(mArtistInfoDao==null);
 				mArtistInfoDao = new ArtistInfoDao(context);
 			return mArtistInfoDao.getDataCount();
 		case START_FROM_ALBUM://专辑
-			if(mMusicInfoDao==null)
+			if(mAlbumInfoDao==null)
 				mAlbumInfoDao = new AlbumInfoDao(context);
 			return mAlbumInfoDao.getDataCount();
 		case START_FROM_LOCAL://我的音乐
@@ -615,7 +652,12 @@ public class MusicUtils implements IConstants {
 		}
 		
 	}
-
+	/**
+	 * 根据id查询
+	 * @param context
+	 * @param songId
+	 * @return
+	 */
 	public static MusicInfo getMusicInfoBySongId(Context context,String songId) {
 		if(mMusicInfoDao==null)
 			mMusicInfoDao = new MusicInfoDao(context);

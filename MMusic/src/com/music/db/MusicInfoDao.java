@@ -35,6 +35,7 @@ public class MusicInfoDao implements IConstants {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		for (BaseMusic musics : list) {
 			MusicInfo music = (MusicInfo) musics;
+			if(isEmpty(music.data))continue;//如果已存在
 			ContentValues cv = new ContentValues();
 			cv.put("songid", music.songId);
 			cv.put("albumid", music.albumId);
@@ -53,7 +54,6 @@ public class MusicInfoDao implements IConstants {
 	public List<BaseMusic> getMusicInfo() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select * from " + TABLE_MUSIC;
-		
 		return parseCursor(db.rawQuery(sql, null));
 	}
 	
@@ -103,7 +103,11 @@ public class MusicInfoDao implements IConstants {
 		}
 		return parseCursor(db.rawQuery(sql, new String[]{ selection }));
 	}
-	
+	/**
+	 * 设置为收藏
+	 * @param id
+	 * @param favorite
+	 */
 	public void setFavoriteStateById(int id, int favorite) {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "update " + TABLE_MUSIC + " set favorite = " + favorite + " where _id = " + id;
@@ -127,6 +131,21 @@ public class MusicInfoDao implements IConstants {
 		}
 		cursor.close();
 		return has;
+	}
+	/**
+	 * 数据库是否已存在
+	 * @param folder 文件路径
+	 * @return true:存在
+	 */
+	private boolean isEmpty(String folder){
+		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
+		String sql = "select count(*) from " + TABLE_MUSIC + " where folder = "+"'"+folder+"'";
+		Cursor cursor = db.rawQuery(sql, null);
+		int count = 0;
+		if(cursor.moveToFirst()) {
+			count = cursor.getInt(0);
+		}
+		return count>0;
 	}
 	/**
 	 * 歌曲列表

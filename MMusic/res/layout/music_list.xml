@@ -52,6 +52,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@color/divider_color"
+            android:fadingEdge="vertical"
+            android:fadingEdgeLength="80dp"
+            android:requiresFadingEdge="vertical"
             android:dividerHeight="0.5dip" />
         <com.music.view.QuickLocationRightView
 	        android:id="@+id/rightCharacterListView"
@@ -70,7 +73,6 @@
         
         
     </RelativeLayout>
-
     <include
         android:id="@+id/rl_bottomLayout"
         layout="@layout/main_bottom_btn"

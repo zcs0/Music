@@ -13,21 +13,21 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
 import com.music.model.MusicInfo;
 import com.music.utils.MusicUtils;
+import com.z.utils.LogUtils;
 
 /**
- * 歌曲控制
+ * 歌曲控制(在serice中创建，负责MediaPlayer播放控制)
  * @author 
  *
  */
-public class MusicControl implements IConstants, OnCompletionListener {
+public class MusicPlayerControl implements IConstants, OnCompletionListener {
 	
-	private String TAG = MusicControl.class.getSimpleName();
+	private String TAG = MusicPlayerControl.class.getSimpleName();
 	private MediaPlayer mMediaPlayer;
 	private int mPlayMode;
 	private List<MusicInfo> mMusicList = new ArrayList<MusicInfo>();
@@ -39,7 +39,7 @@ public class MusicControl implements IConstants, OnCompletionListener {
 	private MusicInfo mCurMusic;
 	
 	
-	public MusicControl(Context context) {
+	public MusicPlayerControl(Context context) {
 		mMediaPlayer = new MediaPlayer();
 		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		mMediaPlayer.setOnCompletionListener(this);
@@ -231,6 +231,7 @@ public class MusicControl implements IConstants, OnCompletionListener {
 	 */
 	private boolean prepare(int pos) {
 		pos = pos>=mMusicList.size()?mMusicList.size()-1:pos;
+		pos = pos<0?0:pos;//如果从是从0开始
 		mCurPlayIndex = pos;
 		mMediaPlayer.reset();
 		String path = mMusicList.get(pos).data;
@@ -239,7 +240,7 @@ public class MusicControl implements IConstants, OnCompletionListener {
 			mMediaPlayer.prepare();
 			mPlayState = MPS_PREPARE;
 		} catch (Exception e) {
-			Log.e(TAG, "", e);
+			LogUtils.e(TAG, "", e);
 			mPlayState = MPS_INVALID;
 			if(pos < mMusicList.size()) {
 				pos++;
@@ -350,7 +351,7 @@ public class MusicControl implements IConstants, OnCompletionListener {
 	/**
 	 * 程序退出
 	 */
-	public void exit() {
+	public void exitSendBroadcast() {
 		pause();
 		Intent intent  = new Intent(MainContentActivity.ALARM_CLOCK_BROADCAST);
 		mContext.sendBroadcast(intent);

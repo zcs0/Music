@@ -82,6 +82,9 @@
 
         <com.music.view.AlwaysMarqueeTextView
             android:id="@+id/artist_tv2"
+            android:fadingEdgeLength="5dp"
+            android:fadingEdge="horizontal"
+            android:requiresFadingEdge="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
@@ -90,6 +93,7 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
+            android:contentDescription="歌手"
             android:textColor="@color/white"
             android:textSize="12sp" />
 
@@ -99,10 +103,14 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:focusable="true"
+            android:fadingEdgeLength="5dp"
+            android:fadingEdge="horizontal"
+            android:requiresFadingEdge="horizontal"
             android:focusableInTouchMode="true"
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
+            android:contentDescription="歌曲"
             android:textColor="@color/white" />
 
         <LinearLayout

@@ -25,6 +25,7 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MenuBackgroundActivity;
@@ -176,7 +177,7 @@ public class SelectBackgroundPhotoFragment extends MusicFragment implements
 
 	@Override
 	public void initView(Bundle bundle, View view) {
-		mSp = new SPStorage(getActivity());
+		mSp = MusicApp.spSD;;
 		mDefaultBgPath = mSp.getPath();
 
 		getData();

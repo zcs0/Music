@@ -44,8 +44,7 @@ public class MenuFragment extends MusicFragment implements OnClickListener,
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		mMainActivity = (MainContentActivity) getActivity();
-		mMainActivity.mSlidingMenu.setOnOpenedListener(this);
+		
 	}
 
 	private void initView(View view) {
@@ -130,6 +129,8 @@ public class MenuFragment extends MusicFragment implements OnClickListener,
 
 	@Override
 	public void initView(Bundle bundle, View view) {
+		mMainActivity = (MainContentActivity) getActivity();
+		mMainActivity.mSlidingMenu.setOnOpenedListener(this);
 		initView(view);
 		mServiceManager = MusicApp.mServiceManager;
 		

@@ -11,7 +11,6 @@ import android.os.Environment;
  *
  */
 public interface IConstants {
-	
 	public static final String BROADCAST_NAME = "com.music.broadcast";
 	public static final String SERVICE_NAME = "com.music.service.MediaService";//蓝牙监听
 	public static final String BROADCAST_QUERY_COMPLETE_NAME = "com.music.querycomplete.broadcast";
@@ -62,6 +61,7 @@ public interface IConstants {
 	public static final String PLAY_STATE_NAME = "PLAY_STATE_NAME";
 	public static final String PLAY_MUSIC_INDEX = "PLAY_MUSIC_INDEX";//播放到第几个
 	
+	public static final String FROM = "from";
 	//歌手和专辑列表点击都会进入MMMusic 此时要传递参数表明是从哪里进入的
 	public enum MusicType{
 		/** 歌手 */
@@ -80,18 +80,18 @@ public interface IConstants {
 		ARTIST_TO_MYMUSIC(8),
 		MENU_BACKGROUND(9);
 		
-		private int value;
+		private int code;
 		private String title;
 
 		MusicType(int value){
-			this.value= value;
+			this.code= value;
 		}
 		MusicType(int value,String str){
-			this.value= value;
+			this.code= value;
 			this.title = str;
 		}
-		public int getValue(){
-			return value;
+		public int getCode(){
+			return code;
 		}
 		public String getTitle(){
 			return title==null?"":title;
@@ -123,7 +123,7 @@ public interface IConstants {
 		}
 		
 	}
-	public static final String FROM = "from";
+	
 	
 	
 }

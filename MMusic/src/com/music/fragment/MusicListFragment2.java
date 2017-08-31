@@ -86,7 +86,7 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 	@Override
 	public void initView(Bundle bundle, View view) {
 		mActivity = getActivity();
-		pPStorage = new SPStorage(getActivity());
+		pPStorage = MusicApp.spSD;;
 		mListViews.add(new TextView(mActivity));
 		mListViews.add(createView2());//添加真正列表显示页
 		mViewPager = super.findViewById(R.id.vp_file_list);
@@ -109,7 +109,7 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 	 * 创建Adapter
 	 */
 	private void createAdapter() {
-		if(mFrom.getValue()<=0||listView==null)return;
+		if(mFrom.getCode()<=0||listView==null)return;
 		tv_title.setText(mFrom.getTitle());
 		new AsyncTask<Void, Void, BaseAdapter>() {
 			@Override
@@ -195,7 +195,7 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 				BaseMusic baseMusic = mList.get(position);
 				//BaseMusic baseMusic = queryMusic.get(position);
 				if(baseMusic instanceof MusicInfo){//如果是一个可播放的文件
-					pPStorage.setLastPlayerListType(mFrom.getValue());//保存类型（程序两次进入时，查看的列表）
+					pPStorage.setLastPlayerListType(mFrom.getCode());//保存类型（程序两次进入时，查看的列表）
 					ArrayList<MusicInfo> mMusicList  = new ArrayList<MusicInfo>();
 					for (BaseMusic list : mList) {
 						mMusicList.add((MusicInfo)list);

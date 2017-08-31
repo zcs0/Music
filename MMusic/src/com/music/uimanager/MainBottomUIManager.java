@@ -50,6 +50,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	private PopupListAdapter popupListAdapter;
 	private PopupWindow popView;
 	private int mCurMode;
+	private MusicInfo mMusicInfo;
 	
 	public MainBottomUIManager(Activity a, View view) {
 		this.mView = view;
@@ -99,7 +100,6 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	 * @param totalTime
 	 */
 	public void refreshSeekProgress(int curTime, int totalTime) {
-
 		curTime /= 1000;
 		totalTime /= 1000;
 		int curminute = curTime / 60;
@@ -114,22 +114,27 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 		}
 		mPlaybackProgress.setProgress(rate);
 	}
-	
+	/**
+	 * 来自于其他界面，广播等更新
+	 * @param curTime
+	 * @param totalTime
+	 * @param music
+	 */
 	public void refreshUI(int curTime, int totalTime, MusicInfo music) {
-
 		int tempCurTime = curTime;
 		int tempTotalTime = totalTime;
 
 		totalTime /= 1000;
 		int totalminute = totalTime / 60;
 		int totalsecond = totalTime % 60;
-		String totalTimeString = String.format("%02d:%02d", totalminute,
-				totalsecond);
+		String totalTimeString = String.format("%02d:%02d", totalminute,totalsecond);
 
-		mDurationTv.setText(totalTimeString);
-
-		mMusicNameTv.setText(music.musicName);
-		mArtistTv.setText(music.artist);
+		mDurationTv.setText(totalTimeString);//设置播放时间
+		if(music != mMusicInfo){
+			mMusicInfo = music;
+			mMusicNameTv.setText(music.musicName);//歌曲名字
+			mArtistTv.setText(music.artist);//歌手
+		}
 
 //		mHeadIcon.setBackgroundDrawable(new BitmapDrawable(mActivity
 //				.getResources(), bitmap));

@@ -26,41 +26,10 @@ public class ListComparator implements Comparator<BaseMusic>{
 		first_l = lhs.getTitle();
 		first_r = rhs.getTitle();
 		if(mFrom == MusicType.START_FROM_FOLDER){
-			int length = first_l.length();
-			int length2 = first_r.length();
+			int length = lhs.folderName.length();
+			int length2 = rhs.folderName.length();
 			return length<length2?-1:1;
 		}
-//		switch (mFrom) {
-//		case START_FROM_LOCAL:// 我的音乐
-//			first_l = lhs.musicName;
-//			first_r = rhs.musicName;
-//			break;
-//		case START_FROM_FAVORITE://我的最爱
-//			first_l = lhs.musicName;
-//			first_r = rhs.musicName;
-//			break;
-//		case START_FROM_FOLDER://文件夹
-//			FolderInfo info = (FolderInfo) lhs;
-//			FolderInfo info2 = (FolderInfo) rhs;
-//			int length = info.folderPath.length();
-//			int length2 = info2.folderPath.length();
-//			return length<length2?-1:1;
-//			//break;
-//		case START_FROM_ARTIST://歌手
-//			ArtistInfo artistInfo = (ArtistInfo) lhs;
-//			ArtistInfo artistInfo2 = (ArtistInfo) rhs;
-//			first_l = artistInfo.artist_name;
-//			first_r = artistInfo2.artist_name;
-//			break;
-//		case START_FROM_ALBUM:// 专辑
-//			AlbumInfo albumInfo = (AlbumInfo) lhs;
-//			AlbumInfo albumInfo2 = (AlbumInfo) rhs;
-//			first_l = albumInfo.album_name;
-//			first_r = albumInfo2.album_name;
-//			
-//			break;
-//		}
-		
 		if(TextUtils.isEmpty(first_l)||TextUtils.isEmpty(first_r)){
 			return 0;
 		}

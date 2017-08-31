@@ -26,7 +26,7 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	public static final String KEY_MUSIC_NAME_KEY = "musicnamekey";
 	public static final String KEY_ARTIST_KEY = "artistkey";
 	public static final String KEY_FAVORITE = "favorite";
-	
+	private String headImgPath;//头像位置
 	/** 数据库中的_id */
 	public int _id = -1;
 	public int songId = -1;
@@ -98,6 +98,12 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	};
 
 
+	public String getHeadImgPath() {
+		return headImgPath;
+	}
+	public void setHeadImgPath(String headImgPath) {
+		this.headImgPath = headImgPath;
+	}
 	public int getFavorite() {
 		return favorite;
 	}

@@ -78,7 +78,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 				SplashScreen.SLIDE_LEFT);
 		// set the Above View
 		mMainFragment = new MainFragment();//主界面
-		mMainFragment.setServiceManager(mServiceManager);//设置音乐管理者
+//		mMainFragment.setServiceManager(mServiceManager);//设置音乐管理者
 		FragmentTransaction beginTransaction = getSupportFragmentManager().beginTransaction();
 		beginTransaction.add(R.id.frame_main, mMainFragment).commit();
 		// configure the SlidingMenu
@@ -301,7 +301,6 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 
 	};
 	
-
 	@Override
 	public void onDestroy() {
 		super.onDestroy();

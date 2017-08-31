@@ -14,10 +14,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.RemoteViews;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
@@ -26,6 +28,7 @@ import com.music.model.MusicInfo;
 import com.music.shake.ShakeDetector;
 import com.music.shake.ShakeDetector.OnShakeListener;
 import com.music.storage.SPStorage;
+import com.music.utils.MusicUtils;
 
 /**
  * 后台Service 控制歌曲的播放 控制顶部Notification的显示
@@ -39,7 +42,7 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 	private static final int PRE_FLAG = 0x3;
 	private static final int EXIT_FLAG = 0x4;
 	
-	private MusicControl mMc;
+	private MusicPlayerControl mMc;
 	private NotificationManager mNotificationManager;
 //	private Notification mNotification;
 	private int NOTIFICATION_ID = 0x1;
@@ -56,10 +59,9 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-		mMc = new MusicControl(this);
-		mSp = new SPStorage(this);
-		mShakeDetector = new ShakeDetector(this);
+		mMc = new MusicPlayerControl(this);
+		mSp = MusicApp.spSD;;
+		mShakeDetector = new ShakeDetector(this);//监听手机甩动
 		mShakeDetector.setOnShakeListener(this);
 		mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		
@@ -190,11 +192,19 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 				break;
 			case EXIT_FLAG://退出
 				cancelNotification();
-				mMc.exit();
+				mMc.exitSendBroadcast();//退出广播
 			}
+			if(flag!=EXIT_FLAG){//不是退出
+				MusicInfo curMusic = mMc.getCurMusic();
+				Bitmap defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
+				Bitmap bitmap = MusicUtils.getCachedArtwork(context,curMusic.albumId, defaultArtwork);
+				mSp.setLastPlayerId(curMusic._id);
+				updateNotification(bitmap, curMusic.musicName,curMusic.artist, mMc.getPlayState());//更新顶部标题状态
+			}
+			
 		}
 	}
-	
+	//取消顶部显示
 	private void cancelNotification() {
 		stopForeground(true);
 		mNotificationManager.cancel(NOTIFICATION_ID);
@@ -280,7 +290,7 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		public void exit() throws RemoteException {
 			cancelNotification();
 			stopSelf();
-			mMc.exit();
+			mMc.exitSendBroadcast();
 		}
 
 		@Override

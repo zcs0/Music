@@ -46,7 +46,7 @@ public class FolderInfo extends BaseMusic implements Parcelable {
 
 	@Override
 	public String getTitle() {
-		return folderPath;
+		return folderName;
 	}
 
 }

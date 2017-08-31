@@ -3,6 +3,8 @@
  */
 package com.music;
 
+import java.util.List;
+
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,8 +13,10 @@ import android.media.AudioManager;
 import android.os.Environment;
 
 import com.music.activity.IConstants;
+import com.music.model.MusicInfo;
 import com.music.service.BluetoothIntentReceiver;
 import com.music.service.ServiceManager;
+import com.music.storage.SPStorage;
 import com.z.CrashHandler;
 import com.z.utils.LogUtils;
 ;
@@ -26,12 +30,14 @@ public class MusicApp extends Application implements IConstants{
 	public static String lrcPathUse = "/lrc";
 	private String logPath = Environment.getExternalStorageDirectory()+"/music.log";
 	private SharedPreferences sp;
+	public static SPStorage spSD;
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		sp = getSharedPreferences(SP_NAME,Context.MODE_WORLD_WRITEABLE);
 		lrcPath = sp.getString(LYRIC_DEFAULE_PATH, lrcPath);
 		lrcPathUse = sp.getString(LYRIC_SAVE_PATH, "");
+		spSD = new SPStorage(this);
 		LogUtils.filePath = logPath;
 		mServiceManager = new ServiceManager(this);//服务管理
 		mServiceManager.connectService();//绑定蓝牙播放的服务
@@ -41,6 +47,14 @@ public class MusicApp extends Application implements IConstants{
 		((AudioManager)getSystemService(AUDIO_SERVICE))
 			.registerMediaButtonEventReceiver(new ComponentName(this,BluetoothIntentReceiver.class));
 		initPath();
+	}
+	
+	/**
+	 * @param musicList  重新设置播放列表
+	 * @param selectedId 要选中的id
+	 */
+	public static void refreshMusicList(List<MusicInfo> musicList,int selectedId) {
+		mServiceManager.refreshMusicList(musicList, selectedId);
 	}
 	
 	private void initPath() {

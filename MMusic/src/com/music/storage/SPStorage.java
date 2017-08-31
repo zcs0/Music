@@ -83,21 +83,41 @@ public class SPStorage implements IConstants {
 	public int getLastPlayerListType(){
 		return mSp.getInt(LAST_PLAYER_TYPE, -1);
 	} 
+	/**
+	 * 获得最后一次播放的id
+	 * @return
+	 */
 	public int getLastPlayerId(){
 		return mSp.getInt(LAST_PLAYER_ID, -1);
 	}
+	/**
+	 * 设置最一次播放的类型（下次打开以此查询的列表）
+	 * @param type
+	 */
 	public void setLastPlayerListType(int type){
 		mEditor.putInt(LAST_PLAYER_TYPE, type);
 		mEditor.commit();
 	} 
+	/**
+	 * 设置最后一次播放的id
+	 * @param id
+	 */
 	public void setLastPlayerId(int id){
 		mEditor.putInt(LAST_PLAYER_ID, id);
 		mEditor.commit();
 	}
+	/**
+	 * 
+	 * @param info
+	 */
 	public void setLastPlayerMusicInfo(String info){
 		mEditor.putString(LAST_PLAYER_INFO, info);
 		mEditor.commit();
 	}
+	/**
+	 * 播放的路径
+	 * @return
+	 */
 	public String getLastPlayerMusicInfo(){
 		return mSp.getString(LAST_PLAYER_INFO, null);
 	}

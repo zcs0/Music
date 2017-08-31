@@ -73,7 +73,7 @@ public class LyricPlayerManager implements IConstants {
 		this.smf = slidingManagerFragment;
 		// this.mLyricDownloadManager=mLyricDownloadManager;
 		this.mLyricDownloadManager = new LyricDownloadManager(content);
-		mSp = new SPStorage(content);
+		mSp = MusicApp.spSD;
 		mLrcNumView = (LyricsLineView) findViewById(R.id.lyricshow);
 		mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
 		mLrcNumView.startRefreshLine();
@@ -123,7 +123,7 @@ public class LyricPlayerManager implements IConstants {
 	 */
 	private void setSelectIndex(int indexOfCurSentence) {
 		if(!smf.isVisible())return;
-		if (mLrcNumView == null || indexOfCurSentence < 0
+		if (mLrcNumView == null ||lyricList==null|| indexOfCurSentence < 0
 				|| lyricList.size() <= indexOfCurSentence)
 			return;
 		LyricSentence lyric = lyricList.get(indexOfCurSentence);// 本次要显示的
@@ -169,7 +169,8 @@ public class LyricPlayerManager implements IConstants {
 	 */
 	public synchronized void loadLyric(MusicInfo playingSong) {
 		//如果些歌词已加载过
-		if (playingSong == null||(mCurrentMusicInfo!=null&&mCurrentMusicInfo.songId==playingSong.songId)) return;
+		if (playingSong == null) return;
+		if(mCurrentMusicInfo!=null&&mCurrentMusicInfo.songId==playingSong.songId)return;
 		readLyric(playingSong);
 
 	}

@@ -32,6 +32,7 @@ import android.widget.SlidingDrawer.OnDrawerCloseListener;
 import android.widget.SlidingDrawer.OnDrawerOpenListener;
 import android.widget.TextView;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.PlayQueueActivity;
@@ -134,7 +135,7 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 	public SlidingManagerFragment(FragmentActivity activity, ServiceManager sm) {
 		this.mServiceManager = sm;
 		this.mActivity = activity;
-		mSp = new SPStorage(mActivity);
+		mSp = MusicApp.spSD;
 		mAudioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
 		mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);//最大音量
 		mCurVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);//当前音量

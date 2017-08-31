@@ -69,6 +69,9 @@ public class MainFragment extends MusicFragment implements IConstants,
 	private ServiceManager mServiceManager;
 	private FolderInfoDao mFolderDao;
 	private Bitmap defaultArtwork;
+	int oldY = 0;
+	private SPStorage pPStorage;
+	private ImageLoader imageLoad;
 	@Override
 	public int createView() {
 		return R.layout.frame_main;
@@ -77,17 +80,18 @@ public class MainFragment extends MusicFragment implements IConstants,
 	public void initView(Bundle bundle, View view) {
 		mActivity = getActivity();
 		imageLoad = new ImageLoader(getActivity());
-		pPStorage = new SPStorage(getActivity());
+		pPStorage = MusicApp.spSD;
 		imageLoad.setCachePath(pPStorage.getHeadPath());
 		imageLoad.setBoolCache(true);
 		pPStorage.setHeadPath(pPStorage.getHeadPath());
 		mGridView = (GridView) findViewById(R.id.gv_view);
+		mServiceManager = MusicApp.mServiceManager;
 		findViewById(R.id.btn_menu).setOnClickListener(this);
 		mAdapter = new MyGridViewAdapter(this.getActivity());//歌曲分类
 		view.setOnTouchListener(this);
 		mBottomLayout = findViewById(R.id.rl_bottomLayout);//底部音乐控制
 		
-		MusicApp.mServiceManager.setOnServiceConnectComplete(this);
+		MusicApp.mServiceManager.setOnServiceConnectComplete(this);//设置绑定播放服务的监听
 
 		mGridView.setAdapter(mAdapter);
 		
@@ -127,8 +131,6 @@ public class MainFragment extends MusicFragment implements IConstants,
 		});
 		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
 		MusicInfo oldMusic = MusicUtils.getMusicInfoBySongId(getActivity(),lastPlayerId+"");
-//		MusicInfo oldMusic = (MusicInfo) mMusicDao.getMusicInfoBySongId(lastPlayerId+"");
-		
 		if(oldMusic!=null){//获得上次最播放的一首歌曲
 			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
 			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
@@ -142,11 +144,12 @@ public class MainFragment extends MusicFragment implements IConstants,
 	 * 设置音乐的管理者
 	 * @param mServiceManager
 	 */
-	public void setServiceManager(ServiceManager mServiceManager){
-		this.mServiceManager = mServiceManager;
-	}
+//	public void setServiceManager(ServiceManager mServiceManager){
+//		this.mServiceManager = mServiceManager;
+//	}
 
 	/**
+	 * 主界面几个音乐分类
 	 * 选中一种类型后，进度界面
 	 * @param mGridView
 	 */
@@ -174,25 +177,30 @@ public class MainFragment extends MusicFragment implements IConstants,
 					break;
 				}
 				mUIManager.setContentType(from);//通知打开音乐类型
-				
 			}
 		});
 	}
 	/**
-	 * 主界面几个音乐分类
+	 * 
 	 * @author ZCS
-	 *
+	 * 绑定播放服务的监听
 	 */
 	@Override
 	public void onServiceConnectComplete(IMediaService service) {
 		// service绑定成功会执行到这里
 		refreshNum();
-		
-		final int type = pPStorage.getLastPlayerListType();//最后次的type
-		final String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
-		if(type<=0)return;
+		int type = pPStorage.getLastPlayerListType();//最后次的type
+		String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
+		if(type<=0){
+			type = MusicType.START_FROM_LOCAL.getCode();
+		}
 		setPlayerList(MusicType.getType(type), info);//得到并设置最后一次播放时的列表
 	}
+	/**
+	 * 设置播放列表
+	 * @param type
+	 * @param info
+	 */
 	private void setPlayerList(final MusicType type, final String info) {
 		new AsyncTask<Void, Void, List<MusicInfo> >(){
 			@Override
@@ -200,22 +208,19 @@ public class MainFragment extends MusicFragment implements IConstants,
 				List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
 				switch (type) {
 				case START_FROM_LOCAL:// 我的音乐
-					queryMusic = MusicUtils.queryMusic(getActivity(), type);
+					queryMusic = MusicUtils.queryMusic(getActivity());
 					break;
 				case START_FROM_FAVORITE://我的最爱
 					queryMusic = MusicUtils.queryFavorite(getActivity());
 					break;
 				case START_FROM_FOLDER://文件夹
 					queryMusic = MusicUtils.queryFolder(mActivity);
-					//queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
 					break;
 				case START_FROM_ARTIST://歌手
 					queryMusic = MusicUtils.queryArtist(mActivity);
-					//queryMusic = MusicUtils.queryMusic(getActivity(),"", info,type);
 					break;
 				case START_FROM_ALBUM:// 专辑
 					queryMusic = MusicUtils.queryAlbums(mActivity);
-//					queryMusic = MusicUtils.queryMusic(getActivity(),"", info + "",type);
 					break;
 				}
 				
@@ -231,8 +236,10 @@ public class MainFragment extends MusicFragment implements IConstants,
 				return musicList;
 			}
 			protected void onPostExecute(List<MusicInfo> result) {
-				int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
-				mServiceManager.refreshMusicList(result,lastPlayerId);
+				int lastPlayerId = MusicApp.spSD.getLastPlayerId();//最后次的id
+				lastPlayerId = lastPlayerId<=0?0:lastPlayerId;
+				if(result.size()>0)
+					MusicApp.refreshMusicList(result,lastPlayerId);
 			};
 			
 		}.execute();
@@ -250,15 +257,10 @@ public class MainFragment extends MusicFragment implements IConstants,
 			@Override
 			protected Void doInBackground(Void... params) {
 				musicCount = MusicUtils.getDataCount(getActivity(),MusicType.START_FROM_LOCAL);
-//				musicCount = mMusicDao.getDataCount();
 				artistCount = MusicUtils.getDataCount(getActivity(),MusicType.START_FROM_ARTIST);
-//				artistCount = mArtistDao.getDataCount();
 				albumCount = MusicUtils.getDataCount(getActivity(),MusicType.START_FROM_ALBUM);
-//				albumCount = mAlbumDao.getDataCount();
 				folderCount = MusicUtils.getDataCount(getActivity(),MusicType.START_FROM_FOLDER);
-//				folderCount = mFolderDao.getDataCount();
 				favoriteCount = MusicUtils.getDataCount(getActivity(),MusicType.START_FROM_FAVORITE);
-//				favoriteCount = mFavoriteDao.getDataCount();
 				return null;
 			}
 			protected void onPostExecute(Void result) {
@@ -268,9 +270,9 @@ public class MainFragment extends MusicFragment implements IConstants,
 		
 		
 	}
-	MusicInfo music;
+	
 	private class MusicPlayBroadcast extends BroadcastReceiver {
-
+		MusicInfo music;//当前播放的音乐
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(BROADCAST_NAME)) {
@@ -346,9 +348,6 @@ public class MainFragment extends MusicFragment implements IConstants,
 		};
 	};
 
-	int oldY = 0;
-	private SPStorage pPStorage;
-	private ImageLoader imageLoad;
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 //		int bottomTop = mBottomLayout.getTop();

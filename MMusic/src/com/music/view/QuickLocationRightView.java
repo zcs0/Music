@@ -93,6 +93,7 @@ public class QuickLocationRightView extends View {
 		handler = new Handler();
 		disapearThread = new DisapearThread();
 		initPop();
+		setVisibility(View.GONE);
 	}
 
 	@Override
@@ -247,6 +248,8 @@ public class QuickLocationRightView extends View {
 
 	public void setListView(ListView listView) {
 		if(listView==null)return;
+		if(quickList!=null&&quickList.size()>5)
+			setVisibility(View.VISIBLE);
 		this.listView = listView;
 		listView.setOnScrollListener(new ListViewScroll());//listView滑动监听
 		invalidate();
@@ -265,10 +268,8 @@ public class QuickLocationRightView extends View {
 	}
 	public Map<String, String> setData(List<String> list){
 		if(list==null||list.size()<=0){
-			setVisibility(View.GONE);
 			return null;
 		}
-		setVisibility(View.VISIBLE);
 		List<String> arrayList = new ArrayList<String>();//拼音
 		List<String> arrayList2 = new ArrayList<String>();//字母
 		List<String> arrayList3 = new ArrayList<String>();//右侧显示
@@ -310,6 +311,7 @@ public class QuickLocationRightView extends View {
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			scrollState1 = scrollState;
+			if(getVisibility()==View.GONE)return;
 			if (scrollState == ListView.OnScrollListener.SCROLL_STATE_IDLE) {
 				handler.removeCallbacks(disapearThread);
 				// 提示延迟1.0s再消失
@@ -322,6 +324,10 @@ public class QuickLocationRightView extends View {
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem,
 				int visibleItemCount, int totalItemCount) {
+			if(quickList!=null&&listView.getChildCount()>=quickList.size()){//如果当前ListView的没有显示全
+				setVisibility(View.VISIBLE);
+			}
+			if(getVisibility()==View.GONE)return;
 			if(title!=null){
 				title.setVisibility(View.VISIBLE);
 				if (firstVisibleItem != 0) {
@@ -333,7 +339,7 @@ public class QuickLocationRightView extends View {
 			}
 			if(!isOnTouch&&txtOverlay!=null&&stringArr!=null&&stringArr.size()>firstVisibleItem){
 //				txtOverlay.setVisibility(View.VISIBLE);
-				txtOverlay.setText(String.valueOf(stringArr.get(firstVisibleItem).toLowerCase().charAt(0)));// 泡泡文字以第一个可见列表为准
+				txtOverlay.setText(String.valueOf(stringArr.get(firstVisibleItem).toUpperCase().charAt(0)));// 泡泡文字以第一个可见列表为准
 			}
 			
 		}

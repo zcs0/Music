@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MenuSettingActivity;
@@ -246,7 +247,7 @@ public class MenuSettingFragment extends MusicFragment implements
 	@Override
 	public void initView(Bundle bundle, View view) {
 		mActivity = getActivity();
-		mSp = new SPStorage(getActivity());
+		mSp = MusicApp.spSD;
 		initView(view);
 	}
 	

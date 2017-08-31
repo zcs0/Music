@@ -54,9 +54,9 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 	public List<MusicInfo> getmMusicList() {
 		return mMusicList;
 	}
-
-	public void setData(List<BaseMusic> list, IConstants.MusicType from) {
-		super.setData(list,from);
+	@Override
+	public void setData(List<BaseMusic> list) {
+		super.setData(list);
 		mMusicList = new ArrayList<MusicInfo>();
 		if(list==null)return;
 		for (BaseMusic bm : list) {
@@ -64,6 +64,10 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 				mMusicList.add((MusicInfo)bm);
 			}
 		}
+	}
+	public void setData(List<BaseMusic> list, IConstants.MusicType from) {
+		setData(list);
+		super.setData(list,from);
 	}
 //
 //	public void refreshPlayingList() {
@@ -92,12 +96,12 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 
 	@Override
 	public int getCount() {
-		return mMusicList.size();
+		return mMusicList==null?0:mMusicList.size();
 	}
 
 	@Override
 	public MusicInfo getItem(int position) {
-		return mMusicList.get(position);
+		return mMusicList==null?null:mMusicList.get(position);
 	}
 
 	@Override

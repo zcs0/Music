@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
@@ -38,8 +39,6 @@ import com.music.storage.SPStorage;
  * 
  */
 public class UIManager implements IConstants {
-
-
 	private FragmentActivity mActivity;
 	private View mView;
 	private LayoutInflater mInflater;
@@ -110,7 +109,7 @@ public class UIManager implements IConstants {
 	 * 获得图片背景
 	 */
 	private void initBg() {
-		SPStorage mSp = new SPStorage(mActivity);
+		SPStorage mSp = MusicApp.spSD;
 		String mDefaultBgPath = mSp.getPath();
 		mMainLayout = findViewById(R.id.main_layout);
 		Bitmap bitmap = getBitmapByPath(mDefaultBgPath);
