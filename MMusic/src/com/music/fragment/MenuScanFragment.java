@@ -43,10 +43,17 @@ public class MenuScanFragment extends MusicFragment implements IConstants, OnCli
 			@Override
 			public void run() {
 				mHelper.deleteTables(getActivity());
-				MusicUtils.queryMusic(getActivity(), MusicType.START_FROM_LOCAL);
-				MusicUtils.queryAlbums(getActivity());
-				MusicUtils.queryArtist(getActivity());
-				MusicUtils.queryFolder(getActivity());
+				MusicUtils.clearCache();
+				MusicUtils.queryByType(getActivity(), MusicType.START_FROM_LOCAL);
+				MusicUtils.queryByType(getActivity(), MusicType.START_FROM_ALBUM);
+				MusicUtils.queryByType(getActivity(), MusicType.START_FROM_ARTIST);
+				MusicUtils.queryByType(getActivity(), MusicType.START_FROM_FAVORITE);
+				MusicUtils.queryByType(getActivity(), MusicType.START_FROM_FOLDER);
+//				MusicUtils.queryMusic(getActivity());
+////				MusicUtils.queryMusic(getActivity(), MusicType.START_FROM_LOCAL);
+//				MusicUtils.queryAlbums(getActivity());
+//				MusicUtils.queryArtist(getActivity());
+//				MusicUtils.queryFolder(getActivity());
 				mHandler.sendEmptyMessage(1);
 			}
 		}).start();

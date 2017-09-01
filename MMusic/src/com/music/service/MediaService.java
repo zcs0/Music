@@ -314,7 +314,9 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		public void cancelNotification() throws RemoteException {
 			MediaService.this.cancelNotification();
 		}
-
+		/**
+		 * _id
+		 */
 		@Override
 		public boolean playById(int id) throws RemoteException {
 			return mMc.playById(id);

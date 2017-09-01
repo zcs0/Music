@@ -78,7 +78,7 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 	
 	/**
 	 * 根据歌曲的id来播放
-	 * @param songId
+	 * @param _id
 	 * @return
 	 */
 	public boolean playById(int id) {
@@ -211,7 +211,7 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 //		Collections.sort(mMList, new ListComparator());
 		if(mMusicList.size() == 0) {
 			mPlayState = MPS_NOFILE;
-			mCurPlayIndex = -1;
+			mCurPlayIndex = 0;
 			return;
 		}
 //		sendBroadCast();
@@ -255,6 +255,7 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 	
 	public void sendBroadCast() {
 		mCurPlayIndex = mCurPlayIndex>=mMusicList.size()?mMusicList.size()-1:mCurPlayIndex;
+		mCurPlayIndex = mCurPlayIndex<0?0:mCurPlayIndex;
 		Intent intent = new Intent(BROADCAST_NAME);
 		intent.putExtra(PLAY_STATE_NAME, mPlayState);
 		intent.putExtra(PLAY_MUSIC_INDEX, mCurPlayIndex);
@@ -273,7 +274,7 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 	}
 	
 	public int getCurMusicId() {
-		return mCurMusicId;
+		return mCurMusic._id;
 	}
 	
 	public MusicInfo getCurMusic() {

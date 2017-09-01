@@ -19,14 +19,14 @@ public class MusicTimer {
 	public final static int REFRESH_PROGRESS_EVENT = 0x100;
 	
 	private static final int INTERVAL_TIME = 1000;
-	private Handler[] mHandler;
+	private Handler mHandler;
 	private Timer mTimer;
 	private TimerTask mTimerTask;
 	
 	private int what;
 	private boolean mTimerStart = false;
 
-	public MusicTimer(Handler... handler) {
+	public MusicTimer(Handler handler) {
 		this.mHandler = handler;
 		this.what = REFRESH_PROGRESS_EVENT;
 		mTimer = new Timer();
@@ -57,10 +57,8 @@ public class MusicTimer {
 		@Override
 		public void run() {
 			if (mHandler != null) {
-				for (Handler handler : mHandler) {
-					Message msg = handler.obtainMessage(what);
-					msg.sendToTarget();
-				}
+				Message msg = mHandler.obtainMessage(what);
+				msg.sendToTarget();
 			}
 		}
 		

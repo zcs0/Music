@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,13 +23,12 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Albums;
 import android.provider.MediaStore.Audio.Media;
 import android.provider.MediaStore.Files.FileColumns;
-import android.text.TextUtils;
 
 import com.music.MusicApp;
 import com.music.activity.IConstants;
 import com.music.db.AlbumInfoDao;
 import com.music.db.ArtistInfoDao;
-import com.music.db.FavoriteInfoDao;
+import com.music.db.DataBase;
 import com.music.db.FolderInfoDao;
 import com.music.db.MusicInfoDao;
 import com.music.model.AlbumInfo;
@@ -37,6 +37,7 @@ import com.music.model.BaseMusic;
 import com.music.model.FolderInfo;
 import com.music.model.MusicInfo;
 import com.music.storage.SPStorage;
+import com.z.utils.LogUtils;
 
 /**
  * 查询各主页信息，获取封面图片等
@@ -88,29 +89,34 @@ public class MusicUtils implements IConstants {
 	// 文件夹信息数据库
 	private static FolderInfoDao mFolderInfoDao;
 	//我的收藏信息数据库
-	private static FavoriteInfoDao mFavoriteDao;
+//	private static FavoriteInfoDao mFavoriteDao;
 
-	private static List<BaseMusic> favoriteList;
+//	private static List<BaseMusic> favoriteList;
 
 	private static List<BaseMusic> folderList;
 
 	private static List<BaseMusic> artistList;
 
 	private static List<BaseMusic> albumList;
+	
+	private static List<BaseMusic> musicList;
+
+	private static String TAG="MusicUtils";
 	/**
 	 * 我的收藏
 	 * @param context
 	 * @return
 	 */
-	public static List<BaseMusic> queryFavorite(Context context) {
-		if(openCache&&favoriteList!=null){//使用缓存
-			return favoriteList;
+	public synchronized static List<BaseMusic> queryFavorite(Context context) {
+		List<BaseMusic> list = new ArrayList<BaseMusic>();
+		List<BaseMusic> queryMusic = queryMusic(context);//得到所有音乐
+		for (BaseMusic baseMusic : queryMusic) {
+			MusicInfo info = (MusicInfo) baseMusic;
+			if(info.favorite==1){
+				list.add(info);
+			}
 		}
-		if(mFavoriteDao == null) {
-			mFavoriteDao = new FavoriteInfoDao(context);
-		}
-		favoriteList = mFavoriteDao.getMusicInfo();
-		return favoriteList;//mFavoriteDao.getMusicInfo();
+		return list;//mFavoriteDao.getMusicInfo();
 	}
 
 	/**
@@ -118,32 +124,33 @@ public class MusicUtils implements IConstants {
 	 * @param context
 	 * @return
 	 */
-	public static List<BaseMusic> queryFolder(Context context) {
+	public synchronized static List<BaseMusic> queryFolder(Context context) {
 		if(openCache&&folderList!=null){//不用全缓存或没有缓存
 			return folderList;
 		}
 		if(mFolderInfoDao == null) {
 			mFolderInfoDao = new FolderInfoDao(context);
 		}
-		SPStorage sp = MusicApp.spSD;
-		Uri uri = MediaStore.Files.getContentUri("external");
-		ContentResolver cr = context.getContentResolver();
-		StringBuilder mSelection = new StringBuilder(FileColumns.MEDIA_TYPE
-				+ " = " + FileColumns.MEDIA_TYPE_AUDIO + " and " + "("
-				+ FileColumns.DATA + " like'%.mp3' or " + Media.DATA
-				+ " like'%.wma')");
-		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
-		if(sp.getFilterSize()) {
-			mSelection.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
-		}
-		if(sp.getFilterTime()) {
-			mSelection.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
-		}
-		mSelection.append(") group by ( " + FileColumns.PARENT);
-		if (mFolderInfoDao.hasData()) {
+		
+		if (mFolderInfoDao.hasData()) {//如果数据库存在
 			folderList = mFolderInfoDao.getFolderInfo();
 //			return mFolderInfoDao.getFolderInfo();
 		} else {
+			SPStorage sp = MusicApp.spSD;
+			Uri uri = MediaStore.Files.getContentUri("external");
+			ContentResolver cr = context.getContentResolver();
+			StringBuilder mSelection = new StringBuilder(FileColumns.MEDIA_TYPE
+					+ " = " + FileColumns.MEDIA_TYPE_AUDIO + " and " + "("
+					+ FileColumns.DATA + " like'%.mp3' or " + Media.DATA
+					+ " like'%.wma')");
+			// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
+			if(sp.getFilterSize()) {
+				mSelection.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+			}
+			if(sp.getFilterTime()) {
+				mSelection.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+			}
+			mSelection.append(") group by ( " + FileColumns.PARENT);
 			folderList = getFolderList(cr.query(uri, proj_folder, mSelection.toString(), null, null));
 			mFolderInfoDao.saveFolderInfo(folderList);
 		}
@@ -155,7 +162,7 @@ public class MusicUtils implements IConstants {
 	 * @param context
 	 * @return
 	 */
-	public static List<BaseMusic> queryArtist(Context context) {
+	public synchronized static List<BaseMusic> queryArtist(Context context) {
 		if(openCache&&artistList!=null){//使用缓存
 			return artistList;
 		}
@@ -163,16 +170,17 @@ public class MusicUtils implements IConstants {
 		if(mArtistInfoDao == null) {
 			mArtistInfoDao = new ArtistInfoDao(context);
 		}
-		Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
-		ContentResolver cr = context.getContentResolver();
 		if (mArtistInfoDao.hasData()) {
 			artistList = mArtistInfoDao.getArtistInfo();
 		} else {
+			Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+			ContentResolver cr = context.getContentResolver();
 			artistList = getArtistList(cr.query(uri, proj_artist,
 					null, null, MediaStore.Audio.Artists.NUMBER_OF_TRACKS
 							+ " desc"));
 			mArtistInfoDao.saveArtistInfo(artistList);
 		}
+		Collections.sort(artistList, new ListComparator(MusicType.START_FROM_ARTIST));//排序后显示
 		return artistList;
 	}
 
@@ -181,62 +189,77 @@ public class MusicUtils implements IConstants {
 	 * @param context
 	 * @return
 	 */
-	public static List<BaseMusic> queryAlbums(Context context) {
+	public synchronized static List<BaseMusic> queryListAlbums(Context context) {
 		if(openCache&&albumList!=null){//使用缓存
 			return albumList;
 		}
-		
 		if(mAlbumInfoDao == null) {
 			mAlbumInfoDao = new AlbumInfoDao(context);
 		}
-		
-		SPStorage sp = MusicApp.spSD;;
-		
-		Uri uri = Albums.EXTERNAL_CONTENT_URI;
-		ContentResolver cr = context.getContentResolver();
-		StringBuilder where = new StringBuilder(Albums._ID
-				+ " in (select distinct " + Media.ALBUM_ID
-				+ " from audio_meta where (1=1 ");
-		
-		if(sp.getFilterSize()) {
-			where.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
-		}
-		if(sp.getFilterTime()) {
-			where.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
-		}
-		where.append("))");
-
 		if (mAlbumInfoDao.hasData()) {
 			albumList = mAlbumInfoDao.getAlbumInfo();
 		} else {
+			SPStorage sp = MusicApp.spSD;
+			
+			Uri uri = Albums.EXTERNAL_CONTENT_URI;
+			ContentResolver cr = context.getContentResolver();
+			StringBuilder where = new StringBuilder(Albums._ID
+					+ " in (select distinct " + Media.ALBUM_ID
+					+ " from audio_meta where (1=1 ");
+			
+			if(sp.getFilterSize()) {
+				where.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+			}
+			if(sp.getFilterTime()) {
+				where.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+			}
+			where.append("))");
 			// Media.ALBUM_KEY 按专辑名称排序
 			albumList = getAlbumList(cr.query(uri, proj_album,
 					where.toString(), null, Media.ALBUM_KEY));
 			mAlbumInfoDao.saveAlbumInfo(albumList);
 		}
+		Collections.sort(albumList, new ListComparator(MusicType.START_FROM_ALBUM));//排序后显示
 		return albumList;
 	}
 
 	/**
-	 * 
-	 * @param context
-	 * @param from 不同的界面进来要做不同的查询
-	 * @return
-	 */
-	public static List<BaseMusic> queryMusic(Context context, MusicType from) {
-		return queryMusic(context, null, null, from);
-	}
-	static List<BaseMusic> musicList;
-	/**
-	 * 
+	 * 读取音乐列表
+	 * synchronized(防止正在写入数据库时再次访问)
 	 * @param context
 	 * @return
 	 */
-	public static List<BaseMusic> queryMusic(Context context) {
+	public synchronized static List<BaseMusic> queryMusic(Context context) {
 		if(openCache&&musicList!=null){//使用缓存
 			return musicList;
 		}
-		musicList = queryMusic(context, null, null, MusicType.START_FROM_LOCAL);
+//		musicList = queryMusic(context, null, null, MusicType.START_FROM_LOCAL);
+		if(mMusicInfoDao==null)
+			mMusicInfoDao= new MusicInfoDao(context);
+		if (mMusicInfoDao.hasData()) {
+			musicList = mMusicInfoDao.getMusicInfo();
+		} else {
+			LogUtils.d(TAG, "读取音乐列表");
+			SPStorage sp = MusicApp.spSD;
+			Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+			StringBuffer select = new StringBuffer(" 1=1 ");
+			// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
+			if(sp.getFilterSize()) {
+				select.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+			}
+			if(sp.getFilterTime()) {
+				select.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+			}
+
+			ContentResolver cr = context.getContentResolver();
+			List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
+					select.toString(), null,
+					MediaStore.Audio.Media.ARTIST_KEY));
+			mMusicInfoDao.saveMusicInfo(list);
+			musicList =  list;
+		}
+		
+		Collections.sort(musicList, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
 		return musicList;
 	}
 	/**
@@ -247,62 +270,60 @@ public class MusicUtils implements IConstants {
 	 * @param from
 	 * @return
 	 */
-	public static List<BaseMusic> queryMusic(Context context,
-			String selections, String selection, MusicType from) {
-		if(mMusicInfoDao == null) {
-			mMusicInfoDao = new MusicInfoDao(context);
-		}
-		SPStorage sp = MusicApp.spSD;
-		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-		
-
-		StringBuffer select = new StringBuffer(" 1=1 ");
-		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
-		if(sp.getFilterSize()) {
-			select.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
-		}
-		if(sp.getFilterTime()) {
-			select.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
-		}
-
-		if (!TextUtils.isEmpty(selections)) {
-			select.append(selections);
-		}
-		
-		switch(from) {
-		case START_FROM_LOCAL://我的音乐
-			if (mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfo();
-			} else {
-				ContentResolver cr = context.getContentResolver();
-				List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
-						select.toString(), null,
-						MediaStore.Audio.Media.ARTIST_KEY));
-				mMusicInfoDao.saveMusicInfo(list);
-				return list;
-			}
-		case START_FROM_ARTIST://歌手
-			if (mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfoByType(selection,from);
-			} else {
-//				return getMusicList(cr.query(uri, proj_music,
+//	private static List<BaseMusic> queryMusic(Context context,
+//			String selections, String selection, MusicType from) {
+//		if(mMusicInfoDao == null) {
+//			mMusicInfoDao = new MusicInfoDao(context);
+//		}
+//		SPStorage sp = MusicApp.spSD;
+//		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+//		StringBuffer select = new StringBuffer(" 1=1 ");
+//		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
+//		if(sp.getFilterSize()) {
+//			select.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+//		}
+//		if(sp.getFilterTime()) {
+//			select.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+//		}
+//
+//		if (!TextUtils.isEmpty(selections)) {
+//			select.append(selections);
+//		}
+//		
+//		switch(from) {
+//		case START_FROM_LOCAL://我的音乐
+//			if (mMusicInfoDao.hasData()) {
+//				return mMusicInfoDao.getMusicInfo();
+//			} else {
+//				ContentResolver cr = context.getContentResolver();
+//				List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
 //						select.toString(), null,
 //						MediaStore.Audio.Media.ARTIST_KEY));
-			}
-		case START_FROM_ALBUM://专辑
-			if (mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfoByType(selection,
-						from);
-			}
-		case START_FROM_FOLDER://文件夹
-			if(mMusicInfoDao.hasData()) {
-				return mMusicInfoDao.getMusicInfoByType(selection, from);
-			}
-			default:
-				return null;
-		}
-
-	}
+//				mMusicInfoDao.saveMusicInfo(list);
+//				return list;
+//			}
+//		case START_FROM_ARTIST://歌手
+//			if (mMusicInfoDao.hasData()) {
+//				return mMusicInfoDao.getMusicInfoByType(selection,from);
+//			} else {
+////				return getMusicList(cr.query(uri, proj_music,
+////						select.toString(), null,
+////						MediaStore.Audio.Media.ARTIST_KEY));
+//			}
+//		case START_FROM_ALBUM://专辑
+//			if (mMusicInfoDao.hasData()) {
+//				return mMusicInfoDao.getMusicInfoByType(selection,
+//						from);
+//			}
+//		case START_FROM_FOLDER://文件夹
+//			if(mMusicInfoDao.hasData()) {
+//				return mMusicInfoDao.getMusicInfoByType(selection, from);
+//			}
+//			default:
+//				return null;
+//		}
+//
+//	}
 	public static ArrayList<BaseMusic> getMusicList(Cursor cursor) {
 		if (cursor == null) {
 			return null;
@@ -348,7 +369,7 @@ public class MusicUtils implements IConstants {
 			info.album_id = cursor.getInt(cursor.getColumnIndex(Albums._ID));
 			info.number_of_songs = cursor.getInt(cursor
 					.getColumnIndex(Albums.NUMBER_OF_SONGS));
-			info.album_art = cursor.getString(cursor
+			info.album_art_img = cursor.getString(cursor
 					.getColumnIndex(Albums.ALBUM_ART));
 			list.add(info);
 		}
@@ -532,7 +553,7 @@ public class MusicUtils implements IConstants {
 	 * 根据歌曲的ID，寻找出歌曲在当前播放列表中的位置
 	 * 
 	 * @param list
-	 * @param id songId
+	 * @param id _id
 	 * @return
 	 */
 	public static int seekPosInListById(List<MusicInfo> list, int id) {
@@ -543,7 +564,7 @@ public class MusicUtils implements IConstants {
 		if (list != null) {
 
 			for (int i = 0; i < list.size(); i++) {
-				if (id == list.get(i).songId) {
+				if (id == list.get(i)._id) {
 					result = i;
 					break;
 				}
@@ -623,6 +644,14 @@ public class MusicUtils implements IConstants {
 
 	public static void clearCache() {
 		sArtCache.clear();
+		mMusicInfoDao   =null;
+		mAlbumInfoDao   =null;
+		mArtistInfoDao  =null;
+		mFolderInfoDao  =null;
+		folderList      =null;
+		artistList      =null;
+		albumList       =null;
+		musicList       =null;
 	}
 
 	public static int getDataCount(Context context,MusicType type) {
@@ -638,22 +667,22 @@ public class MusicUtils implements IConstants {
 		case START_FROM_LOCAL://我的音乐
 			if(mMusicInfoDao==null)
 				mMusicInfoDao = new MusicInfoDao(context);
-			return mMusicInfoDao.getDataCount();
+			return mMusicInfoDao.getMusicCount();
 		case START_FROM_FOLDER://文件夹
 			if(mFolderInfoDao==null)
 				mFolderInfoDao = new FolderInfoDao(context);
 			return mFolderInfoDao.getDataCount();
-		case START_FROM_FAVORITE://我的最爱
-			if(mFavoriteDao == null)
-				mFavoriteDao = new FavoriteInfoDao(context);
-			return mFavoriteDao.getDataCount();
+		case START_FROM_FAVORITE://我的收藏
+			if(mMusicInfoDao == null)
+				mMusicInfoDao = new MusicInfoDao(context);
+			return mMusicInfoDao.getCountFavorite();
 			default:
 				return 0;
 		}
 		
 	}
 	/**
-	 * 根据id查询
+	 * 根据songId查询
 	 * @param context
 	 * @param songId
 	 * @return
@@ -663,4 +692,210 @@ public class MusicUtils implements IConstants {
 			mMusicInfoDao = new MusicInfoDao(context);
 		return (MusicInfo) mMusicInfoDao.getMusicInfoBySongId(songId);
 	}
+	/**
+	 * 根据id查询
+	 * @param context
+	 * @param songId
+	 * @return
+	 */
+	public static MusicInfo getMusicInfoById(Context context,int id) {
+		List<BaseMusic> queryMusic = queryMusic(context);
+		if(queryMusic==null) return null;
+		for (BaseMusic baseMusic : queryMusic) {
+			MusicInfo info =(MusicInfo) baseMusic;
+			if(info._id==id){
+				return info;
+			}
+		}
+		return null;
+	}
+	/**
+	 * 移除收藏
+	 * @param mContext
+	 * @param _id id
+	 */
+	public static void removeFavoriteStateById(Context mContext, int _id) {
+		if(mMusicInfoDao == null) {
+			mMusicInfoDao = new MusicInfoDao(mContext);
+		}
+		mMusicInfoDao.setFavoriteStateById(_id, 0);
+		List<BaseMusic> queryMusic = queryMusic(mContext);
+		if(musicList!=null){
+			for (BaseMusic baseMusic : queryMusic) {
+				if(baseMusic._id==_id){
+					baseMusic._id=0;
+					break;
+				}
+			}
+		}
+		
+	}
+	/**
+	 * 添加一个到收藏
+	 * @param mContext
+	 * @param _id
+	 */
+	public static void addFavoriteStateById(Context mContext, int _id) {
+		if(mMusicInfoDao == null) {
+			mMusicInfoDao = new MusicInfoDao(mContext);
+		}
+		mMusicInfoDao.setFavoriteStateById(_id, 1);
+		List<BaseMusic> queryMusic = queryMusic(mContext);
+		if(queryMusic!=null){
+			for (BaseMusic baseMusic : queryMusic) {
+				if(baseMusic._id==_id){
+					baseMusic._id=1;
+					break;
+				}
+			}
+		}
+		
+	}
+	/**
+	 * 得到文件列表
+	 * @param mContext
+	 * @param folderPath 此路径下地音乐
+	 * @return
+	 */
+	public static List<BaseMusic> queryFolderList(Context mContext,String folderPath) {
+		if(mMusicInfoDao == null) {
+			mMusicInfoDao = new MusicInfoDao(mContext);
+		}
+		List<BaseMusic> musicListByPath = mMusicInfoDao.getMusicListByPath(folderPath);
+		Collections.sort(musicListByPath, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
+		return musicListByPath;
+	}
+	/**
+	 * 根据类型获得列表
+	 * @param context
+	 * @param type {@link MusicType#START_FROM_LOCAL}</br>
+	 * {@link MusicType#START_FROM_ALBUM}</br>
+	 * {@link MusicType#START_FROM_ARTIST}</br>
+	 * {@link MusicType#START_FROM_FAVORITE}</br>
+	 * {@link MusicType#START_FROM_FOLDER}</br>
+	 * @return
+	 */
+	public static List<BaseMusic> queryByType(Context context,MusicType type){
+		switch (type) {
+		case START_FROM_FAVORITE:
+			return queryFavorite(context);
+		case START_FROM_LOCAL:
+			return queryMusic(context);
+		case START_FROM_ARTIST:
+			return queryArtist(context);
+		case START_FROM_ALBUM:
+			return queryListAlbums(context);
+		case START_FROM_FOLDER:
+			return queryFolder(context);
+		}
+		return null;
+	}
+	/**
+	 * 根据类型进行排序操作
+	 * @param queryMusic
+	 * @param mFrom
+	 */
+	public static void sort(List<BaseMusic> queryMusic, MusicType mFrom) {
+		Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+		
+	}
+	/**
+	 * 删除数据库中一的条数据
+	 * @param context
+	 * @param id
+	 */
+	public static void delete(Context context,int id) {
+		removeListById(folderList,id);
+		removeListById(artistList,id);
+		removeListById(albumList,id);
+		removeListById(musicList,id);
+		DataBase db = new DataBase();
+		db.delete(context,id);
+	}
+	private static void removeListById(List<BaseMusic> musicList,int id){
+		if(musicList==null)return;
+		for (BaseMusic musicInfo : musicList) {
+			if(musicInfo._id == id){
+				musicList.remove(musicInfo);
+				break;
+			}
+		}
+	}
+	/**
+	 * 删除目录
+	 * @param mContex
+	 * @param baseMusic
+	 */
+	public static void deleteFolder(Context mContext, BaseMusic baseMusic) {
+		DataBase db = new DataBase();
+		db.deleteFolder(mContext,baseMusic);
+	}
+	/**
+	 * 删除歌手
+	 * @param activity
+	 * @param baseMusic
+	 */
+	public static void deleteArtist(Context mContext,
+			ArtistInfo baseMusic) {
+		DataBase db = new DataBase();
+		db.deleteArtist(mContext,baseMusic);
+	}
+
+	public static void deleteAlbum(Context mContext, AlbumInfo info) {
+		DataBase db = new DataBase();
+		db.deleteAlbum(mContext,info);
+		
+	}
+	/**
+	 * 路径下的所有歌曲
+	 * @param mContext
+	 * @param info
+	 */
+	public static List<BaseMusic> queryMusicByFolder(Context mContext, String path) {
+		List<BaseMusic> queryMusic = queryMusic(mContext);
+		if(queryMusic==null) return null;
+		List<BaseMusic> list = new ArrayList<BaseMusic>();
+		for (BaseMusic baseMusic : queryMusic) {
+			MusicInfo info =(MusicInfo) baseMusic;
+			if(path.equals(info.folder)){
+				list.add(baseMusic);
+			}
+		}
+		return list;
+	}
+	/**
+	 * 查询此歌手的音乐
+	 * @param mContext
+	 * @param artist
+	 * @return
+	 */
+	public static List<BaseMusic> queryMusicByArtist(Context mContext, String artist) {
+		List<BaseMusic> queryMusic = queryMusic(mContext);
+		if(queryMusic==null) return null;
+		List<BaseMusic> list = new ArrayList<BaseMusic>();
+		for (BaseMusic baseMusic : queryMusic) {
+			MusicInfo info =(MusicInfo) baseMusic;
+			if(artist.equals(info.artist)){
+				list.add(baseMusic);
+			}
+		}
+		return list;
+	}
+	public static List<BaseMusic> queryMusiceAlbums(Context mContext, int albums) {
+		MusicInfoDao dao = new MusicInfoDao(mContext);
+//		return dao.getMusicInfoByType(albums+"", MusicType.START_FROM_ALBUM);
+		List<BaseMusic> queryMusic = queryMusic(mContext);
+		if(queryMusic==null) return null;
+		List<BaseMusic> list = new ArrayList<BaseMusic>();
+		for (BaseMusic baseMusic : queryMusic) {
+			MusicInfo info =(MusicInfo) baseMusic;
+			if(info.albumId==albums){
+				list.add(baseMusic);
+			}
+		}
+		return list;
+	}
+	
+	
+	
 }

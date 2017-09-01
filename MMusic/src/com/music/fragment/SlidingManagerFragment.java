@@ -37,14 +37,14 @@ import com.music.R;
 import com.music.activity.IConstants;
 import com.music.activity.PlayQueueActivity;
 import com.music.adapter.MusicAdapter;
-import com.music.db.FavoriteInfoDao;
 import com.music.db.MusicInfoDao;
 import com.music.lrc.LyricPlayerManager;
 import com.music.model.LyricSentence;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
-import com.music.utils.MusicTimer;
+import com.music.utils.MusicUtils;
+import com.music.utils.TimerListener;
 import com.music.utils.TimerTasks;
 import com.music.view.ScrollDrawerLayout;
 import com.z.netUtil.ImageUtil.ImageLoader;
@@ -91,12 +91,12 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 
 	private ImageView mMoveIv;
 	private boolean mIsFavorite = false;
-	private FavoriteInfoDao mFavoriteDao;
+//	private FavoriteInfoDao mFavoriteDao;
 	private MusicInfoDao mMusicDao;
 	
 	private boolean mListNeedRefresh = false;
 	private MusicAdapter mAdapter;;
-	private MusicTimer mMusicTimer;
+//	private MusicTimer mMusicTimer;
 	private int mProgress;
 //	private LyricAdapter mLyricAdapter;
 	private int mScreenWidth;
@@ -281,11 +281,13 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 			mListNeedRefresh = true;
 			if (!mIsFavorite) {
 				startAnimation(mMoveIv);
-				mFavoriteDao.saveMusicInfo(mCurrentMusicInfo);
-				mMusicDao.setFavoriteStateById(mCurrentMusicInfo._id, 1);
+				MusicUtils.addFavoriteStateById(getActivity(), mCurrentMusicInfo._id);
+//				mFavoriteDao.saveMusicInfo(mCurrentMusicInfo);
+//				mMusicDao.setFavoriteStateById(mCurrentMusicInfo._id, 1);
 				mFavoriteBtn.setImageResource(R.drawable.icon_favorite_on);
 			} else {
-				mFavoriteDao.deleteById(mCurrentMusicInfo._id);
+				MusicUtils.removeFavoriteStateById(getActivity(), mCurrentMusicInfo._id);
+//				mFavoriteDao.deleteById(mCurrentMusicInfo._id);
 				mMusicDao.setFavoriteStateById(mCurrentMusicInfo._id, 0);
 				mFavoriteBtn.setImageResource(R.drawable.icon_favorite);
 			}
@@ -300,9 +302,6 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 		}
 	}
 
-	public void setMusicTimer(MusicTimer musicTimer) {
-		this.mMusicTimer = musicTimer;
-	}
 	/**
 	 * 声音控制
 	 */
@@ -492,27 +491,34 @@ public class SlidingManagerFragment extends MusicFragment implements OnClickList
 	public void initView(Bundle bundle, View view) {
 		this.mActivity = getActivity();
 		this.mView = (ScrollDrawerLayout) view;
-		mFavoriteDao = new FavoriteInfoDao(mActivity);
+//		mFavoriteDao = new FavoriteInfoDao(mActivity);
 		mMusicDao = new MusicInfoDao(mActivity);
 		DisplayMetrics metric = new DisplayMetrics();
 		mActivity.getWindowManager().getDefaultDisplay().getMetrics(metric);
 		mScreenWidth = metric.widthPixels;
 		view_in = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
 		view_out = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
-		lyricManager = new LyricPlayerManager(mActivity,this,mServiceManager,mView);//设置歌词显示
-		lyricManager.setMusicTimer(mMusicTimer);
+		lyricManager = new LyricPlayerManager(mActivity,this,mServiceManager,mView);//管理显示歌词控制
 		initView();
 	}
-	public Handler getHandler() {
-		if(mHandler==null)
-			mHandler = new Handler() {//一秒刷新一次
-				@Override
-				public void handleMessage(Message msg) {
-					super.handleMessage(msg);
-					lyricManager.refreshSeekProgress(mServiceManager.position(),mServiceManager.duration());
-				}
-			};
-		return mHandler;
+	public TimerListener getTimerListener() {
+		return new TimerListener() {
+			
+			@Override
+			public void update(long time) {
+				lyricManager.refreshSeekProgress(mServiceManager.position(),mServiceManager.duration());
+				
+			}
+		};
+//		if(mHandler==null)
+//			mHandler = new Handler() {//一秒刷新一次
+//				@Override
+//				public void handleMessage(Message msg) {
+//					super.handleMessage(msg);
+//					
+//				}
+//			};
+//		return mHandler;
 	}
 	
 	

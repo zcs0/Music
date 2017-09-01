@@ -14,10 +14,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.music.model.ArtistInfo;
 import com.music.model.BaseMusic;
 
-public class ArtistInfoDao {
+public class ArtistInfoDao extends DataBase{
 
-	private static final String TABLE_ARTIST = "artist_info";
-	private Context mContext;
 	
 	public ArtistInfoDao(Context context) {
 		this.mContext = context;
@@ -81,4 +79,8 @@ public class ArtistInfoDao {
 		}
 		return count;
 	}
+	public void delete(int id){
+		super.delete(TABLE_ARTIST, id);
+	}
+	
 }

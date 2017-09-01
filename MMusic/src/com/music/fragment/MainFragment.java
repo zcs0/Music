@@ -5,7 +5,6 @@ package com.music.fragment;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -39,8 +38,6 @@ import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.uimanager.MainBottomUIManager;
 import com.music.uimanager.UIManager;
-import com.music.utils.ListComparator;
-import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
 import com.music.utils.PhotoReadUtils;
 import com.z.netUtil.ImageUtil.ImageLoader;
@@ -61,7 +58,6 @@ public class MainFragment extends MusicFragment implements IConstants,
 	
 	public UIManager mUIManager;
 	
-	private MusicTimer mMusicTimer;
 	private MusicPlayBroadcast mPlayBroadcast;
 	private MainBottomUIManager mBottomUIManager;
 	private SlidingManagerFragment mSdm;
@@ -100,8 +96,8 @@ public class MainFragment extends MusicFragment implements IConstants,
 		mSdm = new SlidingManagerFragment(getActivity(), mServiceManager);//播放界面，显示歌词进度，人物图片
 		
 		//开始一个定时器，监听播放进度
-		mMusicTimer = new MusicTimer(mSdm.getHandler(), mBottomUIManager.mHandler);//播放界面，和底部刷新播放时间的监听
-		mSdm.setMusicTimer(mMusicTimer);
+		MusicApp.addTimerListener(mSdm.getTimerListener());//两个监听
+		MusicApp.addTimerListener(mBottomUIManager.getTimerListener());
 		mPlayBroadcast = new MusicPlayBroadcast();//接收播放的广播
 		
 		//添加一个播放的广播监听
@@ -109,7 +105,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 		filter.addAction(BROADCAST_NAME);
 		getActivity().registerReceiver(mPlayBroadcast, filter);
 		if(mServiceManager.getPlayState()==MPS_PLAYING){//如果进入时已经正在播放
-			mMusicTimer.startTimer();
+			MusicApp.startTimer();
 //			mServiceManager.rePlay();
 			mServiceManager.sendBroadcast();
 			mSdm.loadLyric(mServiceManager.getCurMusic());
@@ -130,7 +126,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 			}
 		});
 		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
-		MusicInfo oldMusic = MusicUtils.getMusicInfoBySongId(getActivity(),lastPlayerId+"");
+		MusicInfo oldMusic = MusicUtils.getMusicInfoById(getActivity(),lastPlayerId);
 		if(oldMusic!=null){//获得上次最播放的一首歌曲
 			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
 			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
@@ -205,6 +201,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 		new AsyncTask<Void, Void, List<MusicInfo> >(){
 			@Override
 			protected List<MusicInfo>  doInBackground(Void... params) {
+//				List<BaseMusic> queryMusic = MusicUtils.queryByType(getActivity(), type);
 				List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
 				switch (type) {
 				case START_FROM_LOCAL:// 我的音乐
@@ -214,13 +211,16 @@ public class MainFragment extends MusicFragment implements IConstants,
 					queryMusic = MusicUtils.queryFavorite(getActivity());
 					break;
 				case START_FROM_FOLDER://文件夹
-					queryMusic = MusicUtils.queryFolder(mActivity);
+//					queryMusic = MusicUtils.queryFolder(mActivity);
+					queryMusic = MusicUtils.queryMusicByFolder(getActivity(),info);
 					break;
 				case START_FROM_ARTIST://歌手
-					queryMusic = MusicUtils.queryArtist(mActivity);
+//					queryMusic = MusicUtils.queryArtist(mActivity);
+					queryMusic = MusicUtils.queryMusicByArtist(getActivity(),info);
 					break;
 				case START_FROM_ALBUM:// 专辑
-					queryMusic = MusicUtils.queryAlbums(mActivity);
+					queryMusic = MusicUtils.queryMusiceAlbums(getActivity(),Integer.valueOf(info));
+//					queryMusic = MusicUtils.queryAlbums(mActivity);
 					break;
 				}
 				
@@ -231,7 +231,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 					}
 				}
 				if(musicList!=null&&musicList.size()>0){//排序
-					Collections.sort(musicList, new ListComparator(type));//按名字排序后显示
+//					Collections.sort(musicList, new ListComparator(type));//按名字排序后显示
 				}
 				return musicList;
 			}
@@ -283,17 +283,17 @@ public class MainFragment extends MusicFragment implements IConstants,
 				if (bundle != null) {
 					music = bundle.getParcelable(MusicInfo.KEY_MUSIC);
 				}
-				pPStorage.setLastPlayerId(music.songId);//保存最新播放的歌曲id
+				pPStorage.setLastPlayerId(music._id);//保存最新播放的歌曲id
 				switch (playState) {
 				case MPS_INVALID:// 考虑后面加上如果文件不可播放直接跳到下一首
-					mMusicTimer.stopTimer();
+					MusicApp.stopTimer();
 					mSdm.refreshUI(0, music.duration, music);
 					mSdm.showPlay(true);
 					mBottomUIManager.refreshUI(0, music.duration, music);
 					mBottomUIManager.showPlay(true);
 					break;
 				case MPS_PAUSE://暂停
-					mMusicTimer.stopTimer();
+					MusicApp.stopTimer();
 					mSdm.refreshUI(mServiceManager.position(), music.duration,music);
 					mSdm.showPlay(false);
 					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,music);
@@ -302,7 +302,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 //					mServiceManager.cancelNotification();//Notification弹出的消失
 					break;
 				case MPS_PLAYING://播放中
-					mMusicTimer.startTimer();
+					MusicApp.startTimer();
 					mSdm.refreshUI(mServiceManager.position(), music.duration,music);
 					mSdm.showPlay(true);
 					mBottomUIManager.refreshUI(mServiceManager.position(), music.duration,music);
@@ -310,7 +310,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 					mSdm.startPhotoPlayer();
 					break;
 				case MPS_PREPARE://准备就绪
-					mMusicTimer.stopTimer();
+					MusicApp.stopTimer();
 					mSdm.refreshUI(0, music.duration, music);
 					mSdm.showPlay(false);
 					mBottomUIManager.refreshUI(0, music.duration, music);

@@ -14,8 +14,6 @@ import android.os.Parcelable;
 public class MusicInfo extends BaseMusic implements Parcelable {
 	
 	public final static String KEY_MUSIC= "music";
-	
-	public static final String KEY_ID = "_id";
 	public static final String KEY_SONG_ID = "songid";
 	public static final String KEY_ALBUM_ID = "albumid";
 	public static final String KEY_DURATION = "duration";
@@ -26,9 +24,9 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	public static final String KEY_MUSIC_NAME_KEY = "musicnamekey";
 	public static final String KEY_ARTIST_KEY = "artistkey";
 	public static final String KEY_FAVORITE = "favorite";
+	public static final String KEY_ID = "_id";
 	private String headImgPath;//头像位置
 	/** 数据库中的_id */
-	public int _id = -1;
 	public int songId = -1;
 	public int albumId = -1;//歌首id
 	/**歌曲时长**/

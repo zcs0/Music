@@ -60,7 +60,6 @@ public class FavoriteInfoDao implements IConstants {
 	public List<BaseMusic> getMusicInfo() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "select * from " + TABLE_FAVORITE;
-
 		return parseCursor(db.rawQuery(sql, null));
 	}
 

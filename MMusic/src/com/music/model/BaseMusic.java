@@ -18,7 +18,7 @@ public abstract class BaseMusic {
 	public static final String KEY_ALBUM_ART = "album_art";
 	public static final String KEY_ARTIST_NAME = "artist_name";
 	public static final String KEY_NUMBER_OF_TRACKS = "number_of_tracks";
-	
+	public int _id = -1;
 	public String folderName;
 	public String folderPath;
 	public List<String> headUrl;

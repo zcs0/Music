@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import com.music.MusicApp;
 import com.music.R;
-import com.music.db.MusicInfoDao;
 import com.music.fragment.MainFragment;
 import com.music.fragment.MenuFragment;
 import com.music.service.BluetoothIntentReceiver;
@@ -54,7 +53,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	private ServiceManager mServiceManager;
 
 	private Handler mHandler;
-	private MusicInfoDao mMusicDao;
+//	private MusicInfoDao mMusicDao;
 	private SplashScreen mSplashScreen;
 	private int mScreenWidth;
 	protected String TAG="MainContentActivity";
@@ -94,9 +93,6 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		//测边显示
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.frame_menu, new MenuFragment()).commit();
-		 //数据库
-		mMusicDao = new MusicInfoDao(this);
-
 		mHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
@@ -138,11 +134,16 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 			@Override
 			public void run() {
 				LogUtils.w(TAG, "开始读取音乐...");
-				MusicUtils.queryMusic(MainContentActivity.this,MusicType.START_FROM_LOCAL);
-				MusicUtils.queryAlbums(MainContentActivity.this);
-				MusicUtils.queryArtist(MainContentActivity.this);
-				MusicUtils.queryFolder(MainContentActivity.this);
-				LogUtils.w(TAG, "开始结束音乐...");
+				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_LOCAL);
+				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_ALBUM);
+				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_ARTIST);
+				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_FAVORITE);
+				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_FOLDER);
+//				MusicUtils.queryMusic(MainContentActivity.this);
+//				MusicUtils.queryAlbums(MainContentActivity.this);
+//				MusicUtils.queryArtist(MainContentActivity.this);
+//				MusicUtils.queryFolder(MainContentActivity.this);
+				LogUtils.w(TAG, "读取音乐结束...");
 				mHandler.sendEmptyMessage(1);
 			}
 		}).start();

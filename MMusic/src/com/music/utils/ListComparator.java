@@ -25,9 +25,10 @@ public class ListComparator implements Comparator<BaseMusic>{
 	public int compare(BaseMusic lhs, BaseMusic rhs) {
 		first_l = lhs.getTitle();
 		first_r = rhs.getTitle();
+		if(lhs==null||rhs==null)return 0;
 		if(mFrom == MusicType.START_FROM_FOLDER){
-			int length = lhs.folderName.length();
-			int length2 = rhs.folderName.length();
+			int length = lhs.folderPath.length();
+			int length2 = rhs.folderPath.length();
 			return length<length2?-1:1;
 		}
 		if(TextUtils.isEmpty(first_l)||TextUtils.isEmpty(first_r)){

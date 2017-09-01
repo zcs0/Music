@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -39,6 +38,7 @@ import com.music.uimanager.UIManager;
 import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
 import com.music.viewpagerlistener.ViewPagerOnPageChangeListener;
+import com.z.utils.LogUtils;
 
 /**
  * @ClassName: MusicListFragment.java
@@ -201,21 +201,24 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 						mMusicList.add((MusicInfo)list);
 					}
 					mServiceManager.refreshMusicList(mMusicList);
-					mServiceManager.playById(((MusicInfo)baseMusic).songId);
-					pPStorage.setLastPlayerId(((MusicInfo)baseMusic).songId);//保存id
+					mServiceManager.playById(((MusicInfo)baseMusic)._id);
+					pPStorage.setLastPlayerId(((MusicInfo)baseMusic)._id);//保存id
 					
 				}else{
 					List<BaseMusic> queryMusic=null;
 					if(baseMusic instanceof FolderInfo){//如果是个文件夹信息
-						queryMusic = MusicUtils.queryMusic(mActivity,"", baseMusic.folderPath,MusicType.START_FROM_FOLDER);
+						queryMusic = MusicUtils.queryFolder(getActivity());
+//						queryMusic = MusicUtils.queryMusic(mActivity,"", baseMusic.folderPath,MusicType.START_FROM_FOLDER);
 						pPStorage.setLastPlayerMusicInfo(baseMusic.folderPath);
 						System.out.println(baseMusic.folderPath);
 					}else if(baseMusic instanceof ArtistInfo){//歌手
-						queryMusic = MusicUtils.queryMusic(mActivity,"", ((ArtistInfo)baseMusic).artist_name,MusicType.START_FROM_ARTIST);
+						queryMusic = MusicUtils.queryArtist(getActivity());
+//						queryMusic = MusicUtils.queryMusic(mActivity,"", ((ArtistInfo)baseMusic).artist_name,MusicType.START_FROM_ARTIST);
 						pPStorage.setLastPlayerMusicInfo(((ArtistInfo)baseMusic).artist_name);
 						System.out.println(((ArtistInfo)baseMusic).artist_name);
 					}else if(baseMusic instanceof AlbumInfo){// 专辑
-						queryMusic = MusicUtils.queryMusic(mActivity,"", ((AlbumInfo)baseMusic).album_id + "",MusicType.START_FROM_ALBUM);
+						queryMusic = MusicUtils.queryListAlbums(getActivity());
+//						queryMusic = MusicUtils.queryMusic(mActivity,"", ((AlbumInfo)baseMusic).album_id + "",MusicType.START_FROM_ALBUM);
 						pPStorage.setLastPlayerMusicInfo(((AlbumInfo)baseMusic).album_id+"");
 					}
 					if(queryMusic!=null&&queryMusic.size()>0){
@@ -259,6 +262,7 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 	 * 设置播放状态
 	 */
 	private void initListViewStatus() {
+		if(mAdapter==null||mSdm==null) return;
 		try {
 			mSdm.setListViewAdapter(mAdapter);
 			int playState = mServiceManager.getPlayState();
@@ -268,10 +272,10 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 			if (playState == MPS_PLAYING) {
 				mMusicTimer.startTimer();
 			}
-			List<MusicInfo> musicList = mAdapter.getmMusicList();
-			int playingSongPosition = MusicUtils.seekPosInListById(musicList,
-					mServiceManager.getCurMusicId());
-			mAdapter.setPlayState(playState, playingSongPosition);
+//			List<MusicInfo> musicList = mAdapter.getmMusicList();
+//			int playingSongPosition = MusicUtils.seekPosInListById(musicList,
+//					mServiceManager.getCurMusicId());
+			mAdapter.setPlayState(playState, mServiceManager.getCurMusicId());
 			MusicInfo music = mServiceManager.getCurMusic();
 			mSdm.refreshUI(mServiceManager.position(), music.duration, music);
 			mSdm.showPlay(false);
@@ -279,7 +283,7 @@ public class MusicListFragment2 extends MusicFragment implements IConstants {
 //			mUIm.showPlay(false);
 
 		} catch (Exception e) {
-			Log.d(TAG, "", e);
+			LogUtils.e(TAG, "", e);
 		}
 	}
 

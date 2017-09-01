@@ -233,11 +233,11 @@ public class ServiceManager implements IConstants {
 		return 0;
 	}
 	/**
-	 * MPS_NOFILE准备中</br>
-	 * MPS_PLAYING正在播放中</br>
-	 * MPS_PAUSE 暂停中</br>
-	 * MPS_PREPARE 等待中</br>
-	 * MPS_INVALID 不可播放的文件</br>
+	 * {@link IConstants#MPS_NOFILE}准备中</br>
+	 * {@link IConstants#MPS_PLAYING}正在播放中</br>
+	 * {@link IConstants#MPS_PAUSE} 暂停中</br>
+	 * {@link IConstants#MPS_PREPARE} 等待中</br>
+	 * {@link IConstants#MPS_INVALID} 不可播放的文件</br>
 	 * {@link IConstants}
 	 * @return
 	 */
@@ -286,7 +286,7 @@ public class ServiceManager implements IConstants {
 	}
 	/**
 	 * 正在播放的是第几个mCurMusic.songId
-	 * @return songId
+	 * @return _Id
 	 */
 	public int getCurMusicId() {
 		if(mService != null) {

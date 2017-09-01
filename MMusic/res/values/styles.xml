@@ -108,4 +108,18 @@
         <item name="android:backgroundDimEnabled">false</item>
         <!-- 模糊 -->
     </style>
+     <style name="dialog_font_style">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="dialog_btn_default_style">
+        <item name="android:textColor">@color/btn_select_color</item>
+        <item name="android:background">@drawable/dialog_btn_bg_default</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingBottom">1dp</item>
+    </style>
 </resources>

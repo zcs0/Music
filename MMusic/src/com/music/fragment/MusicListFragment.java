@@ -1,7 +1,6 @@
 package com.music.fragment;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
@@ -38,7 +37,6 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.uimanager.UIManager;
-import com.music.utils.ListComparator;
 import com.music.utils.MusicTimer;
 import com.music.utils.MusicUtils;
 import com.music.view.QuickLocationRightView;
@@ -72,6 +70,7 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 	private View contentView;
 	private ListView listView;
 	int layout_music = R.layout.music_list;
+	private String musicInfo="";//保存最后一播放的音乐相关信息
 	/**
 	 * 保存从数据库中查询的结果
 	 */
@@ -90,7 +89,6 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 		mActivity = getActivity();
 		pPStorage = MusicApp.spSD;//new SPStorage(getActivity());
 		MusicUtils.openCache = true;
-		showLoadingDialog(null);
 		mAdaList.add(new TextView(mActivity));
 		mAdaList.add(createView2());//添加真正列表显示页
 		mViewPager = super.findViewById(R.id.vp_file_list);
@@ -115,13 +113,14 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 	 * @param data 为空时为大分类，不为空时，为小分类
 	 */
 	private void initData(BaseMusic data) {
+		showLoadingDialog(null);
 		if(mFrom.getCode()<=0||listView==null)return;
 		tv_title.setText(mFrom.getTitle());
 		new AsyncTask<BaseMusic, Void, IBaseAdapter>() {
 			@Override
 			protected IBaseAdapter doInBackground(BaseMusic... params) {
 				if(params[0]==null){
-					return createActivity(mFrom);
+					return createAdapter(mFrom);
 				}else{
 					return createMusicAdapter(params[0]);
 				}
@@ -177,13 +176,16 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 				//BaseMusic baseMusic = queryMusic.get(position);
 				if(baseMusic instanceof MusicInfo){//如果是一个可播放的文件
 					pPStorage.setLastPlayerListType(mFrom.getCode());//保存类型（程序两次进入时，查看的列表）
+					pPStorage.setLastPlayerMusicInfo(musicInfo);//保存路径
 					ArrayList<MusicInfo> mMusicList  = new ArrayList<MusicInfo>();
 					for (BaseMusic list : mList) {
 						mMusicList.add((MusicInfo)list);
 					}
 					mServiceManager.refreshMusicList(mMusicList);
-					mServiceManager.playById(((MusicInfo)baseMusic).songId);
-					pPStorage.setLastPlayerId(((MusicInfo)baseMusic).songId);//保存id
+					mServiceManager.playById(((MusicInfo)baseMusic)._id);
+					pPStorage.setLastPlayerId(((MusicInfo)baseMusic)._id);//保存id
+					if(musicAdapter!=null)
+						musicAdapter.notifyDataSetChanged();
 				}else{
 					initData(baseMusic);
 				}
@@ -197,29 +199,42 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 			public void onClick(View v) {
 				mActivity.startActivity(new Intent(mActivity,
 						MusicListSearchActivity.class));
-				
 			}
 		});
 	}
 	/**
-	 * 显示大分类中的小分类
+	 * 点击小分类
 	 * @param baseMusic
 	 * @return
 	 */
 	private IBaseAdapter createMusicAdapter(BaseMusic baseMusic) {
 		List<BaseMusic> queryMusic=null;
-		if(baseMusic instanceof FolderInfo){//如果是个文件夹信息
-			queryMusic = MusicUtils.queryMusic(mActivity,"", baseMusic.folderPath,MusicType.START_FROM_FOLDER);
-			pPStorage.setLastPlayerMusicInfo(baseMusic.folderPath);
+		if(baseMusic instanceof FolderInfo){//如果点击的是个文件夹信息
+			queryMusic = MusicUtils.queryMusicByFolder(getActivity(),baseMusic.folderPath);
+			if(queryMusic==null||queryMusic.size()<=0){
+				MusicUtils.deleteFolder(getActivity(),baseMusic);
+				return null;
+			}
+			musicInfo = baseMusic.folderPath;
 		}else if(baseMusic instanceof ArtistInfo){//歌手
-			queryMusic = MusicUtils.queryMusic(mActivity,"", ((ArtistInfo)baseMusic).artist_name,MusicType.START_FROM_ARTIST);
-			pPStorage.setLastPlayerMusicInfo(((ArtistInfo)baseMusic).artist_name);
+			queryMusic = MusicUtils.queryMusicByArtist(getActivity(),((ArtistInfo) baseMusic).artist_name);
+			if(queryMusic==null||queryMusic.size()<=0){
+				ArtistInfo info = (ArtistInfo)baseMusic;
+				MusicUtils.deleteArtist(getActivity(),info);
+				return null;
+			}
+			musicInfo = ((ArtistInfo)baseMusic).artist_name;
 		}else if(baseMusic instanceof AlbumInfo){// 专辑
-			queryMusic = MusicUtils.queryMusic(mActivity,"", ((AlbumInfo)baseMusic).album_id + "",MusicType.START_FROM_ALBUM);
-			pPStorage.setLastPlayerMusicInfo(((AlbumInfo)baseMusic).album_id+"");
+			queryMusic = MusicUtils.queryMusiceAlbums(getActivity(),((AlbumInfo) baseMusic).album_id);
+			if(queryMusic==null||queryMusic.size()<=0){
+				AlbumInfo info = (AlbumInfo)baseMusic;
+				MusicUtils.deleteAlbum(getActivity(),info);
+				return null;
+			}
+			musicInfo = ((AlbumInfo)baseMusic).album_id+"";
 		}
 		if(queryMusic!=null&&queryMusic.size()>0){
-			Collections.sort(queryMusic, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
+//			Collections.sort(queryMusic, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
 			List<String> listString = new ArrayList<String>();
 			for (BaseMusic list : queryMusic) {
 				String title = list.getTitle();
@@ -229,40 +244,37 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 			quickBar.setData(listString);
 			musicAdapter = new MusicAdapter(mActivity, mServiceManager);
 			musicAdapter.setData(queryMusic);
-			//listView.setAdapter(musicAdapter);
 		}
 		return musicAdapter;
 	}
 	/**
-	 * 显示大分类信息
+	 * 点击大分类信息
 	 * @param mFrom
 	 * @return
 	 */
-	private IBaseAdapter createActivity(IConstants.MusicType mFrom){
+	private IBaseAdapter createAdapter(IConstants.MusicType mFrom){
 		IBaseAdapter adapter = null;
+		queryMusic = MusicUtils.queryByType(getActivity(), mFrom);
 		switch (mFrom) {
 		case START_FROM_LOCAL:// 我的音乐
-			queryMusic = MusicUtils.queryMusic(mActivity);
 			adapter = new MusicAdapter(mActivity, mServiceManager);
 			break;
 		case START_FROM_FAVORITE://我的最爱
-			queryMusic = MusicUtils.queryFavorite(mActivity);
 			adapter = new MusicAdapter(mActivity, mServiceManager);
 			break;
 		case START_FROM_FOLDER://文件夹
-			queryMusic = MusicUtils.queryFolder(mActivity);
 			adapter = new FolderBrowserAdapter(mActivity, mServiceManager);
 			break;
 		case START_FROM_ARTIST://歌手
-			queryMusic = MusicUtils.queryArtist(mActivity);
 			adapter = new ArtistBrowserAdapter(mActivity, mServiceManager);
 			break;
 		case START_FROM_ALBUM:// 专辑
-			queryMusic = MusicUtils.queryAlbums(mActivity);
+//			queryMusic = MusicUtils.queryAlbums(mActivity);
 			adapter = new AlbumBrowserAdapter(mActivity, mServiceManager);
 			break;
 		}
-		Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+		MusicUtils.sort(queryMusic,mFrom);//排序后显示
+//		Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
 		List<String> listString = new ArrayList<String>();
 		for (BaseMusic list : queryMusic) {
 			String title = list.getTitle();

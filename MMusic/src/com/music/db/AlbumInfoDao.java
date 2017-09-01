@@ -14,11 +14,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.music.model.AlbumInfo;
 import com.music.model.BaseMusic;
 
-public class AlbumInfoDao {
+public class AlbumInfoDao extends DataBase{
 
-	private static final String TABLE_ALBUM = "album_info";
-	private Context mContext;
-	
 	public AlbumInfoDao(Context context) {
 		this.mContext = context;
 	}
@@ -31,7 +28,7 @@ public class AlbumInfoDao {
 			cv.put("album_name", info.album_name);
 			cv.put("album_id", info.album_id);
 			cv.put("number_of_songs", info.number_of_songs);
-			cv.put("album_art", info.album_art);
+			cv.put("album_art", info.album_art_img);
 			db.insert(TABLE_ALBUM, null, cv);
 		}
 	}
@@ -44,7 +41,7 @@ public class AlbumInfoDao {
 		while(cursor.moveToNext()) {
 			AlbumInfo info = new AlbumInfo();
 			info.album_name = cursor.getString(cursor.getColumnIndex("album_name"));
-			info.album_art = cursor.getString(cursor.getColumnIndex("album_art"));
+			info.album_art_img = cursor.getString(cursor.getColumnIndex("album_art"));
 			info.album_id = cursor.getInt(cursor.getColumnIndex("album_id"));
 			info.number_of_songs = cursor.getInt(cursor.getColumnIndex("number_of_songs"));
 			list.add(info);
@@ -84,5 +81,8 @@ public class AlbumInfoDao {
 			count = cursor.getInt(0);
 		}
 		return count;
+	}
+	public void delete(int id){
+		super.delete(TABLE_ALBUM, id);
 	}
 }

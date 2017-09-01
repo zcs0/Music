@@ -26,7 +26,6 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.utils.LyricReadUtil;
-import com.music.utils.MusicTimer;
 import com.music.view.LyricsLineView;
 import com.z.utils.LogUtils;
 
@@ -51,19 +50,18 @@ public class LyricPlayerManager implements IConstants {
 	/**
 	 * 搜索歌词按钮
 	 */
-	private TextView mLrcEmptyView;
+	private TextView mLrcHintView;
 	private int mProgress;
 	private SPStorage mSp;
 	private TextView mCurTimeTv, mTotalTimeTv;
 	long l = 300;// 默认动画时长
 	protected String TAG = "LyricPlayerManager";
-	private MusicTimer mMusicTimer;
+//	private MusicTimer mMusicTimer;
 	private View mView;
 	private LyricLoadHelper mLyricLoadHelper;
 	protected int newVals;
 	protected boolean mPlayAuto;
 	private SlidingManagerFragment smf;
-//	private MusicInfo musicInfo;
 
 	String lyricFilePath = null;
 	public LyricPlayerManager(Context content, SlidingManagerFragment slidingManagerFragment, ServiceManager sm, View view) {
@@ -80,8 +78,8 @@ public class LyricPlayerManager implements IConstants {
 		mPlaybackSeekBar = findViewById(R.id.playback_seekbar);
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
 		mTotalTimeTv = findViewById(R.id.totalTime_tv);
-		mLrcEmptyView = findViewById(R.id.lyric_empty);// 搜索歌词
-		mLrcEmptyView.setText("没有歌词,点击手动下载");
+		mLrcHintView = findViewById(R.id.lyric_empty);// 搜索歌词
+		mLrcHintView.setText("没有歌词,点击手动下载");
 		mLyricLoadHelper = new LyricLoadHelper();
 		initView();
 	}
@@ -99,9 +97,9 @@ public class LyricPlayerManager implements IConstants {
 		mPlaybackSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
 		mPlaybackSeekBar.setMax(1000);// 设置进度值最大值为1000
 		mLrcNumView.setVisibility(View.GONE);//默认显示歌词部分不显示
-		mLrcEmptyView.setVisibility(View.VISIBLE);
+		mLrcHintView.setVisibility(View.VISIBLE);
 		// mPlaybackSeekBar.setOnSeekBarChangeListener(l);
-		mLrcEmptyView.setOnClickListener(new View.OnClickListener() {
+		mLrcHintView.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -155,12 +153,14 @@ public class LyricPlayerManager implements IConstants {
 	 */
 	public void loadLyricByHand(String musicName, String artist) {
 		if(TextUtils.isEmpty(artist)&&TextUtils.isEmpty(artist))return;
-		mLrcEmptyView.setText("正在搜索歌词...");
+		mLrcNumView.stopRefreshLine();
+		mLrcHintView.setText("正在搜索歌词...");
+		
 		MusicInfo info = new MusicInfo();
 		info.musicName = musicName;
 		info.artist = artist;
 		isNet = true;
-		loadLyric(info);;
+		loadLyric(info);
 	}
 	
 	boolean isNet = false;
@@ -175,13 +175,16 @@ public class LyricPlayerManager implements IConstants {
 
 	}
 	private void readLyric(MusicInfo playingSong) {
+		mLrcNumView.setDisplayedValues(null);
 		mLrcNumView.setVisibility(View.GONE);//默认显示歌词部分不显示
-		mLrcEmptyView.setVisibility(View.VISIBLE);
+		mLrcHintView.setVisibility(View.VISIBLE);
+		LogUtils.i(TAG, "查找"+playingSong.musicName+"歌词中...");
 		this.mCurrentMusicInfo = playingSong;
 		new AsyncTask<MusicInfo, Void, ArrayList<LyricSentence>>(){
+			MusicInfo info = null;
 			@Override
 			protected ArrayList<LyricSentence> doInBackground(MusicInfo... params) {
-				MusicInfo info = params[0];
+				info = params[0];
 				String readFileLyrc = readFileLyrc(info);
 				ArrayList<LyricSentence> loadLyric = mLyricLoadHelper.loadLyric(readFileLyrc);// 对歌词进行排版(按播放时间排序)
 				if(loadLyric==null||loadLyric.size()<=0){
@@ -202,23 +205,31 @@ public class LyricPlayerManager implements IConstants {
 				return loadLyric;
 			}
 			protected void onPostExecute(java.util.ArrayList<LyricSentence> result) {
-				if(isNet){
-					mLrcEmptyView.setText("没有找歌词,点击再次搜索");
-				}
 				isNet = false;
+				if(result!=null&&result.size()>0){
+					mLrcHintView.setText("歌词加载中...");
+				}else{
+					if(isNet){//允许网络加载
+						mLrcHintView.setText("没有找歌词,点击再次搜索");
+					}else{
+						mLrcHintView.setText("没有找到歌词文件..");
+					}
+				}
 				lyricList = result;
-				LogUtils.i(TAG, "加载歌词");
+//				LogUtils.i(TAG, "正在加载歌词...");
 				if(result!=null&&result.size()>0){
 					mLrcNumView.setVisibility(View.VISIBLE);
-					mLrcEmptyView.setVisibility(View.GONE);
+//					mLrcEmptyView.setVisibility(View.GONE);
+					LogUtils.d(TAG, "设置歌词为->"+info.musicName);
 					mLrcNumView.setDisplayedValues(lyricList);
-					seekBarccrollToLyric(mServiceManager.position(), true);
-				}else{
+					mLrcNumView.startRefreshLine();//开始刷新
+//					seekBarccrollToLyric(mServiceManager.position(), true);
+				}else{//没有歌词，设置显示为隐藏
 					mLrcNumView.setVisibility(View.GONE);
-					mLrcEmptyView.setVisibility(View.VISIBLE);
-					mLrcNumView.setDisplayedValues(null);
+//					mLrcEmptyView.setVisibility(View.VISIBLE);
+//					mLrcNumView.setDisplayedValues(null);
 				}
-				mLrcNumView.setValue(0);
+//				mLrcNumView.setValue(0);
 			};
 			
 			
@@ -301,7 +312,7 @@ public class LyricPlayerManager implements IConstants {
 					mServiceManager.duration());
 			if (isPlayer) {
 				mServiceManager.rePlay();
-				mMusicTimer.startTimer();
+//				MusicApp.startTimer();
 				isPlayer = false;
 			}
 
@@ -313,7 +324,7 @@ public class LyricPlayerManager implements IConstants {
 			if (MPS_PLAYING == mServiceManager.getPlayState()) {// 正在播放
 				isPlayer = true;
 			}
-			mMusicTimer.stopTimer();
+//			MusicApp.stopTimer();
 			mServiceManager.pause();
 		}
 
@@ -375,7 +386,7 @@ public class LyricPlayerManager implements IConstants {
 					isPlayer = true;
 				}
 				mServiceManager.pause();
-				mMusicTimer.stopTimer();
+				MusicApp.stopTimer();
 			}
 			newVals = newVal;
 		}
@@ -390,7 +401,7 @@ public class LyricPlayerManager implements IConstants {
 				mServiceManager.seekTo((int) lyricSentence.getStartTime());
 				if (isPlayer) {
 					mServiceManager.rePlay();
-					mMusicTimer.startTimer();
+//					MusicApp.startTimer();
 					isPlayer = false;
 				}
 				if (lyricSentence.getContentText() != null
@@ -402,15 +413,6 @@ public class LyricPlayerManager implements IConstants {
 		}
 	};
 
-	// private int getCurre(int postion){
-	// if(lyricList==null)return 0;
-	// LyricSentence lyricSentence = lyricList.get(postion);
-	// return (int) lyricSentence.getStartTime();//开始的时间
-	// }
-	public void setMusicTimer(MusicTimer mMusicTimer) {
-		this.mMusicTimer = mMusicTimer;
-
-	}
 
 	/**
 	 * 要播放的音乐

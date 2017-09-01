@@ -7,8 +7,6 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +26,7 @@ import com.music.adapter.PopupListAdapter;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.utils.MusicUtils;
+import com.music.utils.TimerListener;
 import com.music.view.AlwaysMarqueeTextView;
 
 /**
@@ -44,7 +43,7 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 	private TextView mPositionTv, mDurationTv;
 	private ImageButton playerAndPause, mNextBtn, mPlayerList;
 	private ProgressBar mPlaybackProgress;
-	public Handler mHandler;//更新界面的
+//	public Handler mHandler;//更新界面的
 	private Bitmap mDefaultAlbumIcon;
 	private ImageView mHeadIcon;
 	private PopupListAdapter popupListAdapter;
@@ -58,15 +57,15 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 		this.mServiceManager = MusicApp.mServiceManager;
 		initView();
 
-		mHandler = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				super.handleMessage(msg);
-				refreshUI(mServiceManager.position(),
-						mServiceManager.duration(),mServiceManager.getCurMusic());//更新主界面的播放状态
-				updatePopUi();
-			}
-		};
+//		mHandler = new Handler() {
+//			@Override
+//			public void handleMessage(Message msg) {
+//				super.handleMessage(msg);
+//				refreshUI(mServiceManager.position(),
+//						mServiceManager.duration(),mServiceManager.getCurMusic());//更新主界面的播放状态
+//				updatePopUi();
+//			}
+//		};
 	}
 	
 	private void initView() {
@@ -251,6 +250,18 @@ public class MainBottomUIManager implements OnClickListener,IConstants {
 		mHeadIcon.setImageBitmap(bitmap);
 
 		
+	}
+
+	public TimerListener getTimerListener() {
+		return new TimerListener() {
+			
+			@Override
+			public void update(long time) {
+				refreshUI(mServiceManager.position(),
+						mServiceManager.duration(),mServiceManager.getCurMusic());//更新主界面的播放状态
+				updatePopUi();
+			}
+		};
 	}
 
 }

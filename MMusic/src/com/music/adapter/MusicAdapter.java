@@ -6,22 +6,27 @@ package com.music.adapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.music.MusicApp;
 import com.music.R;
 import com.music.activity.IConstants;
-import com.music.db.FavoriteInfoDao;
 import com.music.db.MusicInfoDao;
+import com.music.dialog.BaseDialog;
 import com.music.interfaces.IQueryFinished;
 import com.music.model.BaseMusic;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.utils.MusicUtils;
+import com.z.utils.FileUtils;
+import com.z.utils.SizeUtils;
 
 /**
  * 显示歌曲列表
@@ -34,21 +39,23 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 	private List<MusicInfo> mMusicList;
 //	private ServiceManager mServiceManager;
 
-	private int mPlayState, mCurPlayMusicIndex = -1;
+	private int mPlayState;
 //	private IQueryFinished mIQueryFinished;
-	private FavoriteInfoDao mFavoriteDao;
+//	private FavoriteInfoDao mFavoriteDao;
 	private MusicInfoDao mMusicDao;
+	private ServiceManager smMang;
 	
 
 	class ViewHolder {
 		TextView musicNameTv, artistTv, durationTv;
-		ImageView playStateIconIv, favoriteIv;
+		ImageView playStateIconIv, favoriteIv,musicinfo;
 	}
 	public MusicAdapter(Context context, ServiceManager sm) {
 		this.mContext = context;
-		mFavoriteDao = new FavoriteInfoDao(context);
+//		mFavoriteDao = new FavoriteInfoDao(context);
 		mMusicDao = new MusicInfoDao(context);
 		mMList = null;
+		this.smMang = sm;
 	}
 	
 	public List<MusicInfo> getmMusicList() {
@@ -87,10 +94,12 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 //		mIQueryFinished = finish;
 	}
 
-
-	public void setPlayState(int playState, int playIndex) {
+	/**
+	 * @param playState
+	 * @param playId
+	 */
+	public void setPlayState(int playState, int playId) {
 		mPlayState = playState;
-		mCurPlayMusicIndex = playIndex;
 		notifyDataSetChanged();
 	}
 
@@ -126,11 +135,16 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 					.findViewById(R.id.playstate_iv);
 			viewHolder.favoriteIv = (ImageView) convertView
 					.findViewById(R.id.favorite_iv);
+			viewHolder.musicinfo = (ImageView) convertView.findViewById(R.id.btn_music_info);
 			convertView.setTag(viewHolder);
 		}
 		viewHolder = (ViewHolder) convertView.getTag();
-
-		if (position != mCurPlayMusicIndex) {
+		int musicId = music._id;
+//		MusicInfo curMusic = smMang.getCurMusic();
+		int curMusicId = smMang.getCurMusicId();//正在播放的id
+//		System.out.println(id);
+//		int curMusicId = curMusic._id;//smMang.getCurMusicId();
+		if (musicId != curMusicId) {
 			viewHolder.playStateIconIv.setVisibility(View.GONE);
 		} else {
 			viewHolder.playStateIconIv.setVisibility(View.VISIBLE);
@@ -149,15 +163,17 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 			public void onClick(View v) {
 				if(music.favorite == 1) {//如果当前展示的为的收藏的
 					mMusicList.get(position).favorite = 0;
-					mFavoriteDao.deleteById(music._id);
-					mMusicDao.setFavoriteStateById(music._id, 0);
-					if(mFrom == MusicType.START_FROM_FAVORITE) {//移除收藏
+					MusicUtils.removeFavoriteStateById(mContext, music._id);;//添加收藏
+//					mMusicDao.setFavoriteStateById(music._id, 0);
+					if(mFrom == MusicType.START_FROM_FAVORITE) {//移除当前显示收藏
 						mMusicList.remove(position);
 						notifyDataSetChanged();
 					}
 				} else {
-					mFavoriteDao.saveMusicInfo(music);
-					mMusicDao.setFavoriteStateById(music._id, 1);
+//					MusicUtils.addFavoriteStateById(mContext,music);
+//					mFavoriteDao.saveMusicInfo(music);
+					MusicUtils.addFavoriteStateById(mContext,music._id);
+//					mMusicDao.setFavoriteStateById(music._id, 1);
 					mMusicList.get(position).favorite = 1;//设置为收藏
 				}
 				notifyDataSetChanged();
@@ -172,7 +188,84 @@ public class MusicAdapter extends IBaseAdapter implements IConstants {
 		viewHolder.artistTv.setText(music.artist);
 		viewHolder.durationTv
 				.setText(MusicUtils.makeTimeString(music.duration));
-
+		showDialog(viewHolder.musicinfo,music,position);
 		return convertView;
 	}
+	
+	private void showDialog(View view,final MusicInfo mu,final int position){
+		view.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//dalog_musicinfo_layout
+//				View view = View.inflate(mContext, R.layout.dalog_musicinfo_layout, null);
+//				TextView tv = (TextView) view.findViewById(R.id.tv_info);
+				BaseDialog baseDialog = new BaseDialog(mContext);
+				String str = "标题:"+mu.musicName+"\n";
+				str += "歌手:"+mu.artist+"\n";
+				str += "时长:"+getTime(mu.duration)+"\n";
+				str += "大小:"+getSize(mu.data)+"\n";
+				str += "路径:"+mu.data+"\n";
+//				baseDialog.setContentTxt(str);
+//				tv.setText(str);
+//				baseDialog.setContentView(view,true);
+				baseDialog.setMessage(str);
+				baseDialog.setCenterGravity(Gravity.LEFT);
+				baseDialog.show();
+				baseDialog.setPositiveButton("删除", new BaseDialog.OnClickListener() {
+					@Override
+					public void onClick(Dialog dialog, int which) {
+						int curMusicId = smMang.getCurMusicId();
+						int id = mu._id;
+						if(id==curMusicId&&(smMang.getPlayState()==MPS_PLAYING||smMang.getPlayState()==MPS_PREPARE)){//如果删除的正是播放的音乐
+							int index = mMusicList.size();
+							if(position+1>=index){
+								index=position-1;
+							}else{
+								index = position+1;
+							}
+							if(index>0&&index<mMusicList.size()){
+								MusicInfo musicInfo = mMusicList.get(index);
+								smMang.playById(musicInfo._id);
+							}
+						}
+						mMusicList.remove(position);
+						remove(mu._id);
+						dialog.dismiss();
+					}
+				});
+				baseDialog.setCancel("取消");
+				
+			}
+		});
+	}
+	/**
+	 * 从文件中删除一个
+	 */
+	private void remove(int id){
+		List<MusicInfo> musicList = smMang.getMusicList();
+		int index = 0;
+		for (MusicInfo musicInfo : musicList) {
+			index++;
+			if(musicInfo._id == id){
+				musicList.remove(musicInfo);
+				break;
+			}
+		}
+		MusicApp.refreshMusicList(musicList, index);
+		MusicUtils.delete(mContext, id);
+		notifyDataSetChanged();
+		
+	}
+	private String getSize(String path){
+		return SizeUtils.fileSize(FileUtils.getFileSize(path));
+	}
+	private String getTime(int totalTime){
+		totalTime /= 1000;
+		int totalminute = totalTime / 60;
+		int totalsecond = totalTime % 60;
+		String totalTimeString = String.format("%02d:%02d", totalminute,totalsecond);
+		return totalTimeString;
+	}
+	
 }

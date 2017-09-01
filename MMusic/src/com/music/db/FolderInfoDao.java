@@ -13,11 +13,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.music.model.BaseMusic;
 import com.music.model.FolderInfo;
-public class FolderInfoDao {
+public class FolderInfoDao extends DataBase{
 
-	private static final String TABLE_FOLDER = "folder_info";
-	private Context mContext;
-	
 	public FolderInfoDao(Context context) {
 		this.mContext = context;
 	}
@@ -78,5 +75,8 @@ public class FolderInfoDao {
 			count = cursor.getInt(0);
 		}
 		return count;
+	}
+	public void delete(int id){
+		super.delete(TABLE_FOLDER, id);
 	}
 }
