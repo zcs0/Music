@@ -165,7 +165,7 @@ public class QuickLocationRightView extends View {
 		case MotionEvent.ACTION_DOWN:
 			showBkg = true;
 			if (oldChoose != index) {
-				if (index > 0 && index <= quickList.size()) { // 如果第一个字母是#，无效点击的话，条件变为c>0
+				if (index >= 0 && index <= quickList.size()) { // 如果第一个字母是#，无效点击的话，条件变为c>0
 					onTouchingLetterChanged(quickList.get(index));
 					choose = index; // 处理重复
 					invalidate();
@@ -175,7 +175,7 @@ public class QuickLocationRightView extends View {
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if (oldChoose != index) {
-				if (index > 0 && index < quickList.size()) { // 如果第一个字母是#，无效点击的话，条件变为c>0
+				if (index >= 0 && index < quickList.size()) { // 如果第一个字母是#，无效点击的话，条件变为c>0
 					onTouchingLetterChanged(quickList.get(index));
 					choose = index;
 					invalidate();
@@ -210,9 +210,9 @@ public class QuickLocationRightView extends View {
 				}
 			}
 		}
-		if(txtOverlay!=null){
+		if(txtOverlay!=null/*&&!"#".equals(s)&&!"*".equals(s)*/){
 			txtOverlay.setVisibility(View.VISIBLE);
-			txtOverlay.setText(s.toLowerCase());
+			txtOverlay.setText(s.toUpperCase());
 			handler.removeCallbacks(disapearThread);
 			// 提示延迟1.0s再消失
 			boolean bool = handler.postDelayed(disapearThread, 1000);
@@ -268,7 +268,10 @@ public class QuickLocationRightView extends View {
 	}
 	public Map<String, String> setData(List<String> list){
 		if(list==null||list.size()<=0){
+//			setVisibility(View.GONE);
 			return null;
+		}else{
+//			setVisibility(View.GONE);
 		}
 		List<String> arrayList = new ArrayList<String>();//拼音
 		List<String> arrayList2 = new ArrayList<String>();//字母

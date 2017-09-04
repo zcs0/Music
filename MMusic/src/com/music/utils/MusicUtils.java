@@ -180,7 +180,9 @@ public class MusicUtils implements IConstants {
 							+ " desc"));
 			mArtistInfoDao.saveArtistInfo(artistList);
 		}
-		Collections.sort(artistList, new ListComparator(MusicType.START_FROM_ARTIST));//排序后显示
+//		LogUtils.d(TAG, "歌手排序");
+//		Collections.sort(artistList, new ListComparator(MusicType.START_FROM_ARTIST));//排序后显示
+//		LogUtils.d(TAG, "歌手排序结束");
 		return artistList;
 	}
 
@@ -219,7 +221,9 @@ public class MusicUtils implements IConstants {
 					where.toString(), null, Media.ALBUM_KEY));
 			mAlbumInfoDao.saveAlbumInfo(albumList);
 		}
-		Collections.sort(albumList, new ListComparator(MusicType.START_FROM_ALBUM));//排序后显示
+//		LogUtils.d(TAG, "专辑排序");
+//		Collections.sort(albumList, new ListComparator(MusicType.START_FROM_ALBUM));//排序后显示
+//		LogUtils.d(TAG, "专辑排序结束");
 		return albumList;
 	}
 
@@ -229,8 +233,8 @@ public class MusicUtils implements IConstants {
 	 * @param context
 	 * @return
 	 */
-	public synchronized static List<BaseMusic> queryMusic(Context context) {
-		if(openCache&&musicList!=null){//使用缓存
+	public synchronized static List<BaseMusic> queryMusic(final Context context) {
+		if(openCache&&musicList!=null&&musicList.size()>0){//使用缓存
 			return musicList;
 		}
 //		musicList = queryMusic(context, null, null, MusicType.START_FROM_LOCAL);
@@ -257,73 +261,20 @@ public class MusicUtils implements IConstants {
 					MediaStore.Audio.Media.ARTIST_KEY));
 			mMusicInfoDao.saveMusicInfo(list);
 			musicList =  list;
+			new Thread(){
+				public void run() {
+					MusicInfoDao dao = new MusicInfoDao(context);
+					dao.saveMusicSort(musicList);
+					musicList.clear();
+				};
+				
+			}.start();
 		}
-		
-		Collections.sort(musicList, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
+//		LogUtils.d(TAG, "音乐排序");
+//		Collections.sort(musicList, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
+//		LogUtils.d(TAG, "排序结束...");
 		return musicList;
 	}
-	/**
-	 * 
-	 * @param context
-	 * @param selections
-	 * @param selection
-	 * @param from
-	 * @return
-	 */
-//	private static List<BaseMusic> queryMusic(Context context,
-//			String selections, String selection, MusicType from) {
-//		if(mMusicInfoDao == null) {
-//			mMusicInfoDao = new MusicInfoDao(context);
-//		}
-//		SPStorage sp = MusicApp.spSD;
-//		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-//		StringBuffer select = new StringBuffer(" 1=1 ");
-//		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
-//		if(sp.getFilterSize()) {
-//			select.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
-//		}
-//		if(sp.getFilterTime()) {
-//			select.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
-//		}
-//
-//		if (!TextUtils.isEmpty(selections)) {
-//			select.append(selections);
-//		}
-//		
-//		switch(from) {
-//		case START_FROM_LOCAL://我的音乐
-//			if (mMusicInfoDao.hasData()) {
-//				return mMusicInfoDao.getMusicInfo();
-//			} else {
-//				ContentResolver cr = context.getContentResolver();
-//				List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
-//						select.toString(), null,
-//						MediaStore.Audio.Media.ARTIST_KEY));
-//				mMusicInfoDao.saveMusicInfo(list);
-//				return list;
-//			}
-//		case START_FROM_ARTIST://歌手
-//			if (mMusicInfoDao.hasData()) {
-//				return mMusicInfoDao.getMusicInfoByType(selection,from);
-//			} else {
-////				return getMusicList(cr.query(uri, proj_music,
-////						select.toString(), null,
-////						MediaStore.Audio.Media.ARTIST_KEY));
-//			}
-//		case START_FROM_ALBUM://专辑
-//			if (mMusicInfoDao.hasData()) {
-//				return mMusicInfoDao.getMusicInfoByType(selection,
-//						from);
-//			}
-//		case START_FROM_FOLDER://文件夹
-//			if(mMusicInfoDao.hasData()) {
-//				return mMusicInfoDao.getMusicInfoByType(selection, from);
-//			}
-//			default:
-//				return null;
-//		}
-//
-//	}
 	public static ArrayList<BaseMusic> getMusicList(Cursor cursor) {
 		if (cursor == null) {
 			return null;
@@ -460,26 +411,6 @@ public class MusicUtils implements IConstants {
 		}
 		return bitmap;
 	}
-
-	// A really simple BitmapDrawable-like class, that doesn't do
-	// scaling, dithering or filtering.
-	/*
-	 * private static class FastBitmapDrawable extends Drawable { private Bitmap
-	 * mBitmap; public FastBitmapDrawable(Bitmap b) { mBitmap = b; }
-	 * 
-	 * @Override public void draw(Canvas canvas) { canvas.drawBitmap(mBitmap, 0,
-	 * 0, null); }
-	 * 
-	 * @Override public int getOpacity() { return PixelFormat.OPAQUE; }
-	 * 
-	 * @Override public void setAlpha(int alpha) { }
-	 * 
-	 * @Override public void setColorFilter(ColorFilter cf) { } }
-	 */
-
-	// Get album art for specified album. This method will not try to
-	// fall back to getting artwork directly from the file, nor will
-	// it attempt to repair the database.
 	/**
 	 * 
 	 * @param context
@@ -572,75 +503,6 @@ public class MusicUtils implements IConstants {
 		}
 		return result;
 	}
-
-	/**
-	 * Get album art for specified album. You should not pass in the album id
-	 * for the "unknown" album here (use -1 instead) This method always returns
-	 * the default album art icon when no album art is found.
-	 */
-	/*
-	 * public static Bitmap getArtwork(Context context, long song_id, long
-	 * album_id) { return getArtwork(context, song_id, album_id, true); }
-	 *//**
-	 * Get album art for specified album. You should not pass in the album id
-	 * for the "unknown" album here (use -1 instead)
-	 */
-	/*
-	 * public static Bitmap getArtwork(Context context, long song_id, long
-	 * album_id, boolean allowdefault) {
-	 * 
-	 * // This is something that is not in the database, so get the album // art
-	 * directly // from the file. if (song_id >= 0) { Bitmap bm =
-	 * getArtworkFromFile(context, song_id, -1); if (bm != null) { return bm; }
-	 * else { return getArtwork(context, -1, album_id); } } else if (album_id >=
-	 * 0) {
-	 * 
-	 * ContentResolver res = context.getContentResolver(); Uri uri =
-	 * ContentUris.withAppendedId(sArtworkUri, album_id); if (uri != null) {
-	 * InputStream in = null; try { in = res.openInputStream(uri); return
-	 * BitmapFactory.decodeStream(in, null, sBitmapOptions); } catch
-	 * (FileNotFoundException ex) { // The album art thumbnail does not actually
-	 * exist. Maybe // the // user deleted it, or // maybe it never existed to
-	 * begin with. Bitmap bm = getArtworkFromFile(context, song_id, album_id);
-	 * if (bm != null) { if (bm.getConfig() == null) { bm =
-	 * bm.copy(Bitmap.Config.RGB_565, false); if (bm == null && allowdefault) {
-	 * return getDefaultArtwork(context); } } } else if (allowdefault) { bm =
-	 * getDefaultArtwork(context); } return bm; } finally { try { if (in !=
-	 * null) { in.close(); } } catch (IOException ex) { } } }
-	 * 
-	 * }
-	 * 
-	 * return null; }
-	 * 
-	 * // get album art for specified file private static final String
-	 * sExternalMediaUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-	 * .toString(); private static Bitmap mCachedBit = null;
-	 * 
-	 * private static Bitmap getArtworkFromFile(Context context, long songid,
-	 * long albumid) { Bitmap bm = null; byte[] art = null; String path = null;
-	 * 
-	 * if (albumid < 0 && songid < 0) { throw new IllegalArgumentException(
-	 * "Must specify an album or a song id"); }
-	 * 
-	 * try { if (songid >= 0) { Uri uri =
-	 * Uri.parse("content://media/external/audio/media/" + songid +
-	 * "/albumart"); ParcelFileDescriptor pfd = context.getContentResolver()
-	 * .openFileDescriptor(uri, "r"); if (pfd != null) { FileDescriptor fd =
-	 * pfd.getFileDescriptor(); bm = BitmapFactory.decodeFileDescriptor(fd); }
-	 * else { return getArtworkFromFile(context, -1, albumid); } } else if
-	 * (albumid >= 0) { Uri uri = ContentUris.withAppendedId(sArtworkUri,
-	 * albumid); ParcelFileDescriptor pfd = context.getContentResolver()
-	 * .openFileDescriptor(uri, "r"); if (pfd != null) { FileDescriptor fd =
-	 * pfd.getFileDescriptor(); bm = BitmapFactory.decodeFileDescriptor(fd); } }
-	 * } catch (IllegalStateException ex) { } catch (FileNotFoundException ex) {
-	 * } if (bm != null) { mCachedBit = bm; } return bm; }
-	 */ 
-	 /** private static Bitmap getDefaultArtwork(Context context) {
-	 * BitmapFactory.Options opts = new BitmapFactory.Options();
-	 * opts.inPreferredConfig = Bitmap.Config.ARGB_8888; return
-	 * BitmapFactory.decodeStream(context.getResources()
-	 * .openRawResource(R.drawable.img_album_background), null, opts); }
-	 */
 
 	public static void clearCache() {
 		sArtCache.clear();
@@ -762,7 +624,7 @@ public class MusicUtils implements IConstants {
 			mMusicInfoDao = new MusicInfoDao(mContext);
 		}
 		List<BaseMusic> musicListByPath = mMusicInfoDao.getMusicListByPath(folderPath);
-		Collections.sort(musicListByPath, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
+//		Collections.sort(musicListByPath, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
 		return musicListByPath;
 	}
 	/**
@@ -796,7 +658,9 @@ public class MusicUtils implements IConstants {
 	 * @param mFrom
 	 */
 	public static void sort(List<BaseMusic> queryMusic, MusicType mFrom) {
+		LogUtils.d(TAG, "开始排序");
 		Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+		LogUtils.d(TAG, "排序结束");
 		
 	}
 	/**
@@ -894,6 +758,66 @@ public class MusicUtils implements IConstants {
 			}
 		}
 		return list;
+	}
+	/**
+	 * 第一次加载音乐
+	 * @param context
+	 */
+	public static void initMusic(Context context){
+		LogUtils.d(TAG, "读取音乐列表");
+		SPStorage sp = MusicApp.spSD;
+		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+		StringBuffer select = new StringBuffer(" 1=1 ");
+		// 查询语句：检索出.mp3为后缀名，时长大于1分钟，文件大小大于1MB的媒体文件
+		if(sp.getFilterSize()) {
+			select.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+		}
+		if(sp.getFilterTime()) {
+			select.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+		}
+
+		ContentResolver cr = context.getContentResolver();
+		List<BaseMusic> list = getMusicList(cr.query(uri, proj_music,
+				select.toString(), null,
+				MediaStore.Audio.Media.ARTIST_KEY));
+		mMusicInfoDao.saveMusicInfo(list);
+		musicList =  list;
+	}
+	/**
+	 * 第一次加载专辑
+	 */
+	public static void initAlbum(Context context){
+		SPStorage sp = MusicApp.spSD;
+		
+		Uri uri = Albums.EXTERNAL_CONTENT_URI;
+		ContentResolver cr = context.getContentResolver();
+		StringBuilder where = new StringBuilder(Albums._ID
+				+ " in (select distinct " + Media.ALBUM_ID
+				+ " from audio_meta where (1=1 ");
+		
+		if(sp.getFilterSize()) {
+			where.append(" and " + Media.SIZE + " > " + FILTER_SIZE);
+		}
+		if(sp.getFilterTime()) {
+			where.append(" and " + Media.DURATION + " > " + FILTER_DURATION);
+		}
+		where.append("))");
+		// Media.ALBUM_KEY 按专辑名称排序
+		albumList = getAlbumList(cr.query(uri, proj_album,
+				where.toString(), null, Media.ALBUM_KEY));
+		mAlbumInfoDao.saveAlbumInfo(albumList);
+	}
+	/**
+	 * 歌手列表
+	 */
+	public static void initArtist(Context context){
+		Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+		ContentResolver cr = context.getContentResolver();
+		artistList = getArtistList(cr.query(uri, proj_artist,
+				null, null, MediaStore.Audio.Artists.NUMBER_OF_TRACKS
+						+ " desc"));
+		mArtistInfoDao.saveArtistInfo(artistList);
+		
 	}
 	
 	

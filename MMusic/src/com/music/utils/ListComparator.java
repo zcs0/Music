@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.music.activity.IConstants;
 import com.music.activity.IConstants.MusicType;
 import com.music.model.BaseMusic;
+import com.z.utils.LogUtils;
 
 /**
  * @ClassName:     ListComparator.java
@@ -18,13 +19,16 @@ import com.music.model.BaseMusic;
 public class ListComparator implements Comparator<BaseMusic>{
 	String first_l, first_r;
 	private MusicType mFrom;
+	private String TAG="ListComparator";
 	public ListComparator(IConstants.MusicType mFrom){
+		LogUtils.d(TAG, "排序");
 		this.mFrom = mFrom;
 	}
 	@Override
 	public int compare(BaseMusic lhs, BaseMusic rhs) {
 		first_l = lhs.getTitle();
 		first_r = rhs.getTitle();
+		if(lhs==rhs)return 0;
 		if(lhs==null||rhs==null)return 0;
 		if(mFrom == MusicType.START_FROM_FOLDER){
 			int length = lhs.folderPath.length();
@@ -38,7 +42,8 @@ public class ListComparator implements Comparator<BaseMusic>{
 		String pingYin2 = StringHelper.getPingYin(first_r);
 		char ch = pingYin.charAt(0);
 		char ch2 = pingYin2.charAt(0);
-		return ch<ch2?-1:1;
+		return ch<ch2?-1:ch==ch2?0:1;
+//		return ch<ch2?-1:1;
 	}
 
 

@@ -39,6 +39,7 @@ public class ArtistBrowserAdapter extends IBaseAdapter {
 				mArtistList.add((ArtistInfo)bm);
 			}
 		}
+		super.setData(list);
 	}
 	@Override
 	public void setData(List<BaseMusic> list, MusicType from) {

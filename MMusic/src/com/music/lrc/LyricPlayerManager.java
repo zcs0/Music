@@ -74,7 +74,6 @@ public class LyricPlayerManager implements IConstants {
 		mSp = MusicApp.spSD;
 		mLrcNumView = (LyricsLineView) findViewById(R.id.lyricshow);
 		mLrcNumView.setWrapSelectorWheel(false);// 设置不循环滚动
-		mLrcNumView.startRefreshLine();
 		mPlaybackSeekBar = findViewById(R.id.playback_seekbar);
 		mCurTimeTv = findViewById(R.id.currentTime_tv);
 		mTotalTimeTv = findViewById(R.id.totalTime_tv);

@@ -12,14 +12,11 @@ import com.music.model.BaseMusic;
  * @author         zcs
  * @version        V1.0  
  * @Date           2017年8月31日 下午4:08:24 
- * @Description:   TODO(用一句话描述该文件做什么) 
+ * @Description:   数据库操作的基类
  */
-public class DataBase {
+public class DataBase implements DBNameBase{
 	protected Context mContext;
-	protected static final String TABLE_MUSIC = "music_info";
-	protected static final String TABLE_ALBUM = "album_info";
-	protected static final String TABLE_ARTIST = "artist_info";
-	protected static final String TABLE_FOLDER = "folder_info";
+	
 	public void delete(String tsble,int id){
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		db.delete(tsble, " _id=? ", new String[]{id+""});

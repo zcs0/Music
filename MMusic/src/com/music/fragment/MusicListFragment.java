@@ -1,6 +1,7 @@
 package com.music.fragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -37,10 +37,11 @@ import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
 import com.music.uimanager.UIManager;
-import com.music.utils.MusicTimer;
+import com.music.utils.ListComparator;
 import com.music.utils.MusicUtils;
 import com.music.view.QuickLocationRightView;
 import com.music.viewpagerlistener.ViewPagerOnPageChangeListener;
+import com.z.utils.LogUtils;
 
 /**
  * @ClassName: MusicListFragment.java
@@ -57,13 +58,13 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 	private ViewPager mViewPager;
 	private List<View> mAdaList = new ArrayList<View>();
 	private LayoutInflater mInflater;
-	private MusicAdapter mAdapter;
+//	private MusicAdapter mAdapter;
 	private ServiceManager mServiceManager;
 	private Bitmap defaultArtwork;
 	private RelativeLayout mBottomLayout;
 	private ListView mListView;
-	private SlidingManagerFragment mSdm;
-	private MusicTimer mMusicTimer;
+//	private SlidingManagerFragment mSdm;
+//	private MusicTimer mMusicTimer;
 	private String TAG = "MusicListFragment";
 	private IBaseAdapter musicAdapter;
 	private BaseMusic baseMusic;
@@ -99,7 +100,7 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 		initView();//初始化控件
 		quickBar = (QuickLocationRightView) findViewById(R.id.rightCharacterListView);
 		initData(null);//初始化数据，创建Adapter
-		initListViewStatus();
+//		initListViewStatus();
 		
 		SPStorage mSp = MusicApp.spSD;;
 		String mDefaultBgPath = mSp.getPath();
@@ -131,7 +132,12 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 				if(result!=null&&listView!=null){
 					musicAdapter = result;
 					listView.setAdapter(musicAdapter);
-					quickBar.setListView(listView);
+					if(musicAdapter.getCount()<5){
+						quickBar.setVisibility(View.GONE);
+					}else{
+						quickBar.setVisibility(View.VISIBLE);
+						quickBar.setListView(listView);
+					}
 				}
 			}
 		}.execute(data);
@@ -233,7 +239,11 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 			}
 			musicInfo = ((AlbumInfo)baseMusic).album_id+"";
 		}
+//		if(mFrom!=IConstants.MusicType.START_FROM_LOCAL){//非音乐的需要重新排序
+//			Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+//		}
 		if(queryMusic!=null&&queryMusic.size()>0){
+//			MusicUtils.sort(queryMusic, MusicType.START_FROM_LOCAL);
 //			Collections.sort(queryMusic, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
 			List<String> listString = new ArrayList<String>();
 			for (BaseMusic list : queryMusic) {
@@ -273,8 +283,10 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 			adapter = new AlbumBrowserAdapter(mActivity, mServiceManager);
 			break;
 		}
-		MusicUtils.sort(queryMusic,mFrom);//排序后显示
-//		Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+//		MusicUtils.sort(queryMusic,mFrom);//排序后显示
+		if(mFrom!=IConstants.MusicType.START_FROM_LOCAL){//非音乐的需要重新排序
+			Collections.sort(queryMusic, new ListComparator(mFrom));//排序后显示
+		}
 		List<String> listString = new ArrayList<String>();
 		for (BaseMusic list : queryMusic) {
 			String title = list.getTitle();
@@ -285,32 +297,65 @@ public class MusicListFragment extends MusicFragment implements IConstants {
 		adapter.setData(queryMusic, mFrom);
 		return adapter;
 	}
+	/**
+	 * 汉语拼音转换工具
+	 *
+	 * @param chinese
+	 * @return
+	 */
+//	private String converterToPinYin(String chinese) {
+//		String pinyinString = "";
+//		char[] charArray = chinese.toCharArray();
+//		// 根据需要定制输出格式，我用默认的即可
+//		HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
+//		try {
+//			// 遍历数组，ASC码大于128进行转换
+//			for (int i = 0; i < charArray.length; i++) {
+//				if (charArray[i] > 128) {
+//					// charAt(0)取出首字母
+//					if (charArray[i] >= 0x4e00 && charArray[i] <= 0x9fa5) { // 判断是否中文
+//						pinyinString += PinyinHelper.toHanyuPinyinStringArray(
+//								charArray[i], defaultFormat)[0].charAt(0);
+//					} else { // 不是中文的打上未知，所以无法处理韩文日本等等其他文字
+//						pinyinString += "?";
+//					}
+//				} else {
+//					pinyinString += charArray[i];
+//				}
+//			}
+//			return pinyinString;
+//		} catch (BadHanyuPinyinOutputFormatCombination e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
 	
 	/**
 	 * 设置播放状态
 	 */
 	private void initListViewStatus() {
 		try {
-			mSdm.setListViewAdapter(mAdapter);
-			int playState = mServiceManager.getPlayState();
-			if (playState == MPS_NOFILE || playState == MPS_INVALID) {
-				return;
-			}
-			if (playState == MPS_PLAYING) {
-				mMusicTimer.startTimer();
-			}
-			List<MusicInfo> musicList = mAdapter.getmMusicList();
-			int playingSongPosition = MusicUtils.seekPosInListById(musicList,
-					mServiceManager.getCurMusicId());
-			mAdapter.setPlayState(playState, playingSongPosition);
-			MusicInfo music = mServiceManager.getCurMusic();
-			mSdm.refreshUI(mServiceManager.position(), music.duration, music);
-			mSdm.showPlay(false);
+//			mSdm.setListViewAdapter(mAdapter);
+//			int playState = mServiceManager.getPlayState();
+//			if (playState == MPS_NOFILE || playState == MPS_INVALID) {
+//				return;
+//			}
+//			if (playState == MPS_PLAYING) {
+//				mMusicTimer.startTimer();
+//			}
+//			List<MusicInfo> musicList = mAdapter.getmMusicList();
+//			int playingSongPosition = MusicUtils.seekPosInListById(musicList,
+//					mServiceManager.getCurMusicId());
+//			mAdapter.setPlayState(playState, playingSongPosition);
+//			MusicInfo music = mServiceManager.getCurMusic();
+//			mSdm.refreshUI(mServiceManager.position(), music.duration, music);
+//			mSdm.showPlay(false);
 //			mUIm.refreshUI(mServiceManager.position(), music.duration, music);
 //			mUIm.showPlay(false);
 
 		} catch (Exception e) {
-			Log.d(TAG, "", e);
+			e.printStackTrace();
+			LogUtils.e(TAG, e.toString());
 		}
 	}
 

@@ -26,6 +26,7 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	public static final String KEY_FAVORITE = "favorite";
 	public static final String KEY_ID = "_id";
 	private String headImgPath;//头像位置
+//	public int _id = -1;
 	/** 数据库中的_id */
 	public int songId = -1;
 	public int albumId = -1;//歌首id
@@ -43,6 +44,8 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	 * 文件路径
 	 */
 	public String folder;
+//	public String musicname_a;
+//	public String artist_a;
 	public String musicNameKey;
 	public String artistKey;
 	/** 0表示没有收藏 1表示收藏 */
@@ -110,7 +113,7 @@ public class MusicInfo extends BaseMusic implements Parcelable {
 	}
 	@Override
 	public String getTitle() {
-		return musicName;
+		return musicNameKey;
 	}
 
 }

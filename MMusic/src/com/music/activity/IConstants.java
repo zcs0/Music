@@ -37,6 +37,7 @@ public interface IConstants {
 	public static final String LYRIC_SAVE_PATH = "lyric_save_path";//用户所指定路径
 	public static final String FILTER_WIFI = "filter_wifi";//wifi是否可联网
 	public static final String ALBUM_HEAD_PATH = "album_head_path";//人物的头像
+	public static final String FIRST_DOWN = "first_down";//第一次打开app
 	public static final String ALBUM_HEAD_PATH_CACHE = Environment.getExternalStorageDirectory()+"/lrc";//图片缓存默认路径
 	
 	public final static int REFRESH_PROGRESS_EVENT = 0x100;

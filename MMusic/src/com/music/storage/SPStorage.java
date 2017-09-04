@@ -170,5 +170,15 @@ public class SPStorage implements IConstants {
 	public void setHeadPath(String path) {
 		mSp.edit().putString(ALBUM_HEAD_PATH, path).commit();
 	}
+	/**
+	 * 是否是第一次读取
+	 * @return
+	 */
+	public boolean getIsFirst(){
+		return mSp.getBoolean(FIRST_DOWN, true);
+	}
+	public void setIsFirst(Boolean b){
+		mSp.edit().putBoolean(FIRST_DOWN, b);
+	}
 
 }

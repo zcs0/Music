@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,13 +30,16 @@ import android.widget.Toast;
 
 import com.music.MusicApp;
 import com.music.R;
+import com.music.aidl.IMediaService;
 import com.music.fragment.MainFragment;
 import com.music.fragment.MenuFragment;
+import com.music.interfaces.IOnServiceConnectComplete;
+import com.music.model.BaseMusic;
+import com.music.model.MusicInfo;
 import com.music.service.BluetoothIntentReceiver;
 import com.music.service.ServiceManager;
 import com.music.slidemenu.SlidingMenu;
 import com.music.utils.MusicUtils;
-import com.music.utils.SplashScreen;
 import com.z.utils.LogUtils;
 
 /**
@@ -44,7 +48,7 @@ import com.z.utils.LogUtils;
  * @author 
  *
  */
-public class MainContentActivity extends BaseActivity implements IConstants {
+public class MainContentActivity extends BaseActivity implements IConstants, IOnServiceConnectComplete {
 
 	public static final String ALARM_CLOCK_BROADCAST = "alarm_clock_broadcast";
 	public SlidingMenu mSlidingMenu;
@@ -54,10 +58,11 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 
 	private Handler mHandler;
 //	private MusicInfoDao mMusicDao;
-	private SplashScreen mSplashScreen;
+//	private SplashScreen mSplashScreen;
 	private int mScreenWidth;
 	protected String TAG="MainContentActivity";
 //	private MusicIntentReceiver bluetoothReceiver;//蓝牙控制
+	int isLoadingOk=0;
 	public interface OnBackListener {
 		public abstract void onBack();
 	}
@@ -71,10 +76,10 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		registerReceiver(mAlarmReceiver, filter);
 
 		setContentView(R.layout.activity_main);
-		
-		mSplashScreen = new SplashScreen(this);//引导界面
-		mSplashScreen.show(R.drawable.image_splash_background,
-				SplashScreen.SLIDE_LEFT);
+		MusicApp.mServiceManager.setOnServiceConnectComplete(this);//设置绑定播放服务的监听
+//		mSplashScreen = new SplashScreen(this);//引导界面
+//		mSplashScreen.show(R.drawable.image_splash_background,
+//				SplashScreen.SLIDE_LEFT);
 		// set the Above View
 		mMainFragment = new MainFragment();//主界面
 //		mMainFragment.setServiceManager(mServiceManager);//设置音乐管理者
@@ -97,13 +102,21 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 			@Override
 			public void handleMessage(Message msg) {
 				super.handleMessage(msg);
-				mSplashScreen.removeSplashScreen();
+//				mSplashScreen.removeSplashScreen();
 				mMainFragment.refreshNum();//刷新音乐分类的个数
-				dismissLoadingDialog();
+				if(msg.what==1){
+					dismissLoadingDialog();
+					isLoadingOk ++;
+					setPlayerList();
+//					mMainFragment.initData();
+				}
 			}
 		};
-
-		getData();//从数据库中读取
+//		if(MusicApp.spSD.getIsFirst()){
+//			initData();//从数据库中读取
+//		}else{
+			readData();
+//		}
 //		sendBluetooth();
 	}
 	/**
@@ -126,14 +139,28 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 	/**
 	 * 读取本地文件到数据库
 	 */
-	private void getData() {
-		showLoadingDialog("读取中...");
-		mHandler.sendMessageDelayed(mHandler.obtainMessage(), 500);
+	private void initData() {
+		showLoadingDialog("初始化数据中...");
+//		mHandler.sendMessageDelayed(mHandler.obtainMessage(), 500);
+		new Thread(){
+			public void run() {
+				LogUtils.w(TAG, "开始读取手机中的音乐到数据库中...");
+				MusicUtils.initMusic(MainContentActivity.this);
+				MusicUtils.initArtist(MainContentActivity.this);
+				MusicUtils.initAlbum(MainContentActivity.this);
+				mHandler.sendEmptyMessage(1);
+			};
+			
+		}.start();
+		
+	}
+	
+	private void readData(){
+		showLoadingDialog("数据加载中...");
 		//读取数据库中的数据，如果不存在，读取SD中的音乐
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				LogUtils.w(TAG, "开始读取音乐...");
 				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_LOCAL);
 				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_ALBUM);
 				MusicUtils.queryByType(MainContentActivity.this, MusicType.START_FROM_ARTIST);
@@ -143,7 +170,7 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 //				MusicUtils.queryAlbums(MainContentActivity.this);
 //				MusicUtils.queryArtist(MainContentActivity.this);
 //				MusicUtils.queryFolder(MainContentActivity.this);
-				LogUtils.w(TAG, "读取音乐结束...");
+				LogUtils.w(TAG, "读取手机音乐结束...");
 				mHandler.sendEmptyMessage(1);
 			}
 		}).start();
@@ -307,40 +334,100 @@ public class MainContentActivity extends BaseActivity implements IConstants {
 		super.onDestroy();
 		unregisterReceiver(sdCardReceiver);
 		unregisterReceiver(mAlarmReceiver);
-//		MusicApp.mServiceManager.exit();
-//		MusicApp.mServiceManager = null;
-//		MusicUtils.clearCache();
+		MusicApp.stopTimer();
 //		cancleSleepClock();
 //		System.exit(0);
 	}
-	//蓝牙
-		private void sendBluetooth(){
-					IntentFilter intent = new IntentFilter();
-					intent.setPriority(Integer.MAX_VALUE);
-//					intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
-					intent.addAction("android.media.AUDIO_BECOMING_NOISY");
-					intent.addAction("android.intent.action.MEDIA_BUTTON");
-					intent.addAction("android.intent.action.VOICE_COMMAND");
-//					intent.addAction("android.intent.action.ACTION_SCREEN_ON");//锁屏时会自动退出程序
-//					intent.addAction("android.intent.action.SCREEN_OFF");//锁屏时会自动退出程序
-					intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
-					intent.addAction("android.intent.action.ACTION_SHUTDOWN");
-					intent.addAction("android.intent.action.BOOT_COMPLETED");
-					intent.addAction("android.permission.BLUETOOTH");
-					intent.addAction("android.permission.BLUETOOTH_ADMIN");
-					intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
-					intent.addAction("android.media.AUDIO_BECOMING_NOISY");
-					intent.addAction("android.intent.action.MEDIA_BUTTON");
-					intent.addAction("android.intent.action.VOICE_COMMAND");
-					intent.addAction("android.intent.action.ACTION_SCREEN_ON");
-					intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
-					intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
-					intent.addAction("android.intent.action.ACTION_SHUTDOWN");
-					intent.addAction("android.intent.action.BOOT_COMPLETED");
-					intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
-					BluetoothIntentReceiver bluetoothReceiver = new BluetoothIntentReceiver();
-					registerReceiver(bluetoothReceiver, intent);
-//					bluetoothReceiver.abortBroadcast();//中断下一个接收
-		}
+	/**
+	 * 绑定服务的监听
+	 */
+	@Override
+	public void onServiceConnectComplete(IMediaService service) {
+		isLoadingOk++;
+		setPlayerList();
+	}
+	
+	/**
+	 * 设置播放列表
+	 * @param type
+	 * @param info
+	 */
+	private void setPlayerList() {
+		if(isLoadingOk<2)return;
+		isLoadingOk = 0;
+		new AsyncTask<Void, Void, List<MusicInfo> >(){
+			@Override
+			protected List<MusicInfo>  doInBackground(Void... params) {
+				int i = MusicApp.spSD.getLastPlayerListType();//最后次的type
+				MusicType type=MusicType.START_FROM_LOCAL;;
+				if(i<=0){
+					type = MusicType.START_FROM_LOCAL;
+				}
+				String info = MusicApp.spSD.getLastPlayerMusicInfo();//最后次的type
+				LogUtils.d(TAG, "设置播放列表");
+				List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
+				switch (type) {
+				case START_FROM_LOCAL:// 我的音乐
+					queryMusic = MusicUtils.queryMusic(MainContentActivity.this);
+					break;
+				case START_FROM_FAVORITE://我的最爱
+					queryMusic = MusicUtils.queryFavorite(MainContentActivity.this);
+					break;
+				case START_FROM_FOLDER://文件夹
+					queryMusic = MusicUtils.queryMusicByFolder(MainContentActivity.this,info);
+					break;
+				case START_FROM_ARTIST://歌手
+					queryMusic = MusicUtils.queryMusicByArtist(MainContentActivity.this,info);
+					break;
+				case START_FROM_ALBUM:// 专辑
+					queryMusic = MusicUtils.queryMusiceAlbums(MainContentActivity.this,Integer.valueOf(info));
+					break;
+				}
+				List<MusicInfo> musicList = new ArrayList<MusicInfo>();
+				for (BaseMusic baseMusic : queryMusic) {
+					if(baseMusic instanceof MusicInfo){
+						musicList.add((MusicInfo)baseMusic);
+					}
+				}
+				LogUtils.d(TAG, "设置播放列表完毕");
+				return musicList;
+			}
+			protected void onPostExecute(List<MusicInfo> result) {
+				int lastPlayerId = MusicApp.spSD.getLastPlayerId();//最后次的id
+				lastPlayerId = lastPlayerId<=0?0:lastPlayerId;
+				if(result.size()>0)
+					MusicApp.refreshMusicList(result,lastPlayerId);
+			};
+			
+		}.execute();
+	}
+	private void sendBluetooth(){
+		IntentFilter intent = new IntentFilter();
+		intent.setPriority(Integer.MAX_VALUE);
+//			intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
+		intent.addAction("android.media.AUDIO_BECOMING_NOISY");
+		intent.addAction("android.intent.action.MEDIA_BUTTON");
+		intent.addAction("android.intent.action.VOICE_COMMAND");
+//			intent.addAction("android.intent.action.ACTION_SCREEN_ON");//锁屏时会自动退出程序
+//			intent.addAction("android.intent.action.SCREEN_OFF");//锁屏时会自动退出程序
+		intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
+		intent.addAction("android.intent.action.ACTION_SHUTDOWN");
+		intent.addAction("android.intent.action.BOOT_COMPLETED");
+		intent.addAction("android.permission.BLUETOOTH");
+		intent.addAction("android.permission.BLUETOOTH_ADMIN");
+		intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
+		intent.addAction("android.media.AUDIO_BECOMING_NOISY");
+		intent.addAction("android.intent.action.MEDIA_BUTTON");
+		intent.addAction("android.intent.action.VOICE_COMMAND");
+		intent.addAction("android.intent.action.ACTION_SCREEN_ON");
+		intent.addAction("android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED");
+		intent.addAction("android.media.ACTION_SCO_AUDIO_STATE_UPDATED");
+		intent.addAction("android.intent.action.ACTION_SHUTDOWN");
+		intent.addAction("android.intent.action.BOOT_COMPLETED");
+		intent.addAction("android.intent.action.UPDATE_SUSPEND_TIME_BY_HAND");
+		BluetoothIntentReceiver bluetoothReceiver = new BluetoothIntentReceiver();
+		registerReceiver(bluetoothReceiver, intent);
+//			bluetoothReceiver.abortBroadcast();//中断下一个接收
+}
 
 }

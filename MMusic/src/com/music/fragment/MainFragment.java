@@ -4,7 +4,6 @@
 package com.music.fragment;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -31,8 +30,6 @@ import com.music.activity.MainContentActivity;
 import com.music.adapter.MyGridViewAdapter;
 import com.music.aidl.IMediaService;
 import com.music.db.FolderInfoDao;
-import com.music.interfaces.IOnServiceConnectComplete;
-import com.music.model.BaseMusic;
 import com.music.model.MusicInfo;
 import com.music.service.ServiceManager;
 import com.music.storage.SPStorage;
@@ -49,8 +46,7 @@ import com.z.netUtil.ImageUtil.ImageLoader;
  * @author 
  *
  */
-public class MainFragment extends MusicFragment implements IConstants,
-		IOnServiceConnectComplete, OnTouchListener {
+public class MainFragment extends MusicFragment implements IConstants, OnTouchListener {
 
 	private GridView mGridView;
 	private MyGridViewAdapter mAdapter;
@@ -68,6 +64,7 @@ public class MainFragment extends MusicFragment implements IConstants,
 	int oldY = 0;
 	private SPStorage pPStorage;
 	private ImageLoader imageLoad;
+	private String TAG = "MainFragment";
 	@Override
 	public int createView() {
 		return R.layout.frame_main;
@@ -86,8 +83,6 @@ public class MainFragment extends MusicFragment implements IConstants,
 		mAdapter = new MyGridViewAdapter(this.getActivity());//歌曲分类
 		view.setOnTouchListener(this);
 		mBottomLayout = findViewById(R.id.rl_bottomLayout);//底部音乐控制
-		
-		MusicApp.mServiceManager.setOnServiceConnectComplete(this);//设置绑定播放服务的监听
 
 		mGridView.setAdapter(mAdapter);
 		
@@ -126,23 +121,22 @@ public class MainFragment extends MusicFragment implements IConstants,
 			}
 		});
 		int lastPlayerId = pPStorage.getLastPlayerId();//最后次的id
-		MusicInfo oldMusic = MusicUtils.getMusicInfoById(getActivity(),lastPlayerId);
-		if(oldMusic!=null){//获得上次最播放的一首歌曲
-			mSdm.refreshUI(0, oldMusic.duration, oldMusic);
-			mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
+		if(lastPlayerId!=-1){
+			MusicInfo oldMusic = MusicUtils.getMusicInfoById(getActivity(),lastPlayerId);
+			if(oldMusic!=null){//获得上次最播放的一首歌曲
+				mSdm.refreshUI(0, oldMusic.duration, oldMusic);
+				mBottomUIManager.refreshUI(0, oldMusic.duration, oldMusic);
+			}
 		}
 		
 		showSelectOption(mGridView);//进入选择的音乐类型界面
 		defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
 	}
-	
-	/**
-	 * 设置音乐的管理者
-	 * @param mServiceManager
-	 */
-//	public void setServiceManager(ServiceManager mServiceManager){
-//		this.mServiceManager = mServiceManager;
-//	}
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
 
 	/**
 	 * 主界面几个音乐分类
@@ -176,74 +170,23 @@ public class MainFragment extends MusicFragment implements IConstants,
 			}
 		});
 	}
-	/**
-	 * 
-	 * @author ZCS
-	 * 绑定播放服务的监听
-	 */
-	@Override
-	public void onServiceConnectComplete(IMediaService service) {
-		// service绑定成功会执行到这里
-		refreshNum();
-		int type = pPStorage.getLastPlayerListType();//最后次的type
-		String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
-		if(type<=0){
-			type = MusicType.START_FROM_LOCAL.getCode();
-		}
-		setPlayerList(MusicType.getType(type), info);//得到并设置最后一次播放时的列表
-	}
-	/**
-	 * 设置播放列表
-	 * @param type
-	 * @param info
-	 */
-	private void setPlayerList(final MusicType type, final String info) {
-		new AsyncTask<Void, Void, List<MusicInfo> >(){
-			@Override
-			protected List<MusicInfo>  doInBackground(Void... params) {
-//				List<BaseMusic> queryMusic = MusicUtils.queryByType(getActivity(), type);
-				List<BaseMusic> queryMusic = new ArrayList<BaseMusic>();
-				switch (type) {
-				case START_FROM_LOCAL:// 我的音乐
-					queryMusic = MusicUtils.queryMusic(getActivity());
-					break;
-				case START_FROM_FAVORITE://我的最爱
-					queryMusic = MusicUtils.queryFavorite(getActivity());
-					break;
-				case START_FROM_FOLDER://文件夹
-//					queryMusic = MusicUtils.queryFolder(mActivity);
-					queryMusic = MusicUtils.queryMusicByFolder(getActivity(),info);
-					break;
-				case START_FROM_ARTIST://歌手
-//					queryMusic = MusicUtils.queryArtist(mActivity);
-					queryMusic = MusicUtils.queryMusicByArtist(getActivity(),info);
-					break;
-				case START_FROM_ALBUM:// 专辑
-					queryMusic = MusicUtils.queryMusiceAlbums(getActivity(),Integer.valueOf(info));
-//					queryMusic = MusicUtils.queryAlbums(mActivity);
-					break;
-				}
-				
-				List<MusicInfo> musicList = new ArrayList<MusicInfo>();
-				for (BaseMusic baseMusic : queryMusic) {
-					if(baseMusic instanceof MusicInfo){
-						musicList.add((MusicInfo)baseMusic);
-					}
-				}
-				if(musicList!=null&&musicList.size()>0){//排序
-//					Collections.sort(musicList, new ListComparator(type));//按名字排序后显示
-				}
-				return musicList;
-			}
-			protected void onPostExecute(List<MusicInfo> result) {
-				int lastPlayerId = MusicApp.spSD.getLastPlayerId();//最后次的id
-				lastPlayerId = lastPlayerId<=0?0:lastPlayerId;
-				if(result.size()>0)
-					MusicApp.refreshMusicList(result,lastPlayerId);
-			};
-			
-		}.execute();
-	}
+//	/**
+//	 * 
+//	 * @author ZCS
+//	 * 绑定播放服务的监听
+//	 */
+//	@Override
+//	public void onServiceConnectComplete(IMediaService service) {
+//		// service绑定成功会执行到这里
+//		refreshNum();
+//		int type = pPStorage.getLastPlayerListType();//最后次的type
+//		String info = pPStorage.getLastPlayerMusicInfo();//最后次的type
+//		if(type<=0){
+//			type = MusicType.START_FROM_LOCAL.getCode();
+//		}
+//		setPlayerList(MusicType.getType(type), info);//得到并设置最后一次播放时的列表
+//	}
+	
 	/**
 	 * 显示音乐分类的个数
 	 */
@@ -391,6 +334,11 @@ public class MainFragment extends MusicFragment implements IConstants,
 	public void unPlayBroadcast(){
 		getActivity().unregisterReceiver(mPlayBroadcast);
 		mUIManager.unChangeBgReceiver();
+	}
+	boolean isLoad;
+	public void initData() {
+		isLoad = true;
+		
 	}
 	
 }

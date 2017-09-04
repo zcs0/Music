@@ -2149,6 +2149,7 @@ public class LyricsLineView extends LinearLayout {
 	 * 刷新每一行的进度
 	 */
 	public void startRefreshLine(){
+		if(mDisplayedValues==null||mDisplayedValues.size()<=0)return;
 		isRefresh = true;
 		LogUtils.d(TAG, "开启刷新歌词");
 		if(updateThread==null)
