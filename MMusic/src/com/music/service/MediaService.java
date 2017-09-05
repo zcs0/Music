@@ -25,6 +25,7 @@ import com.music.activity.IConstants;
 import com.music.activity.MainContentActivity;
 import com.music.aidl.IMediaService;
 import com.music.model.MusicInfo;
+import com.music.service.MusicPlayerControl.PlayerListener;
 import com.music.shake.ShakeDetector;
 import com.music.shake.ShakeDetector.OnShakeListener;
 import com.music.storage.SPStorage;
@@ -54,7 +55,7 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 	public boolean mShake;
 	private SPStorage mSp;
 	private ControlBroadcast mConrolBroadcast;//updateNotification更新
-	private MusicPlayBroadcast mPlayBroadcast;
+//	private MusicPlayBroadcast mPlayBroadcast;
 	
 	@Override
 	public void onCreate() {
@@ -73,11 +74,25 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		filter.addAction(EXIT_BROADCAST_NAME);
 		registerReceiver(mConrolBroadcast, filter);
 		
-		mPlayBroadcast = new MusicPlayBroadcast();
-		IntentFilter filter1 = new IntentFilter(BROADCAST_NAME);
-		filter1.addAction(BROADCAST_SHAKE);
-		registerReceiver(mPlayBroadcast, filter1);
+//		mPlayBroadcast = new MusicPlayBroadcast();
+//		IntentFilter filter1 = new IntentFilter(BROADCAST_NAME);
+//		filter1.addAction(BROADCAST_SHAKE);
+//		registerReceiver(mPlayBroadcast, filter1);
 //		sendBluetooth();//打开蓝牙监听
+		mMc.setPlayerListener(new PlayerListener() {//监听播放，刷新notify顶面状态
+			@Override
+			public void player(MusicInfo curMusic, int mPlayState) {
+				if(curMusic==null)return;
+//				if(flag!=EXIT_FLAG){//不是退出
+//					MusicInfo curMusic = mMc.getCurMusic();
+					Bitmap defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
+					Bitmap bitmap = MusicUtils.getCachedArtwork(MediaService.this,curMusic.albumId, defaultArtwork);
+					mSp.setLastPlayerId(curMusic._id);//保存当前播放的音乐id
+					updateNotification(bitmap, curMusic.musicName,curMusic.artist, mMc.getPlayState());//更新顶部标题状态
+//				}
+				
+			}
+		});
 	}
 
 	
@@ -193,13 +208,6 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 			case EXIT_FLAG://退出
 				cancelNotification();
 				mMc.exitSendBroadcast();//退出广播
-			}
-			if(flag!=EXIT_FLAG){//不是退出
-				MusicInfo curMusic = mMc.getCurMusic();
-				Bitmap defaultArtwork = BitmapFactory.decodeResource(getResources(),R.drawable.img_album_background);
-				Bitmap bitmap = MusicUtils.getCachedArtwork(context,curMusic.albumId, defaultArtwork);
-				mSp.setLastPlayerId(curMusic._id);
-				updateNotification(bitmap, curMusic.musicName,curMusic.artist, mMc.getPlayState());//更新顶部标题状态
 			}
 			
 		}
@@ -359,9 +367,9 @@ public class MediaService extends Service implements IConstants, OnShakeListener
 		if(mConrolBroadcast != null) {
 			unregisterReceiver(mConrolBroadcast);
 		}
-		if(mPlayBroadcast != null) {
-			unregisterReceiver(mPlayBroadcast);
-		}
+//		if(mPlayBroadcast != null) {
+//			unregisterReceiver(mPlayBroadcast);
+//		}
 		if(bluetoothReceiver!=null){
 			unregisterReceiver(bluetoothReceiver);
 		}

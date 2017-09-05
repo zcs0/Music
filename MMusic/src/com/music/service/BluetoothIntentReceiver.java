@@ -20,12 +20,18 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.music.MusicApp;
+import com.music.R;
 import com.music.activity.IConstants;
+import com.music.model.MusicInfo;
+import com.music.utils.MusicUtils;
+import com.z.utils.LogUtils;
 
 /**
  * Receives broadcasted intents. In particular, we are interested in the
@@ -39,6 +45,7 @@ public class BluetoothIntentReceiver extends BroadcastReceiver  implements ICons
 	private Context mContext;
 //	private KeyService mKeyService;
 	private ServiceManager mServiceManager;
+	private String TAG;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -64,27 +71,30 @@ public class BluetoothIntentReceiver extends BroadcastReceiver  implements ICons
 			Log.i(LOG_TAG, "ACTION_MEDIA_BUTTON!");
 //			KeyEvent keyEvent = (KeyEvent) intent.getExtras().get(
 //					Intent.EXTRA_KEY_EVENT);
-			if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+			if (keyEvent.getAction() != KeyEvent.ACTION_UP)//手未抬起
 				return;
 //			System.out.println("测试             "+KeyService.parseKeyCode(keyEvent.getKeyCode()));
 
 			switch (keyEvent.getKeyCode()) {
 			case KeyEvent.KEYCODE_HEADSETHOOK:
 			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-				System.out.println("KEYCODE_MEDIA_PLAY_PAUSE");
+				LogUtils.d(TAG,"KEYCODE_MEDIA_PLAY_PAUSE");
 				break;
 			case KeyEvent.KEYCODE_MEDIA_PLAY://播放
-				if(mServiceManager.getPlayState()==MPS_PLAYING){
-					mServiceManager.pause();
-				}else{
+				LogUtils.d(TAG,"KEYCODE_MEDIA_PLAY");
+//				if(mServiceManager.getPlayState()==MPS_PLAYING){
+//					mServiceManager.pause();
+//				}else{
 					mServiceManager.rePlay();
-				}
+//				}
 				System.out.println("KEYCODE_MEDIA_PLAY");
 				break;
 			case KeyEvent.KEYCODE_MEDIA_PAUSE:
+				mServiceManager.pause();
 				System.out.println("KEYCODE_MEDIA_PAUSE");
 				break;
 			case KeyEvent.KEYCODE_MEDIA_STOP:
+				mServiceManager.seekTo(0);
 				System.out.println("KEYCODE_MEDIA_STOP");
 				break;
 			case KeyEvent.KEYCODE_MEDIA_NEXT:
@@ -96,6 +106,11 @@ public class BluetoothIntentReceiver extends BroadcastReceiver  implements ICons
 				System.out.println("KEYCODE_MEDIA_PREVIOUS");//上一首
 				break;
 			}
+			MusicInfo curMusic = mServiceManager.getCurMusic();
+			Bitmap defaultArtwork = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.img_album_background);
+			Bitmap bitmap = MusicUtils.getCachedArtwork(context,curMusic.albumId, defaultArtwork);
+			MusicApp.spSD.setLastPlayerId(curMusic._id);
+			mServiceManager.updateNotification(bitmap, curMusic.musicName,curMusic.artist, mServiceManager.getPlayState());
 		} else if (intent.getAction().equals(
 				BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
 			Log.i(LOG_TAG, "BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED");
@@ -107,6 +122,7 @@ public class BluetoothIntentReceiver extends BroadcastReceiver  implements ICons
 					|| state == BluetoothAdapter.STATE_DISCONNECTED) {
 //				updateTime();
 			}
+			
 		} else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 			Log.i(LOG_TAG, "Intent.ACTION_BOOT_COMPLETED");
 //			updateTime();

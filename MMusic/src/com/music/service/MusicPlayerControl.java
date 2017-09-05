@@ -37,6 +37,7 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 	private Random mRandom;
 	private int mCurMusicId;
 	private MusicInfo mCurMusic;
+	private PlayerListener playerListener;
 	
 	
 	public MusicPlayerControl(Context context) {
@@ -234,7 +235,8 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 		pos = pos<0?0:pos;//如果从是从0开始
 		mCurPlayIndex = pos;
 		mMediaPlayer.reset();
-		String path = mMusicList.get(pos).data;
+		mCurMusic = mMusicList.get(pos);
+		String path = mCurMusic.data;
 		try {
 			mMediaPlayer.setDataSource(path);
 			mMediaPlayer.prepare();
@@ -249,11 +251,17 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 //			sendBroadCast();
 			return false;
 		}
+//		if(playerListener!=null){
+//			playerListener.player(mCurMusic, mPlayState);
+//		}
 		sendBroadCast();
 		return true;
 	}
 	
 	public void sendBroadCast() {
+		if(playerListener!=null){
+			playerListener.player(mCurMusic, mPlayState);
+		}
 		mCurPlayIndex = mCurPlayIndex>=mMusicList.size()?mMusicList.size()-1:mCurPlayIndex;
 		mCurPlayIndex = mCurPlayIndex<0?0:mCurPlayIndex;
 		Intent intent = new Intent(BROADCAST_NAME);
@@ -424,6 +432,13 @@ public class MusicPlayerControl implements IConstants, OnCompletionListener {
 			break;
 		}
 		
+	}
+	
+	public void setPlayerListener(PlayerListener listener){
+		this.playerListener = listener;
+	}
+	interface PlayerListener{
+		public void player(MusicInfo music,int mPlayState);
 	}
 
 }

@@ -60,19 +60,22 @@ public class MusicInfoDao extends DataBase implements IConstants {
 			cv.put(artist, music.artist);
 			cv.put(data,music.data);
 			cv.put(folder, music.folder);
-			cv.put(musicnamekey, music.musicNameKey);
+			if(music.musicNameKey!=null)
+				cv.put(musicnamekey, music.musicNameKey.toLowerCase());
 			cv.put(artistkey, music.artistKey);
-			cv.put(favorite, music.favorite);
 			cv.put(favorite, music.favorite);
 			db.insert(TABLE_MUSIC, null, cv);
 		}
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
-	
+	/**
+	 * 获得所有的音乐列表
+	 * @return
+	 */
 	public List<BaseMusic> getMusicInfo() {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
-		String sql = "select * from " + TABLE_MUSIC;
+		String sql = "select * from " + TABLE_MUSIC +" order by musicnamekey";
 		return parseCursor(db.rawQuery(sql, null));
 	}
 	
@@ -101,7 +104,7 @@ public class MusicInfoDao extends DataBase implements IConstants {
 	public BaseMusic getMusicInfoBySongId(String songId){
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		String sql = "";
-			sql = "select * from " + TABLE_MUSIC + " where songid = ? order by musicname ";
+			sql = "select * from " + TABLE_MUSIC + " where songid = ? order by musicnamekey ";
 		List<BaseMusic> parseCursor = parseCursor(db.rawQuery(sql, new String[]{ songId }));
 		if(parseCursor!=null&&parseCursor.size()>0){
 			return parseCursor.get(0);
@@ -115,7 +118,7 @@ public class MusicInfoDao extends DataBase implements IConstants {
 	 */
 	public List<BaseMusic> getMusicListByPath(String path) {
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
-		String sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicname ";
+		String sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicnamekey ";
 		return parseCursor(db.rawQuery(sql, new String[]{ path }));
 	}
 	/**
@@ -129,13 +132,13 @@ public class MusicInfoDao extends DataBase implements IConstants {
 		String sql = "";
 		switch (type) {
 		case START_FROM_ARTIST://歌手
-			sql = "select * from " + TABLE_MUSIC + " where artist = ? ;//order by musicname ";
+			sql = "select * from " + TABLE_MUSIC + " where artist = ? order by musicnamekey ";
 			break;
 		case START_FROM_ALBUM://专辑
-			sql = "select * from " + TABLE_MUSIC + " where albumid = ? order by musicname ";
+			sql = "select * from " + TABLE_MUSIC + " where albumid = ? order by musicnamekey ";
 			break;
 		case START_FROM_FOLDER://文件夹 
-			sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicname ";
+			sql = "select * from " + TABLE_MUSIC + " where folder = ? order by musicnamekey ";
 			break;
 		}
 		return parseCursor(db.rawQuery(sql, new String[]{ selection }));
@@ -208,7 +211,7 @@ public class MusicInfoDao extends DataBase implements IConstants {
 	 * 保存列表
 	 * @param list
 	 */
-	public void saveMusicSort(List<BaseMusic> list) {
+	private void saveMusicSort(List<BaseMusic> list) {
 		Collections.sort(list, new ListComparator(IConstants.MusicType.START_FROM_LOCAL));
 		SQLiteDatabase db = DatabaseHelper.getInstance(mContext);
 		db.beginTransaction();

@@ -261,14 +261,14 @@ public class MusicUtils implements IConstants {
 					MediaStore.Audio.Media.ARTIST_KEY));
 			mMusicInfoDao.saveMusicInfo(list);
 			musicList =  list;
-			new Thread(){
-				public void run() {
-					MusicInfoDao dao = new MusicInfoDao(context);
-					dao.saveMusicSort(musicList);
-					musicList.clear();
-				};
-				
-			}.start();
+//			new Thread(){
+//				public void run() {
+//					MusicInfoDao dao = new MusicInfoDao(context);
+//					dao.saveMusicSort(musicList);
+//					musicList.clear();
+//				};
+//				
+//			}.start();
 		}
 //		LogUtils.d(TAG, "音乐排序");
 //		Collections.sort(musicList, new ListComparator(MusicType.START_FROM_LOCAL));//排序后显示
