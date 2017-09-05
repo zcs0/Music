@@ -51,6 +51,14 @@ public class BluetoothIntentReceiver extends BroadcastReceiver  implements ICons
 	public void onReceive(Context context, Intent intent) {
 		mServiceManager = MusicApp.mServiceManager;
 		mContext = context;
+		String action = intent.getAction();
+		if(action!=null&&android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)
+				||BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(action)){//android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED
+			if(mServiceManager!=null&&mServiceManager.getPlayState()==MPS_PLAYING){
+				mServiceManager.pause();
+			}
+		}
+		
 		if(intent==null||context==null||intent.getExtras()==null)return;
 //		mKeyService = new KeyService(mContext);
 		KeyEvent keyEvent = (KeyEvent) intent.getExtras().get(
